@@ -1,44 +1,89 @@
+/**
+ * Line sorting utilities
+ */
+
 // Create a reusable collator for performance
 const naturalCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
 
-export const sortAsc = (lines: string[]) => [...lines].sort((a, b) => a.localeCompare(b));
+/**
+ * Sorts lines in ascending order (A-Z)
+ */
+export const sortAsc = (lines: string[]): string[] => 
+    [...lines].sort((a, b) => a.localeCompare(b));
 
-export const sortAscInsensitive = (lines: string[]) =>
+/**
+ * Sorts lines in ascending order, case-insensitive
+ */
+export const sortAscInsensitive = (lines: string[]): string[] =>
     [...lines].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 
-export const sortDesc = (lines: string[]) => [...lines].sort((a, b) => b.localeCompare(a));
+/**
+ * Sorts lines in descending order (Z-A)
+ */
+export const sortDesc = (lines: string[]): string[] => 
+    [...lines].sort((a, b) => b.localeCompare(a));
 
-export const sortDescInsensitive = (lines: string[]) =>
+/**
+ * Sorts lines in descending order, case-insensitive
+ */
+export const sortDescInsensitive = (lines: string[]): string[] =>
     [...lines].sort((a, b) => b.localeCompare(a, undefined, { sensitivity: 'base' }));
 
-export const sortNatural = (lines: string[]) =>
+/**
+ * Natural sort - handles numbers intelligently (e.g., file2.txt before file10.txt)
+ */
+export const sortNatural = (lines: string[]): string[] =>
     [...lines].sort((a, b) => naturalCollator.compare(a, b));
 
-export const sortLengthAsc = (lines: string[]) => [...lines].sort((a, b) => a.length - b.length);
+/**
+ * Sorts lines by length (shortest first)
+ */
+export const sortLengthAsc = (lines: string[]): string[] => 
+    [...lines].sort((a, b) => a.length - b.length);
 
-export const sortLengthDesc = (lines: string[]) => [...lines].sort((a, b) => b.length - a.length);
+/**
+ * Sorts lines by length (longest first)
+ */
+export const sortLengthDesc = (lines: string[]): string[] => 
+    [...lines].sort((a, b) => b.length - a.length);
 
-export const sortReverse = (lines: string[]) => [...lines].reverse();
+/**
+ * Reverses the order of lines
+ */
+export const sortReverse = (lines: string[]): string[] => 
+    [...lines].reverse();
 
-export const sortIP = (lines: string[]) => {
+/**
+ * Sorts lines by IPv4 address (if present in the line)
+ */
+export const sortIP = (lines: string[]): string[] => {
     return [...lines].sort((a, b) => {
-        // Extract IP-like patterns (simple IPv4)
-        const ipA = a.match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/);
-        const ipB = b.match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/);
+        // Extract IPv4 patterns
+        const ipRegex = /\b(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\b/;
+        const matchA = a.match(ipRegex);
+        const matchB = b.match(ipRegex);
 
-        if (!ipA || !ipB) return a.localeCompare(b); // Fallback if no IP found
+        // If either line doesn't contain an IP, fall back to string comparison
+        if (!matchA || !matchB) {
+            return a.localeCompare(b);
+        }
 
-        const numA = ipA[0].split('.').map(Number);
-        const numB = ipB[0].split('.').map(Number);
-
-        for (let i = 0; i < 4; i++) {
-            if (numA[i] !== numB[i]) return numA[i] - numB[i];
+        // Compare each octet numerically
+        for (let i = 1; i <= 4; i++) {
+            const numA = parseInt(matchA[i], 10);
+            const numB = parseInt(matchB[i], 10);
+            if (numA !== numB) {
+                return numA - numB;
+            }
         }
         return 0;
     });
 };
 
-export const sortShuffle = (lines: string[]) => {
+/**
+ * Randomly shuffles lines using Fisher-Yates algorithm
+ */
+export const sortShuffle = (lines: string[]): string[] => {
     const array = [...lines];
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -47,9 +92,17 @@ export const sortShuffle = (lines: string[]) => {
     return array;
 };
 
-export const sortUnique = (lines: string[]) => [...new Set(lines)].sort((a, b) => a.localeCompare(b));
+/**
+ * Sorts lines and removes duplicates (case-sensitive)
+ */
+export const sortUnique = (lines: string[]): string[] => 
+    [...new Set(lines)].sort((a, b) => a.localeCompare(b));
 
-export const sortUniqueInsensitive = (lines: string[]) => {
+/**
+ * Sorts lines and removes duplicates (case-insensitive)
+ * Preserves the original case of the first occurrence
+ */
+export const sortUniqueInsensitive = (lines: string[]): string[] => {
     const seen = new Set<string>();
     const tempArr: { original: string, lower: string }[] = [];
 

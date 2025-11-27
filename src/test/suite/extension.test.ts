@@ -13,7 +13,6 @@ suite('Line King Comprehensive Test Suite', () => {
 
     test('Sorter: IP Address', () => {
         // Should sort numerically by octet, not alphabetically (where 10 < 192)
-        // AND handle mixing 10.0.0.2 vs 10.0.0.10 correctly
         const input = ['192.168.1.1', '10.0.0.2', '10.0.0.1', '10.0.0.10'];
         const expected = ['10.0.0.1', '10.0.0.2', '10.0.0.10', '192.168.1.1'];
         assert.deepStrictEqual(sorter.sortIP(input), expected);
@@ -26,7 +25,6 @@ suite('Line King Comprehensive Test Suite', () => {
     });
 
     test('Sorter: Descending Insensitive', () => {
-        // Ensure case doesn't affect order (A and a are treated equal)
         const input = ['a', 'B', 'c'];
         const expected = ['c', 'B', 'a']; // c > b > a
         assert.deepStrictEqual(sorter.sortDescInsensitive(input), expected);
@@ -55,7 +53,6 @@ suite('Line King Comprehensive Test Suite', () => {
     });
 
     test('Cleaner: Condense Blank Lines', () => {
-        // Should reduce multiple blanks to one, but keep text separation
         const input = ['text', '', '', '', 'more text', '', 'end'];
         const expected = ['text', '', 'more text', '', 'end'];
         assert.deepStrictEqual(cleaner.condenseBlankLines(input), expected);
@@ -63,7 +60,6 @@ suite('Line King Comprehensive Test Suite', () => {
 
     test('Cleaner: Keep Only Duplicates', () => {
         const input = ['a', 'b', 'a', 'c', 'b'];
-        // Should remove 'c' as it appears once. Should keep 'a' and 'b' instances.
         const expected = ['a', 'b', 'a', 'b'];
         assert.deepStrictEqual(cleaner.keepOnlyDuplicates(input), expected);
     });
@@ -79,8 +75,9 @@ suite('Line King Comprehensive Test Suite', () => {
     });
 
     test('Transformer: Title Case', () => {
-        const input = ['the lion king', 'hello-world'];
-        const expected = ['The Lion King', 'Hello-World'];
+        const input = ['the line king', 'hello-world'];
+        // Updated expectation to match strict Title Case logic
+        const expected = ['The Line King', 'Hello-World'];
         assert.deepStrictEqual(transformer.transformTitle(input), expected);
     });
 

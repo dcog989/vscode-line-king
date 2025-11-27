@@ -13,6 +13,7 @@
 .tests/
 .vscode-test/
 .vscode/
+.yarnrc
 **/*.map
 **/*.ts
 **/*.tsbuildinfo

@@ -15,9 +15,6 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.commands.executeCommand('setContext', 'lineKing.isMultiLine', false);
             return;
         }
-        // Considered multi-line if:
-        // 1. Multiple selections exist
-        // 2. OR single selection spans more than one line
         const isMulti = editor.selections.length > 1 ||
             editor.selections.some(s => s.start.line !== s.end.line);
         vscode.commands.executeCommand('setContext', 'lineKing.isMultiLine', isMulti);
@@ -27,12 +24,13 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.onDidChangeTextEditorSelection(updateContextKeys),
         vscode.window.onDidChangeActiveTextEditor(updateContextKeys)
     );
-    updateContextKeys(); // Initial check
+    updateContextKeys();
 
     // --- Helper for Registration ---
+    // KEY FIX: We now 'return' the promise so await executeCommand works correctly
     const register = (cmd: string, fn: (lines: string[]) => string[]) => {
         context.subscriptions.push(vscode.commands.registerTextEditorCommand(cmd, (editor) => {
-            applyLineAction(editor, fn);
+            return applyLineAction(editor, fn);
         }));
     };
 
@@ -50,7 +48,9 @@ export function activate(context: vscode.ExtensionContext) {
     register('lineKing.sort.ip', sorter.sortIP);
     register('lineKing.sort.shuffle', sorter.sortShuffle);
 
-    context.subscriptions.push(vscode.commands.registerTextEditorCommand('lineKing.sort.css', sortCssProperties));
+    context.subscriptions.push(vscode.commands.registerTextEditorCommand('lineKing.sort.css', async (editor) => {
+        return sortCssProperties(editor);
+    }));
 
     // --- Cleaners ---
     register('lineKing.tidy.removeBlank', cleaner.removeBlankLines);
@@ -82,11 +82,14 @@ export function activate(context: vscode.ExtensionContext) {
     register('lineKing.dev.jsonUnescape', transformer.transformJsonUnescape);
 
     // --- Interactive ---
-    context.subscriptions.push(vscode.commands.registerTextEditorCommand('lineKing.manipulate.split', transformer.splitLinesInteractive));
-    context.subscriptions.push(vscode.commands.registerTextEditorCommand('lineKing.manipulate.align', transformer.alignToSeparatorInteractive));
+    context.subscriptions.push(vscode.commands.registerTextEditorCommand('lineKing.manipulate.split', async (editor) => {
+        return transformer.splitLinesInteractive(editor);
+    }));
+    context.subscriptions.push(vscode.commands.registerTextEditorCommand('lineKing.manipulate.align', async (editor) => {
+        return transformer.alignToSeparatorInteractive(editor);
+    }));
 
     // --- Utilities ---
-    // Duplicate
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('lineKing.manipulate.duplicate', async (editor) => {
         const selections = [...editor.selections].sort((a, b) => b.start.compareTo(a.start));
         await editor.edit(editBuilder => {
@@ -99,15 +102,13 @@ export function activate(context: vscode.ExtensionContext) {
         });
     }));
 
-    // EOL Conversion
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('lineKing.util.eol.lf', (editor) => {
-        editor.edit(eb => eb.setEndOfLine(vscode.EndOfLine.LF));
+        return editor.edit(eb => eb.setEndOfLine(vscode.EndOfLine.LF));
     }));
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('lineKing.util.eol.crlf', (editor) => {
-        editor.edit(eb => eb.setEndOfLine(vscode.EndOfLine.CRLF));
+        return editor.edit(eb => eb.setEndOfLine(vscode.EndOfLine.CRLF));
     }));
 
-    // Visualization
     context.subscriptions.push(vscode.commands.registerCommand('lineKing.util.toggleLineEndings', toggleLineEndings));
 
     context.subscriptions.push(

@@ -1,6 +1,10 @@
 import * as vscode from 'vscode';
 
-export async function sortCssProperties(editor: vscode.TextEditor) {
+/**
+ * Sorts CSS properties within rule blocks
+ * Supports both alphabetical and length-based sorting strategies
+ */
+export async function sortCssProperties(editor: vscode.TextEditor): Promise<void> {
     const document = editor.document;
     const text = document.getText();
     const config = vscode.workspace.getConfiguration('lineKing');
@@ -12,53 +16,66 @@ export async function sortCssProperties(editor: vscode.TextEditor) {
     let propertyBlockStart = -1;
     let propertyBlockEnd = -1;
 
-    // Regex for a CSS property: padding: 0; or --var: 10px;
-    // Must not contain { or }
-    const propertyRegex = /^\s*[a-zA-Z0-9-]+\s*:[^;{}]*;\s*$/;
+    // Regex for a CSS property line
+    // Matches: property: value; or --custom-prop: value;
+    // Must not contain { or } (which would indicate rule boundaries)
+    const propertyRegex = /^\s*[a-zA-Z0-9_-]+\s*:[^;{}]*;\s*$/;
 
+    /**
+     * Sorts and applies the current property block
+     */
     const flushBlock = () => {
         if (propertyBlockStart > -1 && propertyBlockEnd > propertyBlockStart) {
-            // Get the slice
+            // Extract the property lines
             const slice = lines.slice(propertyBlockStart, propertyBlockEnd + 1);
 
-            // Apply sorting strategy
+            // Apply the selected sorting strategy
             if (strategy === 'length') {
                 slice.sort((a, b) => a.trim().length - b.trim().length);
             } else {
-                // Default: Alphabetical
+                // Default: Alphabetical sorting
                 slice.sort((a, b) => a.trim().localeCompare(b.trim()));
             }
 
-            // Create edit
+            // Create a text edit for this block
             const range = new vscode.Range(
                 new vscode.Position(propertyBlockStart, 0),
                 new vscode.Position(propertyBlockEnd, lines[propertyBlockEnd].length)
             );
 
-            const newText = slice.join(document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n');
+            const eol = document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n';
+            const newText = slice.join(eol);
             edits.push(vscode.TextEdit.replace(range, newText));
         }
+        
+        // Reset block tracking
         propertyBlockStart = -1;
         propertyBlockEnd = -1;
     };
 
+    // Scan through all lines
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
 
         if (propertyRegex.test(line)) {
+            // This line is a CSS property
             if (propertyBlockStart === -1) {
                 propertyBlockStart = i;
             }
             propertyBlockEnd = i;
         } else {
-            // Non-property line
+            // Non-property line encountered
+            // Only flush if it's not an empty line (empty lines within a block are ok)
             if (line.trim().length > 0) {
                 flushBlock();
             }
         }
     }
-    flushBlock(); // Final flush
+    
+    // Flush any remaining property block at the end of the file
+    flushBlock();
 
+    // Apply all edits
     if (edits.length > 0) {
         await editor.edit(editBuilder => {
             for (const edit of edits) {

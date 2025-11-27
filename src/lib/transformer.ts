@@ -3,73 +3,157 @@ import { getJoinSeparator } from '../utils/editor';
 
 // --- Text Case Helpers ---
 
-function toCamel(str: string) {
+function toCamel(str: string): string {
     return str.replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) =>
         index === 0 ? word.toLowerCase() : word.toUpperCase()
     ).replace(/\s+/g, '');
 }
 
-function toKebab(str: string) {
+function toKebab(str: string): string {
     return str
         .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
         ?.map(x => x.toLowerCase())
         .join('-') || str;
 }
 
-function toSnake(str: string) {
+function toSnake(str: string): string {
     return str
         .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
         ?.map(x => x.toLowerCase())
         .join('_') || str;
 }
 
-function toPascal(str: string) {
+function toPascal(str: string): string {
     return str.replace(/(?:^\w|[A-Z]|\b\w)/g, (word) => word.toUpperCase()).replace(/\s+/g, '');
 }
 
-function toSentence(str: string) {
+function toSentence(str: string): string {
     const s = str.trim();
     if (s.length === 0) return str;
     return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 }
 
-function toTitle(str: string) {
-    // 1. Lowercase the entire string to normalize
-    // 2. Replace the first character of every word boundary (\b) with uppercase
+function toTitle(str: string): string {
     return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// --- Browser-compatible Base64 helpers ---
+
+/**
+ * Encodes a string to base64 in a browser-compatible way
+ */
+function base64Encode(str: string): string {
+    try {
+        // Use TextEncoder for proper UTF-8 handling
+        const encoder = new TextEncoder();
+        const data = encoder.encode(str);
+        // Convert to base64
+        return btoa(String.fromCharCode(...data));
+    } catch (err) {
+        // Fallback for simpler ASCII strings
+        return btoa(str);
+    }
+}
+
+/**
+ * Decodes a base64 string in a browser-compatible way
+ */
+function base64Decode(str: string): string {
+    try {
+        const decoded = atob(str);
+        // Convert back to UTF-8
+        const bytes = new Uint8Array(decoded.split('').map(c => c.charCodeAt(0)));
+        const decoder = new TextDecoder();
+        return decoder.decode(bytes);
+    } catch (err) {
+        // Fallback or return original on error
+        try {
+            return atob(str);
+        } catch {
+            return str;
+        }
+    }
 }
 
 // --- Transformers ---
 
-export const transformUpper = (lines: string[]) => lines.map(l => l.toUpperCase());
-export const transformLower = (lines: string[]) => lines.map(l => l.toLowerCase());
-export const transformCamel = (lines: string[]) => lines.map(l => toCamel(l));
-export const transformKebab = (lines: string[]) => lines.map(l => toKebab(l));
-export const transformSnake = (lines: string[]) => lines.map(l => toSnake(l));
-export const transformPascal = (lines: string[]) => lines.map(l => toPascal(l));
-export const transformSentence = (lines: string[]) => lines.map(l => toSentence(l));
-export const transformTitle = (lines: string[]) => lines.map(l => toTitle(l));
+export const transformUpper = (lines: string[]): string[] => lines.map(l => l.toUpperCase());
+export const transformLower = (lines: string[]): string[] => lines.map(l => l.toLowerCase());
+export const transformCamel = (lines: string[]): string[] => lines.map(l => toCamel(l));
+export const transformKebab = (lines: string[]): string[] => lines.map(l => toKebab(l));
+export const transformSnake = (lines: string[]): string[] => lines.map(l => toSnake(l));
+export const transformPascal = (lines: string[]): string[] => lines.map(l => toPascal(l));
+export const transformSentence = (lines: string[]): string[] => lines.map(l => toSentence(l));
+export const transformTitle = (lines: string[]): string[] => lines.map(l => toTitle(l));
 
 // --- Encoding ---
-export const transformUrlEncode = (lines: string[]) => lines.map(l => encodeURIComponent(l));
-export const transformUrlDecode = (lines: string[]) => lines.map(l => decodeURIComponent(l));
-export const transformBase64Encode = (lines: string[]) => lines.map(l => Buffer.from(l).toString('base64'));
-export const transformBase64Decode = (lines: string[]) => lines.map(l => Buffer.from(l, 'base64').toString('utf8'));
-export const transformJsonEscape = (lines: string[]) => lines.map(l => JSON.stringify(l).slice(1, -1));
-export const transformJsonUnescape = (lines: string[]) => lines.map(l => {
-    try { return JSON.parse(`"${l}"`); } catch { return l; }
-});
+export const transformUrlEncode = (lines: string[]): string[] => 
+    lines.map(l => {
+        try {
+            return encodeURIComponent(l);
+        } catch {
+            return l;
+        }
+    });
+
+export const transformUrlDecode = (lines: string[]): string[] => 
+    lines.map(l => {
+        try {
+            return decodeURIComponent(l);
+        } catch {
+            return l;
+        }
+    });
+
+export const transformBase64Encode = (lines: string[]): string[] => 
+    lines.map(l => {
+        try {
+            return base64Encode(l);
+        } catch {
+            return l;
+        }
+    });
+
+export const transformBase64Decode = (lines: string[]): string[] => 
+    lines.map(l => {
+        try {
+            return base64Decode(l);
+        } catch {
+            return l;
+        }
+    });
+
+export const transformJsonEscape = (lines: string[]): string[] => 
+    lines.map(l => {
+        try {
+            return JSON.stringify(l).slice(1, -1);
+        } catch {
+            return l;
+        }
+    });
+
+export const transformJsonUnescape = (lines: string[]): string[] => 
+    lines.map(l => {
+        try {
+            return JSON.parse(`"${l}"`);
+        } catch {
+            return l;
+        }
+    });
 
 // --- Sequence ---
-export const transformSequence = (lines: string[]) => lines.map((_, i) => `${i + 1}`);
+export const transformSequence = (lines: string[]): string[] => lines.map((_, i) => `${i + 1}`);
 
 // --- Join / Split / Align ---
 
-export const transformJoin = (lines: string[]) => {
+export const transformJoin = (lines: string[]): string[] => {
     const separator = getJoinSeparator();
     return [lines.join(separator)];
 };
 
+/**
+ * Interactively splits lines by a user-specified separator
+ */
 export async function splitLinesInteractive(editor: vscode.TextEditor): Promise<void> {
     const separator = await vscode.window.showInputBox({
         prompt: 'Enter the separator to split by',
@@ -88,6 +172,9 @@ export async function splitLinesInteractive(editor: vscode.TextEditor): Promise<
     });
 }
 
+/**
+ * Aligns text to a separator by adding padding
+ */
 export async function alignToSeparatorInteractive(editor: vscode.TextEditor): Promise<void> {
     const separator = await vscode.window.showInputBox({
         prompt: 'Enter separator to align',
@@ -98,20 +185,19 @@ export async function alignToSeparatorInteractive(editor: vscode.TextEditor): Pr
 
     const { applyLineAction } = await import('../utils/editor');
     await applyLineAction(editor, (lines) => {
-        // 1. Find max position of separator
+        // Find max position of separator
         let maxPos = 0;
         const splitLines = lines.map(line => {
             const idx = line.indexOf(separator);
-            if (idx > maxPos) maxPos = idx;
+            if (idx !== -1 && idx > maxPos) maxPos = idx;
             return { line, idx };
         });
 
-        // 2. Pad
+        // Pad each line to align separators
         return splitLines.map(item => {
             if (item.idx === -1) return item.line;
             const before = item.line.substring(0, item.idx).trimEnd();
             const after = item.line.substring(item.idx + separator.length).trimStart();
-            // Pad spaces
             const spaces = ' '.repeat(maxPos - before.length);
             return `${before}${spaces} ${separator} ${after}`;
         });

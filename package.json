@@ -2,7 +2,7 @@
     "name": "line-king",
     "displayName": "Line King",
     "description": "The ultimate line manipulation tool. Sort, tidy, clean, duplicate, and transform text lines with ease.",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "publisher": "dcog989",
     "icon": "assets/icon.png",
     "repository": {
@@ -19,6 +19,19 @@
     "categories": [
         "Formatters",
         "Other"
+    ],
+    "keywords": [
+        "sort",
+        "lines",
+        "text",
+        "manipulation",
+        "format",
+        "tidy",
+        "clean",
+        "duplicate",
+        "transform",
+        "case",
+        "encoding"
     ],
     "activationEvents": [
         "onStartupFinished"
@@ -39,7 +52,7 @@
                 "lineKing.joinSeparator": {
                     "type": "string",
                     "default": " ",
-                    "description": "The character or string used when joining lines."
+                    "description": "The character or string used when joining lines together."
                 },
                 "lineKing.cleanupOnSave": {
                     "type": "string",
@@ -48,6 +61,12 @@
                         "removeBlankLines",
                         "trimTrailingWhitespace",
                         "sortCssProperties"
+                    ],
+                    "enumDescriptions": [
+                        "Do not perform any automatic cleanup",
+                        "Automatically remove all blank lines when saving",
+                        "Automatically trim trailing whitespace when saving",
+                        "Automatically sort CSS properties alphabetically when saving"
                     ],
                     "default": "none",
                     "description": "Automatically perform a cleanup action when saving a file."
@@ -58,8 +77,12 @@
                         "alphabetical",
                         "length"
                     ],
+                    "enumDescriptions": [
+                        "Sort CSS properties alphabetically by property name",
+                        "Sort CSS properties by line length (shortest first)"
+                    ],
                     "default": "alphabetical",
-                    "description": "Strategy for sorting CSS properties."
+                    "description": "Strategy for sorting CSS properties within rule blocks."
                 }
             }
         },
@@ -503,6 +526,7 @@
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
         "check-types": "tsc --noEmit",
+        "lint": "eslint src --ext ts",
         "test": "npm run compile && node ./out/test/runTest.js",
         "clean": "node -e \"const fs = require('fs'); ['dist', 'out', '.vscode-test'].forEach(dir => fs.rmSync(dir, {recursive:true, force:true}));\""
     },
