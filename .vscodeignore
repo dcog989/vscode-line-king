@@ -10,7 +10,7 @@
 .gitignore
 .repomixignore
 .scripts/
-.tests/
+.test/
 .vscode-test/
 .vscode/
 .yarnrc
