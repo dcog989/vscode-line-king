@@ -526,7 +526,7 @@
         "check-types": "tsc --noEmit",
         "lint": "eslint src --ext ts",
         "test": "npm run compile && node ./out/test/runTest.js",
-        "clean": "node -e \"const fs = require('fs'); ['dist', 'out', '.vscode-test'].forEach(dir => fs.rmSync(dir, {recursive:true, force:true}));\""
+        "clean": "node -e \"const fs = require('fs'); ['dist', 'out'].forEach(dir => { try { fs.rmSync(dir, {recursive:true, force:true}); } catch(e) { console.log('Skipped:', dir); } });\""
     },
     "devDependencies": {
         "@types/glob": "^8.1.0",
