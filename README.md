@@ -1,15 +1,15 @@
-# Line King
+# ![Line King logo](https://raw.githubusercontent.com/dcog989/vscode-line-king/main/assets/icon-64.png) Line King
 
-**The Ultimate Line Manipulation Tool for VS Code.**
+The best Line Manipulation Tool for VS Code ever? Many people are saying so.
 
-Line King replaces the need for multiple single-purpose extensions by combining sorting, tidying, cleaning, and text manipulation into one powerful, lightweight utility.
+Line King replaces multiple single-purpose extensions by combining sorting, tidying, cleaning, and text manipulation into a single, fast, lightweight utility. Plus, it's smart - only displays what is relevant to what is selected.
 
 ![Version](https://img.shields.io/badge/version-0.0.2-blue.svg)
 ![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.106.1-brightgreen.svg)
 
 ## Features
 
-### 📊 Sorting
+### Sorting
 *Works on selection or entire document.*
 
 - **Sort Ascending/Descending** - Standard alphabetical sort (case-sensitive or case-insensitive)
@@ -21,7 +21,7 @@ Line King replaces the need for multiple single-purpose extensions by combining 
 - **Shuffle** - Randomize line order
 - **CSS Properties Sort** - Sorts CSS/SCSS/LESS properties alphabetically or by length within rule blocks
 
-### 🧹 Tidying & Cleaning
+### Tidying & Cleaning
 
 - **Remove Blank Lines** - Deletes all empty lines
 - **Condense Blank Lines** - Reduces multiple consecutive blank lines to a single one
@@ -29,7 +29,7 @@ Line King replaces the need for multiple single-purpose extensions by combining 
 - **Keep Only Duplicates** - Useful for finding repeated data; removes all unique lines
 - **Trim Whitespace** - Remove leading, trailing, or both from each line
 
-### ✨ Text Transformation
+### Text Transformation
 
 - **Case Conversion**:
   - UPPERCASE
@@ -46,7 +46,7 @@ Line King replaces the need for multiple single-purpose extensions by combining 
   - Base64 Encode/Decode
   - JSON String Escape/Unescape
 
-### 🛠️ Utilities
+### Utilities
 
 - **Duplicate Line/Selection** - Smarter duplication that handles newlines correctly
 - **Join Lines** - Combines selected lines using a configurable separator
@@ -60,17 +60,20 @@ Line King replaces the need for multiple single-purpose extensions by combining 
 ## Usage
 
 ### Context Menu
+
 1. Select text or place cursor in the document
 2. Right-click to open the context menu
 3. Look for the **Line King** submenu
 4. Choose your desired operation
 
 ### Command Palette
+
 1. Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac)
 2. Type "Line King" to see all available commands
 3. Select the command you want to run
 
 ### Behavior
+
 - **With selection**: Commands operate on the selected lines (expanded to full lines)
 - **Without selection**: Most commands operate on the entire document
 - **Multiple selections**: Commands handle multiple selections intelligently
@@ -79,11 +82,11 @@ Line King replaces the need for multiple single-purpose extensions by combining 
 
 Access settings via: File > Preferences > Settings > Extensions > Line King
 
-| Setting                        | Description                                                                                                 | Default        |
-| :----------------------------- | :---------------------------------------------------------------------------------------------------------- | :------------- |
-| `lineKing.joinSeparator`       | Character or string used when joining lines together.                                                       | `" "` (Space)  |
-| `lineKing.cleanupOnSave`       | Action to run on save: `none`, `removeBlankLines`, `trimTrailingWhitespace`, or `sortCssProperties`.       | `none`         |
-| `lineKing.cssSortStrategy`     | Strategy for CSS sorting: `alphabetical` (by property name) or `length` (by line length).                  | `alphabetical` |
+| Setting                    | Description                                                                                          | Default        |
+| :------------------------- | :--------------------------------------------------------------------------------------------------- | :------------- |
+| `lineKing.joinSeparator`   | Character or string used when joining lines together.                                                | `" "` (Space)  |
+| `lineKing.cleanupOnSave`   | Action to run on save: `none`, `removeBlankLines`, `trimTrailingWhitespace`, or `sortCssProperties`. | `none`         |
+| `lineKing.cssSortStrategy` | Strategy for CSS sorting: `alphabetical` (by property name) or `length` (by line length).            | `alphabetical` |
 
 ### Example Configuration
 
@@ -225,32 +228,14 @@ Line King is designed to work in:
 
 None currently. Please report issues on [GitHub](https://github.com/dcog989/vscode-line-king/issues).
 
-## Release Notes
-
-### 0.0.2
-- Enhanced browser compatibility for Base64 encoding/decoding
-- Improved error handling for all encoding operations
-- Added comprehensive JSDoc documentation
-- Better type safety with explicit return types
-- Enhanced `removeDuplicates` to preserve line order
-- Improved CSS property sorting with better regex
-- Added keywords for better discoverability
-
-### 0.0.1
-- Initial release
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-See LICENSE file for details.
+MIT.
 
 ## Support
 
 If you encounter any issues or have feature requests, please file them on the [GitHub repository](https://github.com/dcog989/vscode-line-king/issues).
-
----
-
-**Enjoy using Line King!** 👑
