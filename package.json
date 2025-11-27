@@ -1,8 +1,8 @@
 {
     "name": "line-king",
     "displayName": "Line King",
-    "description": "The ultimate line manipulation tool. Sort, tidy, clean, duplicate, and transform text lines with ease.",
-    "version": "0.0.3",
+    "description": "Manipulate all the line things. Sort, tidy, clean, duplicate, transform.",
+    "version": "0.0.4",
     "publisher": "dcog989",
     "icon": "assets/icon.png",
     "repository": {
@@ -33,9 +33,7 @@
         "case",
         "encoding"
     ],
-    "activationEvents": [
-        "onStartupFinished"
-    ],
+    "activationEvents": [],
     "main": "./out/extension.js",
     "browser": "./out/extension.js",
     "capabilities": {
