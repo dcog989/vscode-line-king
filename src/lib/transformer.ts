@@ -34,10 +34,9 @@ function toSentence(str: string) {
 }
 
 function toTitle(str: string) {
-    return str.replace(
-        /\w\S*/g,
-        text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
-    );
+    // 1. Lowercase the entire string to normalize
+    // 2. Replace the first character of every word boundary (\b) with uppercase
+    return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 }
 
 // --- Transformers ---

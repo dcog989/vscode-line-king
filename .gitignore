@@ -1,10 +1,10 @@
 # Project Specific
+.ai/
 .assets/
 .docs/
+.repomixignore
 .scripts/
 .test/
-.ai/
-.repomixignore
 repomix.config.json
 
 

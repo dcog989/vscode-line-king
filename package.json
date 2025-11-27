@@ -322,7 +322,8 @@
                 },
                 {
                     "command": "lineKing.tidy.removeBlank",
-                    "group": "3_tidy@1"
+                    "group": "3_tidy@1",
+                    "when": "lineKing.isMultiLine"
                 },
                 {
                     "command": "lineKing.tidy.removeDuplicates",
@@ -331,7 +332,18 @@
                 },
                 {
                     "command": "lineKing.tidy.trimTrailing",
-                    "group": "3_tidy@3"
+                    "group": "3_tidy@3",
+                    "when": "lineKing.isMultiLine"
+                },
+                {
+                    "command": "lineKing.tidy.trimLeading",
+                    "group": "3_tidy@4",
+                    "when": "lineKing.isMultiLine"
+                },
+                {
+                    "command": "lineKing.tidy.trimBoth",
+                    "group": "3_tidy@5",
+                    "when": "lineKing.isMultiLine"
                 },
                 {
                     "command": "lineKing.manipulate.duplicate",
@@ -343,13 +355,31 @@
                     "when": "lineKing.isMultiLine"
                 },
                 {
-                    "command": "lineKing.manipulate.align",
+                    "command": "lineKing.manipulate.split",
                     "group": "4_util@3",
+                    "when": "editorHasSelection"
+                },
+                {
+                    "command": "lineKing.manipulate.align",
+                    "group": "4_util@4",
                     "when": "lineKing.isMultiLine"
                 },
                 {
+                    "command": "lineKing.manipulate.sequence",
+                    "group": "4_util@5",
+                    "when": "editorHasSelection"
+                },
+                {
+                    "command": "lineKing.util.eol.lf",
+                    "group": "5_eof@1"
+                },
+                {
+                    "command": "lineKing.util.eol.crlf",
+                    "group": "5_eof@2"
+                },
+                {
                     "command": "lineKing.util.toggleLineEndings",
-                    "group": "5_debug"
+                    "group": "5_eof@3"
                 }
             ],
             "lineKing.sortMenu": [
@@ -358,28 +388,48 @@
                     "group": "1_basic@1"
                 },
                 {
-                    "command": "lineKing.sort.desc",
+                    "command": "lineKing.sort.asc.insensitive",
                     "group": "1_basic@2"
                 },
                 {
-                    "command": "lineKing.sort.natural",
+                    "command": "lineKing.sort.desc",
                     "group": "1_basic@3"
                 },
                 {
-                    "command": "lineKing.sort.reverse",
+                    "command": "lineKing.sort.desc.insensitive",
                     "group": "1_basic@4"
+                },
+                {
+                    "command": "lineKing.sort.natural",
+                    "group": "1_basic@5"
+                },
+                {
+                    "command": "lineKing.sort.reverse",
+                    "group": "1_basic@6"
                 },
                 {
                     "command": "lineKing.sort.length.asc",
                     "group": "2_len@1"
                 },
                 {
+                    "command": "lineKing.sort.length.desc",
+                    "group": "2_len@2"
+                },
+                {
                     "command": "lineKing.sort.unique",
                     "group": "3_unique@1"
                 },
                 {
-                    "command": "lineKing.sort.ip",
+                    "command": "lineKing.sort.unique.insensitive",
                     "group": "3_unique@2"
+                },
+                {
+                    "command": "lineKing.sort.ip",
+                    "group": "3_unique@3"
+                },
+                {
+                    "command": "lineKing.sort.shuffle",
+                    "group": "3_unique@4"
                 },
                 {
                     "command": "lineKing.sort.css",
@@ -412,8 +462,12 @@
                     "group": "2_code@2"
                 },
                 {
-                    "command": "lineKing.manipulate.snake",
+                    "command": "lineKing.manipulate.kebab",
                     "group": "2_code@3"
+                },
+                {
+                    "command": "lineKing.manipulate.snake",
+                    "group": "2_code@4"
                 }
             ],
             "lineKing.devMenu": [
@@ -435,6 +489,10 @@
                 },
                 {
                     "command": "lineKing.dev.jsonEscape",
+                    "group": "3_json"
+                },
+                {
+                    "command": "lineKing.dev.jsonUnescape",
                     "group": "3_json"
                 }
             ]
