@@ -1,0 +1,234 @@
+{
+    "name": "line-king",
+    "displayName": "Line King",
+    "description": "The ultimate line manipulation tool. Sort, tidy, clean, duplicate, and transform text lines with ease.",
+    "version": "0.0.1",
+    "publisher": "dcog989",
+    "icon": "assets/icon.png",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dcog989/vscode-line-king.git"
+    },
+    "bugs": {
+        "url": "https://github.com/dcog989/vscode-line-king/issues"
+    },
+    "homepage": "https://github.com/dcog989/vscode-line-king/blob/main/README.md",
+    "engines": {
+        "vscode": "^1.106.1"
+    },
+    "categories": [
+        "Formatters",
+        "Other"
+    ],
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "./out/extension.js",
+    "browser": "./out/extension.js",
+    "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+            "supported": true
+        }
+    },
+    "contributes": {
+        "configuration": {
+            "type": "object",
+            "title": "Line King",
+            "properties": {
+                "lineKing.joinSeparator": {
+                    "type": "string",
+                    "default": " ",
+                    "description": "The character or string used when joining lines."
+                },
+                "lineKing.cleanupOnSave": {
+                    "type": "string",
+                    "enum": [
+                        "none",
+                        "removeBlankLines",
+                        "trimTrailingWhitespace",
+                        "sortCssProperties"
+                    ],
+                    "default": "none",
+                    "description": "Automatically perform a cleanup action when saving a file."
+                },
+                "lineKing.cssSortStrategy": {
+                    "type": "string",
+                    "enum": [
+                        "alphabetical",
+                        "length"
+                    ],
+                    "default": "alphabetical",
+                    "description": "Strategy for sorting CSS properties."
+                }
+            }
+        },
+        "commands": [
+            {
+                "command": "lineKing.sort.asc",
+                "title": "Sort Lines: Ascending (A-Z)",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.sort.asc.insensitive",
+                "title": "Sort Lines: Ascending (Case Insensitive)",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.sort.desc",
+                "title": "Sort Lines: Descending (Z-A)",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.sort.unique",
+                "title": "Sort Lines: Unique (Remove Duplicates)",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.sort.unique.insensitive",
+                "title": "Sort Lines: Unique (Case Insensitive)",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.sort.natural",
+                "title": "Sort Lines: Natural (Alphanumeric)",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.sort.length.asc",
+                "title": "Sort Lines: By Length (Shortest to Longest)",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.sort.length.desc",
+                "title": "Sort Lines: By Length (Longest to Shortest)",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.sort.shuffle",
+                "title": "Sort Lines: Shuffle (Random)",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.sort.css",
+                "title": "Sort CSS/SCSS Properties",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.tidy.removeBlank",
+                "title": "Remove All Blank Lines",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.tidy.condenseBlank",
+                "title": "Condense Blank Lines",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.tidy.removeDuplicates",
+                "title": "Remove All Duplicate Lines",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.tidy.keepDuplicates",
+                "title": "Keep Only Duplicate Lines",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.tidy.trimTrailing",
+                "title": "Trim Trailing Whitespace",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.manipulate.duplicate",
+                "title": "Duplicate Selection/Line",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.manipulate.join",
+                "title": "Join Lines",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.manipulate.split",
+                "title": "Split Line by Separator...",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.manipulate.upper",
+                "title": "Convert to Uppercase",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.manipulate.lower",
+                "title": "Convert to Lowercase",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.manipulate.camel",
+                "title": "Convert to camelCase",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.manipulate.kebab",
+                "title": "Convert to kebab-case",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.manipulate.snake",
+                "title": "Convert to snake_case",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.manipulate.pascal",
+                "title": "Convert to PascalCase",
+                "category": "Line King"
+            },
+            {
+                "command": "lineKing.util.toggleLineEndings",
+                "title": "Toggle Line Endings Visibility",
+                "category": "Line King"
+            }
+        ],
+        "menus": {
+            "editor/context": [
+                {
+                    "command": "lineKing.sort.asc",
+                    "group": "1_lineKing_sort@1",
+                    "when": "editorHasSelection"
+                },
+                {
+                    "command": "lineKing.sort.unique",
+                    "group": "1_lineKing_sort@2",
+                    "when": "editorHasSelection"
+                },
+                {
+                    "command": "lineKing.tidy.removeBlank",
+                    "group": "1_lineKing_tidy@1"
+                },
+                {
+                    "command": "lineKing.manipulate.duplicate",
+                    "group": "1_lineKing_manip@1"
+                }
+            ]
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "check-types": "tsc --noEmit",
+        "test": "npm run compile && node ./out/test/runTest.js",
+        "clean": "node -e \"const fs = require('fs'); ['dist', 'out', '.vscode-test'].forEach(dir => fs.rmSync(dir, {recursive:true, force:true}));\""
+    },
+    "devDependencies": {
+        "@types/glob": "^8.1.0",
+        "@types/mocha": "^10.0.10",
+        "@types/node": "^24.10.1",
+        "@types/vscode": "^1.106.1",
+        "@vscode/test-electron": "^2.5.2",
+        "glob": "^13.0.0",
+        "mocha": "^11.7.5",
+        "typescript": "^5.9.3"
+    }
+}
