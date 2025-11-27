@@ -2,7 +2,7 @@
 .assets/
 .docs/
 .scripts/
-.tests/
+.test/
 .ai/
 .repomixignore
 repomix.config.json

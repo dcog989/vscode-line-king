@@ -2,7 +2,7 @@
     "name": "line-king",
     "displayName": "Line King",
     "description": "The ultimate line manipulation tool. Sort, tidy, clean, duplicate, and transform text lines with ease.",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "publisher": "dcog989",
     "icon": "assets/icon.png",
     "repository": {
@@ -66,149 +66,376 @@
         "commands": [
             {
                 "command": "lineKing.sort.asc",
-                "title": "Sort Lines: Ascending (A-Z)",
-                "category": "Line King"
+                "title": "Ascending (A-Z)",
+                "category": "Line King: Sort"
             },
             {
                 "command": "lineKing.sort.asc.insensitive",
-                "title": "Sort Lines: Ascending (Case Insensitive)",
-                "category": "Line King"
+                "title": "Ascending (Case Insensitive)",
+                "category": "Line King: Sort"
             },
             {
                 "command": "lineKing.sort.desc",
-                "title": "Sort Lines: Descending (Z-A)",
-                "category": "Line King"
+                "title": "Descending (Z-A)",
+                "category": "Line King: Sort"
+            },
+            {
+                "command": "lineKing.sort.desc.insensitive",
+                "title": "Descending (Case Insensitive)",
+                "category": "Line King: Sort"
             },
             {
                 "command": "lineKing.sort.unique",
-                "title": "Sort Lines: Unique (Remove Duplicates)",
-                "category": "Line King"
+                "title": "Unique (Remove Duplicates)",
+                "category": "Line King: Sort"
             },
             {
                 "command": "lineKing.sort.unique.insensitive",
-                "title": "Sort Lines: Unique (Case Insensitive)",
-                "category": "Line King"
+                "title": "Unique (Case Insensitive)",
+                "category": "Line King: Sort"
             },
             {
                 "command": "lineKing.sort.natural",
-                "title": "Sort Lines: Natural (Alphanumeric)",
-                "category": "Line King"
+                "title": "Natural (Alphanumeric)",
+                "category": "Line King: Sort"
             },
             {
                 "command": "lineKing.sort.length.asc",
-                "title": "Sort Lines: By Length (Shortest to Longest)",
-                "category": "Line King"
+                "title": "By Length (Shortest)",
+                "category": "Line King: Sort"
             },
             {
                 "command": "lineKing.sort.length.desc",
-                "title": "Sort Lines: By Length (Longest to Shortest)",
-                "category": "Line King"
+                "title": "By Length (Longest)",
+                "category": "Line King: Sort"
+            },
+            {
+                "command": "lineKing.sort.reverse",
+                "title": "Reverse Order",
+                "category": "Line King: Sort"
+            },
+            {
+                "command": "lineKing.sort.ip",
+                "title": "By IP Address",
+                "category": "Line King: Sort"
             },
             {
                 "command": "lineKing.sort.shuffle",
-                "title": "Sort Lines: Shuffle (Random)",
-                "category": "Line King"
+                "title": "Shuffle",
+                "category": "Line King: Sort"
             },
             {
                 "command": "lineKing.sort.css",
-                "title": "Sort CSS/SCSS Properties",
-                "category": "Line King"
+                "title": "Sort CSS Properties",
+                "category": "Line King: Sort"
             },
             {
                 "command": "lineKing.tidy.removeBlank",
-                "title": "Remove All Blank Lines",
-                "category": "Line King"
+                "title": "Remove Blank Lines",
+                "category": "Line King: Tidy"
             },
             {
                 "command": "lineKing.tidy.condenseBlank",
                 "title": "Condense Blank Lines",
-                "category": "Line King"
+                "category": "Line King: Tidy"
             },
             {
                 "command": "lineKing.tidy.removeDuplicates",
-                "title": "Remove All Duplicate Lines",
-                "category": "Line King"
+                "title": "Remove Duplicate Lines",
+                "category": "Line King: Tidy"
             },
             {
                 "command": "lineKing.tidy.keepDuplicates",
-                "title": "Keep Only Duplicate Lines",
-                "category": "Line King"
+                "title": "Keep Only Duplicates",
+                "category": "Line King: Tidy"
             },
             {
                 "command": "lineKing.tidy.trimTrailing",
                 "title": "Trim Trailing Whitespace",
-                "category": "Line King"
+                "category": "Line King: Tidy"
+            },
+            {
+                "command": "lineKing.tidy.trimLeading",
+                "title": "Trim Leading Whitespace",
+                "category": "Line King: Tidy"
+            },
+            {
+                "command": "lineKing.tidy.trimBoth",
+                "title": "Trim Both Ends",
+                "category": "Line King: Tidy"
+            },
+            {
+                "command": "lineKing.manipulate.upper",
+                "title": "UPPERCASE",
+                "category": "Line King: Case"
+            },
+            {
+                "command": "lineKing.manipulate.lower",
+                "title": "lowercase",
+                "category": "Line King: Case"
+            },
+            {
+                "command": "lineKing.manipulate.sentence",
+                "title": "Sentence case",
+                "category": "Line King: Case"
+            },
+            {
+                "command": "lineKing.manipulate.title",
+                "title": "Title Case",
+                "category": "Line King: Case"
+            },
+            {
+                "command": "lineKing.manipulate.camel",
+                "title": "camelCase",
+                "category": "Line King: Case"
+            },
+            {
+                "command": "lineKing.manipulate.kebab",
+                "title": "kebab-case",
+                "category": "Line King: Case"
+            },
+            {
+                "command": "lineKing.manipulate.snake",
+                "title": "snake_case",
+                "category": "Line King: Case"
+            },
+            {
+                "command": "lineKing.manipulate.pascal",
+                "title": "PascalCase",
+                "category": "Line King: Case"
             },
             {
                 "command": "lineKing.manipulate.duplicate",
-                "title": "Duplicate Selection/Line",
-                "category": "Line King"
+                "title": "Duplicate Selection",
+                "category": "Line King: Tools"
             },
             {
                 "command": "lineKing.manipulate.join",
                 "title": "Join Lines",
-                "category": "Line King"
+                "category": "Line King: Tools"
             },
             {
                 "command": "lineKing.manipulate.split",
-                "title": "Split Line by Separator...",
-                "category": "Line King"
+                "title": "Split Lines...",
+                "category": "Line King: Tools"
             },
             {
-                "command": "lineKing.manipulate.upper",
-                "title": "Convert to Uppercase",
-                "category": "Line King"
+                "command": "lineKing.manipulate.align",
+                "title": "Align to Separator...",
+                "category": "Line King: Tools"
             },
             {
-                "command": "lineKing.manipulate.lower",
-                "title": "Convert to Lowercase",
-                "category": "Line King"
+                "command": "lineKing.manipulate.sequence",
+                "title": "Insert Numeric Sequence (1,2,3...)",
+                "category": "Line King: Tools"
             },
             {
-                "command": "lineKing.manipulate.camel",
-                "title": "Convert to camelCase",
-                "category": "Line King"
+                "command": "lineKing.dev.urlEncode",
+                "title": "URL Encode",
+                "category": "Line King: Dev"
             },
             {
-                "command": "lineKing.manipulate.kebab",
-                "title": "Convert to kebab-case",
-                "category": "Line King"
+                "command": "lineKing.dev.urlDecode",
+                "title": "URL Decode",
+                "category": "Line King: Dev"
             },
             {
-                "command": "lineKing.manipulate.snake",
-                "title": "Convert to snake_case",
-                "category": "Line King"
+                "command": "lineKing.dev.base64Encode",
+                "title": "Base64 Encode",
+                "category": "Line King: Dev"
             },
             {
-                "command": "lineKing.manipulate.pascal",
-                "title": "Convert to PascalCase",
-                "category": "Line King"
+                "command": "lineKing.dev.base64Decode",
+                "title": "Base64 Decode",
+                "category": "Line King: Dev"
+            },
+            {
+                "command": "lineKing.dev.jsonEscape",
+                "title": "JSON String Escape",
+                "category": "Line King: Dev"
+            },
+            {
+                "command": "lineKing.dev.jsonUnescape",
+                "title": "JSON String Unescape",
+                "category": "Line King: Dev"
             },
             {
                 "command": "lineKing.util.toggleLineEndings",
                 "title": "Toggle Line Endings Visibility",
-                "category": "Line King"
+                "category": "Line King: Util"
+            },
+            {
+                "command": "lineKing.util.eol.lf",
+                "title": "Convert to LF (Unix)",
+                "category": "Line King: Util"
+            },
+            {
+                "command": "lineKing.util.eol.crlf",
+                "title": "Convert to CRLF (Windows)",
+                "category": "Line King: Util"
+            }
+        ],
+        "submenus": [
+            {
+                "id": "lineKing.mainMenu",
+                "label": "Line King"
+            },
+            {
+                "id": "lineKing.sortMenu",
+                "label": "Sort Lines",
+                "icon": "$(sort-precedence)"
+            },
+            {
+                "id": "lineKing.caseMenu",
+                "label": "Change Case",
+                "icon": "$(case-change)"
+            },
+            {
+                "id": "lineKing.devMenu",
+                "label": "Dev Tools",
+                "icon": "$(code)"
             }
         ],
         "menus": {
             "editor/context": [
                 {
-                    "command": "lineKing.sort.asc",
-                    "group": "1_lineKing_sort@1",
+                    "submenu": "lineKing.mainMenu",
+                    "group": "modification",
+                    "when": "editorTextFocus"
+                }
+            ],
+            "lineKing.mainMenu": [
+                {
+                    "submenu": "lineKing.sortMenu",
+                    "group": "1_sort",
+                    "when": "lineKing.isMultiLine"
+                },
+                {
+                    "submenu": "lineKing.caseMenu",
+                    "group": "2_transform",
                     "when": "editorHasSelection"
                 },
                 {
-                    "command": "lineKing.sort.unique",
-                    "group": "1_lineKing_sort@2",
+                    "submenu": "lineKing.devMenu",
+                    "group": "2_transform",
                     "when": "editorHasSelection"
                 },
                 {
                     "command": "lineKing.tidy.removeBlank",
-                    "group": "1_lineKing_tidy@1"
+                    "group": "3_tidy@1"
+                },
+                {
+                    "command": "lineKing.tidy.removeDuplicates",
+                    "group": "3_tidy@2",
+                    "when": "lineKing.isMultiLine"
+                },
+                {
+                    "command": "lineKing.tidy.trimTrailing",
+                    "group": "3_tidy@3"
                 },
                 {
                     "command": "lineKing.manipulate.duplicate",
-                    "group": "1_lineKing_manip@1"
+                    "group": "4_util@1"
+                },
+                {
+                    "command": "lineKing.manipulate.join",
+                    "group": "4_util@2",
+                    "when": "lineKing.isMultiLine"
+                },
+                {
+                    "command": "lineKing.manipulate.align",
+                    "group": "4_util@3",
+                    "when": "lineKing.isMultiLine"
+                },
+                {
+                    "command": "lineKing.util.toggleLineEndings",
+                    "group": "5_debug"
+                }
+            ],
+            "lineKing.sortMenu": [
+                {
+                    "command": "lineKing.sort.asc",
+                    "group": "1_basic@1"
+                },
+                {
+                    "command": "lineKing.sort.desc",
+                    "group": "1_basic@2"
+                },
+                {
+                    "command": "lineKing.sort.natural",
+                    "group": "1_basic@3"
+                },
+                {
+                    "command": "lineKing.sort.reverse",
+                    "group": "1_basic@4"
+                },
+                {
+                    "command": "lineKing.sort.length.asc",
+                    "group": "2_len@1"
+                },
+                {
+                    "command": "lineKing.sort.unique",
+                    "group": "3_unique@1"
+                },
+                {
+                    "command": "lineKing.sort.ip",
+                    "group": "3_unique@2"
+                },
+                {
+                    "command": "lineKing.sort.css",
+                    "group": "4_css"
+                }
+            ],
+            "lineKing.caseMenu": [
+                {
+                    "command": "lineKing.manipulate.upper",
+                    "group": "1_basic@1"
+                },
+                {
+                    "command": "lineKing.manipulate.lower",
+                    "group": "1_basic@2"
+                },
+                {
+                    "command": "lineKing.manipulate.sentence",
+                    "group": "1_basic@3"
+                },
+                {
+                    "command": "lineKing.manipulate.title",
+                    "group": "1_basic@4"
+                },
+                {
+                    "command": "lineKing.manipulate.camel",
+                    "group": "2_code@1"
+                },
+                {
+                    "command": "lineKing.manipulate.pascal",
+                    "group": "2_code@2"
+                },
+                {
+                    "command": "lineKing.manipulate.snake",
+                    "group": "2_code@3"
+                }
+            ],
+            "lineKing.devMenu": [
+                {
+                    "command": "lineKing.dev.urlEncode",
+                    "group": "1_enc"
+                },
+                {
+                    "command": "lineKing.dev.urlDecode",
+                    "group": "1_enc"
+                },
+                {
+                    "command": "lineKing.dev.base64Encode",
+                    "group": "2_base"
+                },
+                {
+                    "command": "lineKing.dev.base64Decode",
+                    "group": "2_base"
+                },
+                {
+                    "command": "lineKing.dev.jsonEscape",
+                    "group": "3_json"
                 }
             ]
         }

@@ -9,7 +9,7 @@ export const condenseBlankLines = (lines: string[]) => {
         const isBlank = line.trim().length === 0;
         if (isBlank) {
             if (!previousWasBlank) {
-                result.push(line); // Keep one blank line
+                result.push(line);
                 previousWasBlank = true;
             }
         } else {
@@ -27,10 +27,14 @@ export const keepOnlyDuplicates = (lines: string[]) => {
     for (const line of lines) {
         counts.set(line, (counts.get(line) || 0) + 1);
     }
-    // Filter to keep only lines that appeared more than once
-    // We map the original lines to preserve order, but only if count > 1
     return lines.filter(line => (counts.get(line) || 0) > 1);
 };
 
 export const trimTrailingWhitespace = (lines: string[]) =>
     lines.map(line => line.replace(/\s+$/, ''));
+
+export const trimLeadingWhitespace = (lines: string[]) =>
+    lines.map(line => line.replace(/^\s+/, ''));
+
+export const trimBothWhitespace = (lines: string[]) =>
+    lines.map(line => line.trim());

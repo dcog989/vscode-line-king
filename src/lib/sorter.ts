@@ -1,3 +1,6 @@
+// Create a reusable collator for performance
+const naturalCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+
 export const sortAsc = (lines: string[]) => [...lines].sort((a, b) => a.localeCompare(b));
 
 export const sortAscInsensitive = (lines: string[]) =>
@@ -5,12 +8,35 @@ export const sortAscInsensitive = (lines: string[]) =>
 
 export const sortDesc = (lines: string[]) => [...lines].sort((a, b) => b.localeCompare(a));
 
+export const sortDescInsensitive = (lines: string[]) =>
+    [...lines].sort((a, b) => b.localeCompare(a, undefined, { sensitivity: 'base' }));
+
 export const sortNatural = (lines: string[]) =>
-    [...lines].sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+    [...lines].sort((a, b) => naturalCollator.compare(a, b));
 
 export const sortLengthAsc = (lines: string[]) => [...lines].sort((a, b) => a.length - b.length);
 
 export const sortLengthDesc = (lines: string[]) => [...lines].sort((a, b) => b.length - a.length);
+
+export const sortReverse = (lines: string[]) => [...lines].reverse();
+
+export const sortIP = (lines: string[]) => {
+    return [...lines].sort((a, b) => {
+        // Extract IP-like patterns (simple IPv4)
+        const ipA = a.match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/);
+        const ipB = b.match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/);
+
+        if (!ipA || !ipB) return a.localeCompare(b); // Fallback if no IP found
+
+        const numA = ipA[0].split('.').map(Number);
+        const numB = ipB[0].split('.').map(Number);
+
+        for (let i = 0; i < 4; i++) {
+            if (numA[i] !== numB[i]) return numA[i] - numB[i];
+        }
+        return 0;
+    });
+};
 
 export const sortShuffle = (lines: string[]) => {
     const array = [...lines];
@@ -25,11 +51,6 @@ export const sortUnique = (lines: string[]) => [...new Set(lines)].sort((a, b) =
 
 export const sortUniqueInsensitive = (lines: string[]) => {
     const seen = new Set<string>();
-    const result: string[] = [];
-
-    // First pass: filter duplicates case-insensitively
-    // We keep the first variation we see, or we could normalize.
-    // Usually keeping the first occurrence is safer.
     const tempArr: { original: string, lower: string }[] = [];
 
     for (const line of lines) {
@@ -40,7 +61,6 @@ export const sortUniqueInsensitive = (lines: string[]) => {
         }
     }
 
-    // Second pass: sort
     tempArr.sort((a, b) => a.lower.localeCompare(b.lower));
     return tempArr.map(x => x.original);
 };
