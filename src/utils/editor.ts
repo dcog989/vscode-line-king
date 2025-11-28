@@ -1,23 +1,25 @@
 import * as vscode from 'vscode';
+import { CONFIG } from '../constants';
 
 type LineProcessor = (lines: string[]) => string[];
+
+export interface LineActionOptions {
+    expandSelection?: boolean;
+}
 
 /**
  * Applies a transformation function to selected lines or the entire document
  *
  * Behavior:
- * - If text is selected: Expands to full lines and applies transformation to that range
+ * - If text is selected: Expands to full lines (unless disabled in options) and applies transformation
  * - If no text is selected: Applies transformation to the entire document
  * - Handles multiple selections
  * - Preserves the document's line ending format (LF or CRLF)
  *
  * @param editor The active text editor
  * @param processor Function that transforms an array of lines and returns the result
+ * @param options Configuration options for the action
  */
-export interface LineActionOptions {
-    expandSelection?: boolean;
-}
-
 export async function applyLineAction(
     editor: vscode.TextEditor,
     processor: LineProcessor,
@@ -85,5 +87,5 @@ export async function applyLineAction(
  * Default is a space character
  */
 export function getJoinSeparator(): string {
-    return vscode.workspace.getConfiguration('lineKing').get<string>('joinSeparator', ' ');
+    return vscode.workspace.getConfiguration(CONFIG.NAMESPACE).get<string>(CONFIG.JOIN_SEPARATOR, ' ');
 }

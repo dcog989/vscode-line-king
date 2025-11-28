@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { CONFIG } from '../constants';
 
 /**
  * Sorts CSS properties within rule blocks
@@ -7,9 +8,8 @@ import * as vscode from 'vscode';
 export async function sortCssProperties(editor: vscode.TextEditor): Promise<void> {
     const document = editor.document;
     const text = document.getText();
-    const config = vscode.workspace.getConfiguration('lineKing');
-    const strategy = config.get<string>('cssSortStrategy', 'alphabetical');
-
+    const config = vscode.workspace.getConfiguration(CONFIG.NAMESPACE);
+    const strategy = config.get<string>(CONFIG.CSS_SORT_STRATEGY, 'alphabetical');
     const edits: vscode.TextEdit[] = [];
     const lines = text.split(/\r?\n/);
 
