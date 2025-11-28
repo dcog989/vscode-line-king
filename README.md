@@ -1,8 +1,8 @@
 # ![Line King logo](https://raw.githubusercontent.com/dcog989/vscode-line-king/main/assets/icon-64.png) Line King
 
-## PRE-RELEASE / BETA
+## PRE-RELEASE
 
-This is a new arrival. It is fully functional and has been tested, but edge cases likely exist.
+This is a new arrival. It is fully functional and has been tested, but edge cases likely exist, and functionality will need refining.
 
 Please report any issues on [GitHub](https://github.com/dcog989/vscode-line-king/issues).
 
