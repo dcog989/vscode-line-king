@@ -1,8 +1,8 @@
 {
     "name": "line-king",
-    "displayName": "Line King",
+    "displayName": "Line King Beta",
     "description": "Manipulate all the line things. Sort, tidy, clean, duplicate, transform, encode / decode.",
-    "version": "0.0.9",
+    "version": "0.1.2",
     "publisher": "dcog989",
     "icon": "assets/icon.png",
     "repository": {
@@ -33,7 +33,9 @@
         "case",
         "encoding"
     ],
-    "activationEvents": [],
+    "activationEvents": [
+        "onStartupFinished"
+    ],
     "main": "./out/extension.js",
     "browser": "./out/extension.js",
     "capabilities": {
@@ -339,12 +341,11 @@
                 {
                     "submenu": "lineKing.sortMenu",
                     "group": "1_sort",
-                    "when": "lineKing.isMultiLine"
+                    "when": "lineKing.isMultiLine || !editorHasSelection"
                 },
                 {
                     "submenu": "lineKing.caseMenu",
-                    "group": "2_transform",
-                    "when": "editorHasSelection"
+                    "group": "2_transform"
                 },
                 {
                     "submenu": "lineKing.devMenu",
@@ -354,31 +355,32 @@
                 {
                     "command": "lineKing.tidy.removeBlank",
                     "group": "3_tidy@1",
-                    "when": "lineKing.isMultiLine"
+                    "when": "lineKing.isMultiLine || !editorHasSelection"
                 },
                 {
                     "command": "lineKing.tidy.removeDuplicates",
                     "group": "3_tidy@2",
-                    "when": "lineKing.isMultiLine"
+                    "when": "lineKing.isMultiLine || !editorHasSelection"
                 },
                 {
                     "command": "lineKing.tidy.trimTrailing",
                     "group": "3_tidy@3",
-                    "when": "lineKing.isMultiLine"
+                    "when": "lineKing.isMultiLine || !editorHasSelection"
                 },
                 {
                     "command": "lineKing.tidy.trimLeading",
                     "group": "3_tidy@4",
-                    "when": "lineKing.isMultiLine"
+                    "when": "lineKing.isMultiLine || !editorHasSelection"
                 },
                 {
                     "command": "lineKing.tidy.trimBoth",
                     "group": "3_tidy@5",
-                    "when": "lineKing.isMultiLine"
+                    "when": "lineKing.isMultiLine || !editorHasSelection"
                 },
                 {
                     "command": "lineKing.manipulate.duplicate",
-                    "group": "4_util@1"
+                    "group": "4_util@1",
+                    "when": "editorHasSelection"
                 },
                 {
                     "command": "lineKing.manipulate.join",
@@ -398,7 +400,7 @@
                 {
                     "command": "lineKing.manipulate.sequence",
                     "group": "4_util@5",
-                    "when": "editorHasSelection"
+                    "when": "lineKing.isMultiLine"
                 },
                 {
                     "command": "lineKing.util.eol.lf",

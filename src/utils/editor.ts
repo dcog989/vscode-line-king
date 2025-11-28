@@ -14,9 +14,14 @@ type LineProcessor = (lines: string[]) => string[];
  * @param editor The active text editor
  * @param processor Function that transforms an array of lines and returns the result
  */
+export interface LineActionOptions {
+    expandSelection?: boolean;
+}
+
 export async function applyLineAction(
     editor: vscode.TextEditor,
-    processor: LineProcessor
+    processor: LineProcessor,
+    options: LineActionOptions = { expandSelection: true }
 ): Promise<void> {
     const document = editor.document;
     const selections = editor.selections;
@@ -32,12 +37,18 @@ export async function applyLineAction(
             if (!selection.isEmpty) {
                 hasSelection = true;
 
-                // Get the full lines for the selection
-                const startLine = document.lineAt(selection.start.line);
-                const endLine = document.lineAt(selection.end.line);
+                let range: vscode.Range;
 
-                // Expand to full lines
-                const range = new vscode.Range(startLine.range.start, endLine.range.end);
+                if (options.expandSelection) {
+                    // Get the full lines for the selection
+                    const startLine = document.lineAt(selection.start.line);
+                    const endLine = document.lineAt(selection.end.line);
+                    range = new vscode.Range(startLine.range.start, endLine.range.end);
+                } else {
+                    // Use the exact selection range
+                    range = selection;
+                }
+
                 const text = document.getText(range);
 
                 // Split into lines (handles both CRLF and LF)

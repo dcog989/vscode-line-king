@@ -77,13 +77,14 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     // --- Helper for Registration ---
-    const register = (cmd: string, fn: (lines: string[]) => string[]) => {
+    // Added expandSelection parameter (defaults to true for Line operations)
+    const register = (cmd: string, fn: (lines: string[]) => string[], expandSelection = true) => {
         context.subscriptions.push(vscode.commands.registerTextEditorCommand(cmd, (editor) => {
-            return applyLineAction(editor, fn);
+            return applyLineAction(editor, fn, { expandSelection });
         }));
     };
 
-    // --- Sorters ---
+    // --- Sorters (Keep expandSelection = true) ---
     register('lineKing.sort.asc', sorter.sortAsc);
     register('lineKing.sort.asc.insensitive', sorter.sortAscInsensitive);
     register('lineKing.sort.desc', sorter.sortDesc);
@@ -101,7 +102,7 @@ export function activate(context: vscode.ExtensionContext) {
         return sortCssProperties(editor);
     }));
 
-    // --- Cleaners ---
+    // --- Cleaners (Keep expandSelection = true) ---
     register('lineKing.tidy.removeBlank', cleaner.removeBlankLines);
     register('lineKing.tidy.condenseBlank', cleaner.condenseBlankLines);
     register('lineKing.tidy.removeDuplicates', cleaner.removeDuplicateLines);
@@ -110,24 +111,24 @@ export function activate(context: vscode.ExtensionContext) {
     register('lineKing.tidy.trimLeading', cleaner.trimLeadingWhitespace);
     register('lineKing.tidy.trimBoth', cleaner.trimBothWhitespace);
 
-    // --- Transformers ---
-    register('lineKing.manipulate.upper', transformer.transformUpper);
-    register('lineKing.manipulate.lower', transformer.transformLower);
-    register('lineKing.manipulate.camel', transformer.transformCamel);
-    register('lineKing.manipulate.kebab', transformer.transformKebab);
-    register('lineKing.manipulate.snake', transformer.transformSnake);
-    register('lineKing.manipulate.pascal', transformer.transformPascal);
-    register('lineKing.manipulate.sentence', transformer.transformSentence);
-    register('lineKing.manipulate.title', transformer.transformTitle);
-    register('lineKing.manipulate.join', transformer.transformJoin);
+    // --- Transformers (Use expandSelection = false) ---
+    register('lineKing.manipulate.upper', transformer.transformUpper, false);
+    register('lineKing.manipulate.lower', transformer.transformLower, false);
+    register('lineKing.manipulate.camel', transformer.transformCamel, false);
+    register('lineKing.manipulate.kebab', transformer.transformKebab, false);
+    register('lineKing.manipulate.snake', transformer.transformSnake, false);
+    register('lineKing.manipulate.pascal', transformer.transformPascal, false);
+    register('lineKing.manipulate.sentence', transformer.transformSentence, false);
+    register('lineKing.manipulate.title', transformer.transformTitle, false);
+    register('lineKing.manipulate.join', transformer.transformJoin, false);
 
-    // Encoders
-    register('lineKing.dev.urlEncode', transformer.transformUrlEncode);
-    register('lineKing.dev.urlDecode', transformer.transformUrlDecode);
-    register('lineKing.dev.base64Encode', transformer.transformBase64Encode);
-    register('lineKing.dev.base64Decode', transformer.transformBase64Decode);
-    register('lineKing.dev.jsonEscape', transformer.transformJsonEscape);
-    register('lineKing.dev.jsonUnescape', transformer.transformJsonUnescape);
+    // Encoders (Use expandSelection = false)
+    register('lineKing.dev.urlEncode', transformer.transformUrlEncode, false);
+    register('lineKing.dev.urlDecode', transformer.transformUrlDecode, false);
+    register('lineKing.dev.base64Encode', transformer.transformBase64Encode, false);
+    register('lineKing.dev.base64Decode', transformer.transformBase64Decode, false);
+    register('lineKing.dev.jsonEscape', transformer.transformJsonEscape, false);
+    register('lineKing.dev.jsonUnescape', transformer.transformJsonUnescape, false);
 
     // --- Interactive ---
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('lineKing.manipulate.split', async (editor) => {
