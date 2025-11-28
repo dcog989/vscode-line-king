@@ -17,9 +17,7 @@
 **/*.map
 **/*.ts
 **/*.tsbuildinfo
-assets/icon-64.png
-assets/icon.svg
-assets/screen-1.png
+assets/
 node_modules/
 out/test/
 repomix.config.json
@@ -34,5 +32,4 @@ vsc-extension-quickstart.md
 !dist/
 !package.json
 !README.md
-!CHANGELOG.md
 !assets/icon.png
