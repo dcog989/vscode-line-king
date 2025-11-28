@@ -2,7 +2,7 @@
     "name": "line-king",
     "displayName": "Line King",
     "description": "Manipulate all the line things. Sort, tidy, clean, duplicate, transform.",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "publisher": "dcog989",
     "icon": "assets/icon.png",
     "repository": {
@@ -299,6 +299,11 @@
                 "command": "lineKing.util.eol.crlf",
                 "title": "Convert to CRLF (Windows)",
                 "category": "Line King: Util"
+            },
+            {
+                "command": "lineKing.debug.checkContext",
+                "title": "Debug: Check Context State",
+                "category": "Line King"
             }
         ],
         "submenus": [
@@ -333,7 +338,8 @@
             "lineKing.mainMenu": [
                 {
                     "submenu": "lineKing.sortMenu",
-                    "group": "1_sort"
+                    "group": "1_sort",
+                    "when": "lineKing.isMultiLine"
                 },
                 {
                     "submenu": "lineKing.caseMenu",
@@ -347,23 +353,28 @@
                 },
                 {
                     "command": "lineKing.tidy.removeBlank",
-                    "group": "3_tidy@1"
+                    "group": "3_tidy@1",
+                    "when": "lineKing.isMultiLine"
                 },
                 {
                     "command": "lineKing.tidy.removeDuplicates",
-                    "group": "3_tidy@2"
+                    "group": "3_tidy@2",
+                    "when": "lineKing.isMultiLine"
                 },
                 {
                     "command": "lineKing.tidy.trimTrailing",
-                    "group": "3_tidy@3"
+                    "group": "3_tidy@3",
+                    "when": "lineKing.isMultiLine"
                 },
                 {
                     "command": "lineKing.tidy.trimLeading",
-                    "group": "3_tidy@4"
+                    "group": "3_tidy@4",
+                    "when": "lineKing.isMultiLine"
                 },
                 {
                     "command": "lineKing.tidy.trimBoth",
-                    "group": "3_tidy@5"
+                    "group": "3_tidy@5",
+                    "when": "lineKing.isMultiLine"
                 },
                 {
                     "command": "lineKing.manipulate.duplicate",
@@ -371,7 +382,8 @@
                 },
                 {
                     "command": "lineKing.manipulate.join",
-                    "group": "4_util@2"
+                    "group": "4_util@2",
+                    "when": "lineKing.isMultiLine"
                 },
                 {
                     "command": "lineKing.manipulate.split",
@@ -380,7 +392,8 @@
                 },
                 {
                     "command": "lineKing.manipulate.align",
-                    "group": "4_util@4"
+                    "group": "4_util@4",
+                    "when": "lineKing.isMultiLine"
                 },
                 {
                     "command": "lineKing.manipulate.sequence",

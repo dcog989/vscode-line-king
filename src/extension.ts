@@ -17,30 +17,64 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
         
-        // Check if we have multiple lines selected OR multiple selections
-        const isMulti = editor.selections.length > 1 ||
-            editor.selections.some(s => s.start.line !== s.end.line);
+        // Check if we have:
+        // 1. Multiple selections (even on same line), OR
+        // 2. A single selection that spans multiple lines, OR
+        // 3. Multiple cursor positions
+        const hasMultipleSelections = editor.selections.length > 1;
+        const hasMultiLineSelection = editor.selections.some(s => s.start.line !== s.end.line);
+        const isMulti = hasMultipleSelections || hasMultiLineSelection;
         
         vscode.commands.executeCommand('setContext', 'lineKing.isMultiLine', isMulti);
         vscode.commands.executeCommand('setContext', 'lineKing.lineEndingsVisible', isLineEndingsVisible());
     };
 
-    // Register event listeners FIRST
+    // Register event listeners
     context.subscriptions.push(
-        vscode.window.onDidChangeTextEditorSelection(updateContextKeys),
-        vscode.window.onDidChangeActiveTextEditor(updateContextKeys)
+        vscode.window.onDidChangeTextEditorSelection(e => {
+            // Use immediate update when selection changes
+            updateContextKeys();
+        }),
+        vscode.window.onDidChangeActiveTextEditor(editor => {
+            updateContextKeys();
+        })
     );
     
-    // CRITICAL: Set initial context immediately
-    // Use setImmediate to ensure it runs after extension is fully activated
-    setImmediate(() => {
+    // Initialize context immediately AND on next tick
+    updateContextKeys();
+    
+    // Also update after a short delay to catch any restored selections
+    setTimeout(() => {
         updateContextKeys();
-    });
+    }, 100);
 
-    // Also update on first active editor
-    if (vscode.window.activeTextEditor) {
-        updateContextKeys();
-    }
+    // Debug command to check context state
+    context.subscriptions.push(vscode.commands.registerCommand('lineKing.debug.checkContext', () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showInformationMessage('No active editor');
+            return;
+        }
+        
+        const selections = editor.selections;
+        const info = selections.map((s, i) => 
+            `Selection ${i}: Line ${s.start.line}-${s.end.line}, Char ${s.start.character}-${s.end.character}`
+        ).join('\n');
+        
+        const hasMultipleSelections = selections.length > 1;
+        const hasMultiLineSelection = selections.some(s => s.start.line !== s.end.line);
+        const isMulti = hasMultipleSelections || hasMultiLineSelection;
+        
+        vscode.window.showInformationMessage(
+            `Line King Context Debug:\n` +
+            `Selections: ${selections.length}\n` +
+            `Has multiple selections: ${hasMultipleSelections}\n` +
+            `Has multi-line selection: ${hasMultiLineSelection}\n` +
+            `isMultiLine should be: ${isMulti}\n\n` +
+            info,
+            { modal: true }
+        );
+    }));
 
     // --- Helper for Registration ---
     const register = (cmd: string, fn: (lines: string[]) => string[]) => {
