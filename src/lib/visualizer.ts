@@ -1,139 +1,119 @@
 import * as vscode from 'vscode';
 
-let lfDecoration: vscode.TextEditorDecorationType | undefined;
-let crlfDecoration: vscode.TextEditorDecorationType | undefined;
-let isEnabled = false;
+class LineEndingVisualizer {
+    private lfDecoration: vscode.TextEditorDecorationType | undefined;
+    private crlfDecoration: vscode.TextEditorDecorationType | undefined;
+    private _isEnabled = false;
 
-/**
- * Returns whether line endings are currently visible
- */
-export function isLineEndingsVisible(): boolean {
-    return isEnabled;
-}
-
-/**
- * Toggles or sets the visibility of line ending characters
- * Shows LF (↓) and CRLF (↵) markers at the end of each line
- * @param forceState Optional boolean to force enable (true) or disable (false)
- */
-export function toggleLineEndings(forceState?: boolean): void {
-    isEnabled = forceState !== undefined ? forceState : !isEnabled;
-
-    if (isEnabled) {
-        updateDecorations(vscode.window.activeTextEditor);
-        vscode.window.showInformationMessage('Line Endings: Visible');
-    } else {
-        clearDecorations();
-        vscode.window.showInformationMessage('Line Endings: Hidden');
-    }
-}
-
-/**
- * Initializes the decoration types for line ending markers
- */
-function initDecorations(): void {
-    if (lfDecoration && crlfDecoration) return;
-
-    const color = new vscode.ThemeColor('editorCodeLens.foreground');
-
-    lfDecoration = vscode.window.createTextEditorDecorationType({
-        after: {
-            contentText: '↓',
-            color: color,
-            margin: '0 0 0 3px',
-            fontWeight: 'bold'
-        }
-    });
-
-    crlfDecoration = vscode.window.createTextEditorDecorationType({
-        after: {
-            contentText: '↵',
-            color: color,
-            margin: '0 0 0 3px',
-            fontWeight: 'bold'
-        }
-    });
-}
-
-/**
- * Clears line ending decorations from all visible editors
- */
-function clearDecorations(): void {
-    const editors = vscode.window.visibleTextEditors;
-    for (const editor of editors) {
-        if (lfDecoration) {
-            editor.setDecorations(lfDecoration, []);
-        }
-        if (crlfDecoration) {
-            editor.setDecorations(crlfDecoration, []);
-        }
-    }
-}
-
-/**
- * Updates line ending decorations for the given editor
- * Detects and visualizes both LF and CRLF line endings at the END of lines
- * Optimized: Only processes visible ranges
- *
- * @param editor The text editor to update decorations for
- */
-export function updateDecorations(editor: vscode.TextEditor | undefined): void {
-    if (!editor || !isEnabled) {
-        if (!isEnabled) {
-            clearDecorations();
-        }
-        return;
+    public get isEnabled(): boolean {
+        return this._isEnabled;
     }
 
-    initDecorations();
+    /**
+     * Toggles visibility state
+     */
+    public toggle(forceState?: boolean): void {
+        this._isEnabled = forceState !== undefined ? forceState : !this._isEnabled;
 
-    const lfRanges: vscode.Range[] = [];
-    const crlfRanges: vscode.Range[] = [];
-    const document = editor.document;
+        if (this._isEnabled) {
+            this.update(vscode.window.activeTextEditor);
+            vscode.window.showInformationMessage('Line Endings: Visible');
+        } else {
+            this.clear();
+            vscode.window.showInformationMessage('Line Endings: Hidden');
+        }
+    }
 
-    // Only process lines that are currently visible to the user
-    for (const visibleRange of editor.visibleRanges) {
-        // Iterate through lines in this visible range
-        for (let i = visibleRange.start.line; i <= visibleRange.end.line; i++) {
-            // Safety check for invalid lines
-            if (i >= document.lineCount) continue;
+    /**
+     * Updates decorations for the specific editor based on visible ranges
+     */
+    public update(editor: vscode.TextEditor | undefined): void {
+        if (!editor || !this._isEnabled) {
+            if (!this._isEnabled) {
+                this.clear();
+            }
+            return;
+        }
 
-            const line = document.lineAt(i);
+        this.initDecorations();
 
-            // Place decoration at the end of visible text
-            const endPos = line.range.end;
-            const decorationRange = new vscode.Range(endPos, endPos);
+        const lfRanges: vscode.Range[] = [];
+        const crlfRanges: vscode.Range[] = [];
+        const document = editor.document;
 
-            // Detect line ending type
-            if (i < document.lineCount - 1) {
-                // Check the actual line ending in the document
-                const nextLineStart = new vscode.Position(i + 1, 0);
-                const lineEndOffset = document.offsetAt(nextLineStart) - document.offsetAt(line.range.end);
+        // Optimization: Only process lines that are currently visible to the user
+        for (const visibleRange of editor.visibleRanges) {
+            for (let i = visibleRange.start.line; i <= visibleRange.end.line; i++) {
+                if (i >= document.lineCount) continue;
 
-                if (lineEndOffset === 2) {
-                    // CRLF (\r\n)
-                    crlfRanges.push(decorationRange);
-                } else if (lineEndOffset === 1) {
-                    // LF (\n)
-                    lfRanges.push(decorationRange);
-                }
-            } else {
-                // Last line - check if file ends with a newline
-                const text = document.getText();
-                if (text.endsWith('\r\n')) {
-                    crlfRanges.push(decorationRange);
-                } else if (text.endsWith('\n')) {
-                    lfRanges.push(decorationRange);
+                const line = document.lineAt(i);
+                const endPos = line.range.end;
+                const decorationRange = new vscode.Range(endPos, endPos);
+
+                // Detect line ending type
+                if (i < document.lineCount - 1) {
+                    const nextLineStart = new vscode.Position(i + 1, 0);
+                    const lineEndOffset = document.offsetAt(nextLineStart) - document.offsetAt(line.range.end);
+
+                    if (lineEndOffset === 2) {
+                        crlfRanges.push(decorationRange);
+                    } else if (lineEndOffset === 1) {
+                        lfRanges.push(decorationRange);
+                    }
+                } else {
+                    // Last line
+                    const text = document.getText();
+                    if (text.endsWith('\r\n')) {
+                        crlfRanges.push(decorationRange);
+                    } else if (text.endsWith('\n')) {
+                        lfRanges.push(decorationRange);
+                    }
                 }
             }
         }
+
+        if (this.lfDecoration) editor.setDecorations(this.lfDecoration, lfRanges);
+        if (this.crlfDecoration) editor.setDecorations(this.crlfDecoration, crlfRanges);
     }
 
-    // Apply decorations
-    if (lfDecoration) {
-        editor.setDecorations(lfDecoration, lfRanges);
+    private clear(): void {
+        const editors = vscode.window.visibleTextEditors;
+        for (const editor of editors) {
+            if (this.lfDecoration) editor.setDecorations(this.lfDecoration, []);
+            if (this.crlfDecoration) editor.setDecorations(this.crlfDecoration, []);
+        }
     }
-    if (crlfDecoration) {
-        editor.setDecorations(crlfDecoration, crlfRanges);
+
+    private initDecorations(): void {
+        if (this.lfDecoration && this.crlfDecoration) return;
+
+        const color = new vscode.ThemeColor('editorCodeLens.foreground');
+        const options = (text: string): vscode.DecorationRenderOptions => ({
+            after: {
+                contentText: text,
+                color: color,
+                margin: '0 0 0 3px',
+                fontWeight: 'bold'
+            }
+        });
+
+        this.lfDecoration = vscode.window.createTextEditorDecorationType(options('↓'));
+        this.crlfDecoration = vscode.window.createTextEditorDecorationType(options('↵'));
     }
+}
+
+// Export Singleton Instance
+export const visualizer = new LineEndingVisualizer();
+
+// --- Export Wrappers for Compatibility ---
+export function isLineEndingsVisible(): boolean {
+    return visualizer.isEnabled;
+}
+
+export function toggleLineEndings(forceState?: boolean): void {
+    visualizer.toggle(forceState);
+}
+
+export function updateDecorations(editor: vscode.TextEditor | undefined): void {
+    visualizer.update(editor);
 }
