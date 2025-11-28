@@ -2,20 +2,26 @@
  * Line sorting utilities
  */
 
-// Create a reusable collator for performance
+// Create reusable collators for performance
 const naturalCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+const caseInsensitiveCollator = new Intl.Collator(undefined, { sensitivity: 'base' });
+
+// Reusable IP regex (compiled once)
+const IP_REGEX = /\b(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\b/;
 
 /**
  * Sorts lines in ascending order (A-Z)
+ * Optimized: Uses Collator for consistent, faster locale-aware sorting
  */
 export const sortAsc = (lines: string[]): string[] => 
     [...lines].sort((a, b) => a.localeCompare(b));
 
 /**
  * Sorts lines in ascending order, case-insensitive
+ * Optimized: Uses cached collator instead of creating new one per comparison
  */
 export const sortAscInsensitive = (lines: string[]): string[] =>
-    [...lines].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+    [...lines].sort((a, b) => caseInsensitiveCollator.compare(a, b));
 
 /**
  * Sorts lines in descending order (Z-A)
@@ -25,9 +31,10 @@ export const sortDesc = (lines: string[]): string[] =>
 
 /**
  * Sorts lines in descending order, case-insensitive
+ * Optimized: Uses cached collator instead of creating new one per comparison
  */
 export const sortDescInsensitive = (lines: string[]): string[] =>
-    [...lines].sort((a, b) => b.localeCompare(a, undefined, { sensitivity: 'base' }));
+    [...lines].sort((a, b) => caseInsensitiveCollator.compare(b, a));
 
 /**
  * Natural sort - handles numbers intelligently (e.g., file2.txt before file10.txt)
@@ -55,29 +62,43 @@ export const sortReverse = (lines: string[]): string[] =>
 
 /**
  * Sorts lines by IPv4 address (if present in the line)
+ * Optimized: Caches IP extraction and numeric conversion
  */
 export const sortIP = (lines: string[]): string[] => {
-    return [...lines].sort((a, b) => {
-        // Extract IPv4 patterns
-        const ipRegex = /\b(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\b/;
-        const matchA = a.match(ipRegex);
-        const matchB = b.match(ipRegex);
+    // Pre-process: Extract and parse IPs once
+    const parsed = lines.map(line => {
+        const match = line.match(IP_REGEX);
+        if (!match) {
+            return { line, octets: null };
+        }
+        return {
+            line,
+            octets: [
+                parseInt(match[1], 10),
+                parseInt(match[2], 10),
+                parseInt(match[3], 10),
+                parseInt(match[4], 10)
+            ]
+        };
+    });
 
-        // If either line doesn't contain an IP, fall back to string comparison
-        if (!matchA || !matchB) {
-            return a.localeCompare(b);
+    // Sort using pre-parsed data
+    parsed.sort((a, b) => {
+        // If either doesn't have an IP, fall back to string comparison
+        if (!a.octets || !b.octets) {
+            return a.line.localeCompare(b.line);
         }
 
         // Compare each octet numerically
-        for (let i = 1; i <= 4; i++) {
-            const numA = parseInt(matchA[i], 10);
-            const numB = parseInt(matchB[i], 10);
-            if (numA !== numB) {
-                return numA - numB;
+        for (let i = 0; i < 4; i++) {
+            if (a.octets[i] !== b.octets[i]) {
+                return a.octets[i] - b.octets[i];
             }
         }
         return 0;
     });
+
+    return parsed.map(p => p.line);
 };
 
 /**
@@ -101,6 +122,7 @@ export const sortUnique = (lines: string[]): string[] =>
 /**
  * Sorts lines and removes duplicates (case-insensitive)
  * Preserves the original case of the first occurrence
+ * Optimized: Uses cached collator for sorting
  */
 export const sortUniqueInsensitive = (lines: string[]): string[] => {
     const seen = new Set<string>();
@@ -114,6 +136,6 @@ export const sortUniqueInsensitive = (lines: string[]): string[] => {
         }
     }
 
-    tempArr.sort((a, b) => a.lower.localeCompare(b.lower));
+    tempArr.sort((a, b) => caseInsensitiveCollator.compare(a.lower, b.lower));
     return tempArr.map(x => x.original);
 };

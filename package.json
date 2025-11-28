@@ -2,7 +2,7 @@
     "name": "line-king",
     "displayName": "Line King",
     "description": "Manipulate all the line things. Sort, tidy, clean, duplicate, transform.",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "publisher": "dcog989",
     "icon": "assets/icon.png",
     "repository": {
