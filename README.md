@@ -12,9 +12,6 @@ The best Line Manipulation Tool for VS Code ever? Many people are saying so.
 
 Line King replaces multiple single-purpose extensions by combining sorting, tidying, cleaning, and text manipulation into a single, fast, lightweight utility. It's smart - only displays what is relevant to what is selected.
 
-![Version](https://img.shields.io/badge/version-0.0.2-blue.svg)
-![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.106.1-brightgreen.svg)
-
 ## Features
 
 ### Sorting
@@ -82,9 +79,15 @@ Line King replaces multiple single-purpose extensions by combining sorting, tidy
 
 ### Behavior
 
-- **With selection**: Commands operate on the selected lines (expanded to full lines)
-- **Without selection**: Most commands operate on the entire document
-- **Multiple selections**: Commands handle multiple selections intelligently
+- **Line Operations (Sort, Tidy, Join, Align)**:
+  - **With selection**: Automatically expands selection to encompass the full lines.
+  - **Without selection**: Operates on the entire document.
+
+- **Text Operations (Case, Encode, Transform)**:
+  - **With selection**: Operates **strictly** on the selected text characters.
+  - **Without selection**: Operates on the entire document.
+
+- **Multiple selections**: All commands handle multiple cursors/selections intelligently.
 
 ## Configuration
 
