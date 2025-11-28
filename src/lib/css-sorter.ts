@@ -47,7 +47,7 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
             const newText = slice.join(eol);
             edits.push(vscode.TextEdit.replace(range, newText));
         }
-        
+
         // Reset block tracking
         propertyBlockStart = -1;
         propertyBlockEnd = -1;
@@ -71,7 +71,7 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
             }
         }
     }
-    
+
     // Flush any remaining property block at the end of the file
     flushBlock();
 

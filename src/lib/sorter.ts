@@ -13,7 +13,7 @@ const IP_REGEX = /\b(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\b/;
  * Sorts lines in ascending order (A-Z)
  * Optimized: Uses Collator for consistent, faster locale-aware sorting
  */
-export const sortAsc = (lines: string[]): string[] => 
+export const sortAsc = (lines: string[]): string[] =>
     [...lines].sort((a, b) => a.localeCompare(b));
 
 /**
@@ -26,7 +26,7 @@ export const sortAscInsensitive = (lines: string[]): string[] =>
 /**
  * Sorts lines in descending order (Z-A)
  */
-export const sortDesc = (lines: string[]): string[] => 
+export const sortDesc = (lines: string[]): string[] =>
     [...lines].sort((a, b) => b.localeCompare(a));
 
 /**
@@ -45,19 +45,19 @@ export const sortNatural = (lines: string[]): string[] =>
 /**
  * Sorts lines by length (shortest first)
  */
-export const sortLengthAsc = (lines: string[]): string[] => 
+export const sortLengthAsc = (lines: string[]): string[] =>
     [...lines].sort((a, b) => a.length - b.length);
 
 /**
  * Sorts lines by length (longest first)
  */
-export const sortLengthDesc = (lines: string[]): string[] => 
+export const sortLengthDesc = (lines: string[]): string[] =>
     [...lines].sort((a, b) => b.length - a.length);
 
 /**
  * Reverses the order of lines
  */
-export const sortReverse = (lines: string[]): string[] => 
+export const sortReverse = (lines: string[]): string[] =>
     [...lines].reverse();
 
 /**
@@ -116,7 +116,7 @@ export const sortShuffle = (lines: string[]): string[] => {
 /**
  * Sorts lines and removes duplicates (case-sensitive)
  */
-export const sortUnique = (lines: string[]): string[] => 
+export const sortUnique = (lines: string[]): string[] =>
     [...new Set(lines)].sort((a, b) => a.localeCompare(b));
 
 /**

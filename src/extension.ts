@@ -3,7 +3,7 @@ import * as cleaner from './lib/cleaner';
 import { sortCssProperties } from './lib/css-sorter';
 import * as sorter from './lib/sorter';
 import * as transformer from './lib/transformer';
-import { toggleLineEndings, updateDecorations, isLineEndingsVisible } from './lib/visualizer';
+import { isLineEndingsVisible, toggleLineEndings, updateDecorations } from './lib/visualizer';
 import { applyLineAction } from './utils/editor';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -16,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.commands.executeCommand('setContext', 'lineKing.lineEndingsVisible', false);
             return;
         }
-        
+
         // Check if we have:
         // 1. Multiple selections (even on same line), OR
         // 2. A single selection that spans multiple lines, OR
@@ -24,7 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
         const hasMultipleSelections = editor.selections.length > 1;
         const hasMultiLineSelection = editor.selections.some(s => s.start.line !== s.end.line);
         const isMulti = hasMultipleSelections || hasMultiLineSelection;
-        
+
         vscode.commands.executeCommand('setContext', 'lineKing.isMultiLine', isMulti);
         vscode.commands.executeCommand('setContext', 'lineKing.lineEndingsVisible', isLineEndingsVisible());
     };
@@ -39,10 +39,10 @@ export function activate(context: vscode.ExtensionContext) {
             updateContextKeys();
         })
     );
-    
+
     // Initialize context immediately AND on next tick
     updateContextKeys();
-    
+
     // Also update after a short delay to catch any restored selections
     setTimeout(() => {
         updateContextKeys();
@@ -55,16 +55,16 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage('No active editor');
             return;
         }
-        
+
         const selections = editor.selections;
-        const info = selections.map((s, i) => 
+        const info = selections.map((s, i) =>
             `Selection ${i}: Line ${s.start.line}-${s.end.line}, Char ${s.start.character}-${s.end.character}`
         ).join('\n');
-        
+
         const hasMultipleSelections = selections.length > 1;
         const hasMultiLineSelection = selections.some(s => s.start.line !== s.end.line);
         const isMulti = hasMultipleSelections || hasMultiLineSelection;
-        
+
         vscode.window.showInformationMessage(
             `Line King Context Debug:\n` +
             `Selections: ${selections.length}\n` +

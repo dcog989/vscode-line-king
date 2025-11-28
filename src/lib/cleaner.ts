@@ -39,10 +39,10 @@ export const removeDuplicateLines = (lines: string[]): string[] => {
     const seen = new Set<string>();
     const result: string[] = [];
     let previousLine = '';
-    
+
     for (const line of lines) {
         const isBlank = line.trim().length === 0;
-        
+
         if (isBlank) {
             // For blank lines, only remove if it's consecutive
             if (line !== previousLine) {
@@ -55,10 +55,10 @@ export const removeDuplicateLines = (lines: string[]): string[] => {
                 result.push(line);
             }
         }
-        
+
         previousLine = line;
     }
-    
+
     return result;
 };
 
@@ -68,12 +68,12 @@ export const removeDuplicateLines = (lines: string[]): string[] => {
  */
 export const keepOnlyDuplicates = (lines: string[]): string[] => {
     const counts = new Map<string, number>();
-    
+
     // Count occurrences
     for (const line of lines) {
         counts.set(line, (counts.get(line) || 0) + 1);
     }
-    
+
     // Filter to keep only lines that appear more than once
     return lines.filter(line => (counts.get(line) || 0) > 1);
 };

@@ -4,18 +4,18 @@ type LineProcessor = (lines: string[]) => string[];
 
 /**
  * Applies a transformation function to selected lines or the entire document
- * 
+ *
  * Behavior:
  * - If text is selected: Expands to full lines and applies transformation to that range
  * - If no text is selected: Applies transformation to the entire document
  * - Handles multiple selections
  * - Preserves the document's line ending format (LF or CRLF)
- * 
+ *
  * @param editor The active text editor
  * @param processor Function that transforms an array of lines and returns the result
  */
 export async function applyLineAction(
-    editor: vscode.TextEditor, 
+    editor: vscode.TextEditor,
     processor: LineProcessor
 ): Promise<void> {
     const document = editor.document;
@@ -31,7 +31,7 @@ export async function applyLineAction(
         for (const selection of sortedSelections) {
             if (!selection.isEmpty) {
                 hasSelection = true;
-                
+
                 // Get the full lines for the selection
                 const startLine = document.lineAt(selection.start.line);
                 const endLine = document.lineAt(selection.end.line);
@@ -42,10 +42,10 @@ export async function applyLineAction(
 
                 // Split into lines (handles both CRLF and LF)
                 const lines = text.split(/\r?\n/);
-                
+
                 // Apply the transformation
                 const processedLines = processor(lines);
-                
+
                 // Use the document's line ending format
                 const eol = document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n';
 

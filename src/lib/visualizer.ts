@@ -18,7 +18,7 @@ export function isLineEndingsVisible(): boolean {
  */
 export function toggleLineEndings(forceState?: boolean): void {
     isEnabled = forceState !== undefined ? forceState : !isEnabled;
-    
+
     if (isEnabled) {
         updateDecorations(vscode.window.activeTextEditor);
         vscode.window.showInformationMessage('Line Endings: Visible');
@@ -73,7 +73,7 @@ function clearDecorations(): void {
 /**
  * Updates line ending decorations for the given editor
  * Detects and visualizes both LF and CRLF line endings at the END of lines
- * 
+ *
  * @param editor The text editor to update decorations for
  */
 export function updateDecorations(editor: vscode.TextEditor | undefined): void {
@@ -83,7 +83,7 @@ export function updateDecorations(editor: vscode.TextEditor | undefined): void {
         }
         return;
     }
-    
+
     initDecorations();
 
     const lfRanges: vscode.Range[] = [];
@@ -94,17 +94,17 @@ export function updateDecorations(editor: vscode.TextEditor | undefined): void {
     for (let i = 0; i < document.lineCount; i++) {
         const line = document.lineAt(i);
         const lineText = line.text;
-        
+
         // Place decoration at the end of visible text
         const endPos = line.range.end;
         const decorationRange = new vscode.Range(endPos, endPos);
-        
+
         // Detect line ending type
         // For the last line, check if it ends with a line break
         if (i < document.lineCount - 1) {
             // Check the actual line ending in the document
             const lineEnd = document.offsetAt(new vscode.Position(i + 1, 0)) - document.offsetAt(line.range.end);
-            
+
             if (lineEnd === 2) {
                 // CRLF (\r\n)
                 crlfRanges.push(decorationRange);

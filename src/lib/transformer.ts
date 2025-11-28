@@ -87,7 +87,7 @@ export const transformSentence = (lines: string[]): string[] => lines.map(l => t
 export const transformTitle = (lines: string[]): string[] => lines.map(l => toTitle(l));
 
 // --- Encoding ---
-export const transformUrlEncode = (lines: string[]): string[] => 
+export const transformUrlEncode = (lines: string[]): string[] =>
     lines.map(l => {
         try {
             return encodeURIComponent(l);
@@ -96,7 +96,7 @@ export const transformUrlEncode = (lines: string[]): string[] =>
         }
     });
 
-export const transformUrlDecode = (lines: string[]): string[] => 
+export const transformUrlDecode = (lines: string[]): string[] =>
     lines.map(l => {
         try {
             return decodeURIComponent(l);
@@ -105,7 +105,7 @@ export const transformUrlDecode = (lines: string[]): string[] =>
         }
     });
 
-export const transformBase64Encode = (lines: string[]): string[] => 
+export const transformBase64Encode = (lines: string[]): string[] =>
     lines.map(l => {
         try {
             return base64Encode(l);
@@ -114,7 +114,7 @@ export const transformBase64Encode = (lines: string[]): string[] =>
         }
     });
 
-export const transformBase64Decode = (lines: string[]): string[] => 
+export const transformBase64Decode = (lines: string[]): string[] =>
     lines.map(l => {
         try {
             return base64Decode(l);
@@ -123,7 +123,7 @@ export const transformBase64Decode = (lines: string[]): string[] =>
         }
     });
 
-export const transformJsonEscape = (lines: string[]): string[] => 
+export const transformJsonEscape = (lines: string[]): string[] =>
     lines.map(l => {
         try {
             return JSON.stringify(l).slice(1, -1);
@@ -132,7 +132,7 @@ export const transformJsonEscape = (lines: string[]): string[] =>
         }
     });
 
-export const transformJsonUnescape = (lines: string[]): string[] => 
+export const transformJsonUnescape = (lines: string[]): string[] =>
     lines.map(l => {
         try {
             return JSON.parse(`"${l}"`);
