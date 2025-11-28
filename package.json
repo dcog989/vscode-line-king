@@ -2,7 +2,7 @@
     "name": "line-king",
     "displayName": "Line King",
     "description": "Manipulate all the line things. Sort, tidy, clean, duplicate, transform.",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "publisher": "dcog989",
     "icon": "assets/icon.png",
     "repository": {
@@ -333,8 +333,7 @@
             "lineKing.mainMenu": [
                 {
                     "submenu": "lineKing.sortMenu",
-                    "group": "1_sort",
-                    "when": "lineKing.isMultiLine"
+                    "group": "1_sort"
                 },
                 {
                     "submenu": "lineKing.caseMenu",
@@ -348,28 +347,23 @@
                 },
                 {
                     "command": "lineKing.tidy.removeBlank",
-                    "group": "3_tidy@1",
-                    "when": "lineKing.isMultiLine"
+                    "group": "3_tidy@1"
                 },
                 {
                     "command": "lineKing.tidy.removeDuplicates",
-                    "group": "3_tidy@2",
-                    "when": "lineKing.isMultiLine"
+                    "group": "3_tidy@2"
                 },
                 {
                     "command": "lineKing.tidy.trimTrailing",
-                    "group": "3_tidy@3",
-                    "when": "lineKing.isMultiLine"
+                    "group": "3_tidy@3"
                 },
                 {
                     "command": "lineKing.tidy.trimLeading",
-                    "group": "3_tidy@4",
-                    "when": "lineKing.isMultiLine"
+                    "group": "3_tidy@4"
                 },
                 {
                     "command": "lineKing.tidy.trimBoth",
-                    "group": "3_tidy@5",
-                    "when": "lineKing.isMultiLine"
+                    "group": "3_tidy@5"
                 },
                 {
                     "command": "lineKing.manipulate.duplicate",
@@ -377,8 +371,7 @@
                 },
                 {
                     "command": "lineKing.manipulate.join",
-                    "group": "4_util@2",
-                    "when": "lineKing.isMultiLine"
+                    "group": "4_util@2"
                 },
                 {
                     "command": "lineKing.manipulate.split",
@@ -387,8 +380,7 @@
                 },
                 {
                     "command": "lineKing.manipulate.align",
-                    "group": "4_util@4",
-                    "when": "lineKing.isMultiLine"
+                    "group": "4_util@4"
                 },
                 {
                     "command": "lineKing.manipulate.sequence",

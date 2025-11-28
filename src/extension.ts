@@ -16,17 +16,31 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.commands.executeCommand('setContext', 'lineKing.lineEndingsVisible', false);
             return;
         }
+        
+        // Check if we have multiple lines selected OR multiple selections
         const isMulti = editor.selections.length > 1 ||
             editor.selections.some(s => s.start.line !== s.end.line);
+        
         vscode.commands.executeCommand('setContext', 'lineKing.isMultiLine', isMulti);
         vscode.commands.executeCommand('setContext', 'lineKing.lineEndingsVisible', isLineEndingsVisible());
     };
 
+    // Register event listeners FIRST
     context.subscriptions.push(
         vscode.window.onDidChangeTextEditorSelection(updateContextKeys),
         vscode.window.onDidChangeActiveTextEditor(updateContextKeys)
     );
-    updateContextKeys();
+    
+    // CRITICAL: Set initial context immediately
+    // Use setImmediate to ensure it runs after extension is fully activated
+    setImmediate(() => {
+        updateContextKeys();
+    });
+
+    // Also update on first active editor
+    if (vscode.window.activeTextEditor) {
+        updateContextKeys();
+    }
 
     // --- Helper for Registration ---
     const register = (cmd: string, fn: (lines: string[]) => string[]) => {
