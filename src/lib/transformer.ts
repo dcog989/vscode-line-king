@@ -141,9 +141,6 @@ export const transformJsonUnescape = (lines: string[]): string[] =>
         }
     });
 
-// --- Sequence ---
-export const transformSequence = (lines: string[]): string[] => lines.map((_, i) => `${i + 1}`);
-
 // --- Join / Split / Align ---
 
 export const transformJoin = (lines: string[]): string[] => {
@@ -169,6 +166,16 @@ export async function splitLinesInteractive(editor: vscode.TextEditor): Promise<
             result.push(...line.split(separator));
         }
         return result;
+    });
+}
+
+/**
+ * Inserts a numeric sequence that prefixes selected text/lines
+ */
+export async function insertNumericSequence(editor: vscode.TextEditor): Promise<void> {
+    const { applyLineAction } = await import('../utils/editor');
+    await applyLineAction(editor, (lines) => {
+        return lines.map((line, i) => `${i + 1} ${line}`);
     });
 }
 

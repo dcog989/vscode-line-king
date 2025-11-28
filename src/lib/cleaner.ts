@@ -32,16 +32,34 @@ export const condenseBlankLines = (lines: string[]): string[] => {
 
 /**
  * Removes duplicate lines while preserving order (keeps first occurrence)
+ * Special handling: For blank/whitespace lines, only removes consecutive duplicates
+ * For non-blank lines, removes all duplicates throughout the selection
  */
-export const removeDuplicates = (lines: string[]): string[] => {
+export const removeDuplicateLines = (lines: string[]): string[] => {
     const seen = new Set<string>();
-    return lines.filter(line => {
-        if (seen.has(line)) {
-            return false;
+    const result: string[] = [];
+    let previousLine = '';
+    
+    for (const line of lines) {
+        const isBlank = line.trim().length === 0;
+        
+        if (isBlank) {
+            // For blank lines, only remove if it's consecutive
+            if (line !== previousLine) {
+                result.push(line);
+            }
+        } else {
+            // For non-blank lines, remove all duplicates
+            if (!seen.has(line)) {
+                seen.add(line);
+                result.push(line);
+            }
         }
-        seen.add(line);
-        return true;
-    });
+        
+        previousLine = line;
+    }
+    
+    return result;
 };
 
 /**

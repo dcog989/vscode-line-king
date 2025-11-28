@@ -281,8 +281,13 @@
                 "category": "Line King: Dev"
             },
             {
-                "command": "lineKing.util.toggleLineEndings",
-                "title": "Toggle Line Endings Visibility",
+                "command": "lineKing.util.showLineEndings",
+                "title": "Show Line Endings",
+                "category": "Line King: Util"
+            },
+            {
+                "command": "lineKing.util.hideLineEndings",
+                "title": "Hide Line Endings",
                 "category": "Line King: Util"
             },
             {
@@ -399,8 +404,14 @@
                     "group": "5_eof@2"
                 },
                 {
-                    "command": "lineKing.util.toggleLineEndings",
-                    "group": "5_eof@3"
+                    "command": "lineKing.util.showLineEndings",
+                    "group": "5_eof@3",
+                    "when": "!lineKing.lineEndingsVisible"
+                },
+                {
+                    "command": "lineKing.util.hideLineEndings",
+                    "group": "5_eof@3",
+                    "when": "lineKing.lineEndingsVisible"
                 }
             ],
             "lineKing.sortMenu": [

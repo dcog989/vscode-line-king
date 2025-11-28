@@ -3,7 +3,7 @@ import * as cleaner from './lib/cleaner';
 import { sortCssProperties } from './lib/css-sorter';
 import * as sorter from './lib/sorter';
 import * as transformer from './lib/transformer';
-import { toggleLineEndings, updateDecorations } from './lib/visualizer';
+import { toggleLineEndings, updateDecorations, isLineEndingsVisible } from './lib/visualizer';
 import { applyLineAction } from './utils/editor';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -13,11 +13,13 @@ export function activate(context: vscode.ExtensionContext) {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             vscode.commands.executeCommand('setContext', 'lineKing.isMultiLine', false);
+            vscode.commands.executeCommand('setContext', 'lineKing.lineEndingsVisible', false);
             return;
         }
         const isMulti = editor.selections.length > 1 ||
             editor.selections.some(s => s.start.line !== s.end.line);
         vscode.commands.executeCommand('setContext', 'lineKing.isMultiLine', isMulti);
+        vscode.commands.executeCommand('setContext', 'lineKing.lineEndingsVisible', isLineEndingsVisible());
     };
 
     context.subscriptions.push(
@@ -27,7 +29,6 @@ export function activate(context: vscode.ExtensionContext) {
     updateContextKeys();
 
     // --- Helper for Registration ---
-    // KEY FIX: We now 'return' the promise so await executeCommand works correctly
     const register = (cmd: string, fn: (lines: string[]) => string[]) => {
         context.subscriptions.push(vscode.commands.registerTextEditorCommand(cmd, (editor) => {
             return applyLineAction(editor, fn);
@@ -55,7 +56,7 @@ export function activate(context: vscode.ExtensionContext) {
     // --- Cleaners ---
     register('lineKing.tidy.removeBlank', cleaner.removeBlankLines);
     register('lineKing.tidy.condenseBlank', cleaner.condenseBlankLines);
-    register('lineKing.tidy.removeDuplicates', cleaner.removeDuplicates);
+    register('lineKing.tidy.removeDuplicates', cleaner.removeDuplicateLines);
     register('lineKing.tidy.keepDuplicates', cleaner.keepOnlyDuplicates);
     register('lineKing.tidy.trimTrailing', cleaner.trimTrailingWhitespace);
     register('lineKing.tidy.trimLeading', cleaner.trimLeadingWhitespace);
@@ -71,7 +72,6 @@ export function activate(context: vscode.ExtensionContext) {
     register('lineKing.manipulate.sentence', transformer.transformSentence);
     register('lineKing.manipulate.title', transformer.transformTitle);
     register('lineKing.manipulate.join', transformer.transformJoin);
-    register('lineKing.manipulate.sequence', transformer.transformSequence);
 
     // Encoders
     register('lineKing.dev.urlEncode', transformer.transformUrlEncode);
@@ -87,6 +87,9 @@ export function activate(context: vscode.ExtensionContext) {
     }));
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('lineKing.manipulate.align', async (editor) => {
         return transformer.alignToSeparatorInteractive(editor);
+    }));
+    context.subscriptions.push(vscode.commands.registerTextEditorCommand('lineKing.manipulate.sequence', async (editor) => {
+        return transformer.insertNumericSequence(editor);
     }));
 
     // --- Utilities ---
@@ -109,10 +112,21 @@ export function activate(context: vscode.ExtensionContext) {
         return editor.edit(eb => eb.setEndOfLine(vscode.EndOfLine.CRLF));
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand('lineKing.util.toggleLineEndings', toggleLineEndings));
+    // Line ending visibility toggle with smart naming
+    context.subscriptions.push(vscode.commands.registerCommand('lineKing.util.showLineEndings', () => {
+        toggleLineEndings(true);
+        updateContextKeys();
+    }));
+    context.subscriptions.push(vscode.commands.registerCommand('lineKing.util.hideLineEndings', () => {
+        toggleLineEndings(false);
+        updateContextKeys();
+    }));
 
     context.subscriptions.push(
-        vscode.window.onDidChangeActiveTextEditor(editor => updateDecorations(editor)),
+        vscode.window.onDidChangeActiveTextEditor(editor => {
+            updateDecorations(editor);
+            updateContextKeys();
+        }),
         vscode.workspace.onDidChangeTextDocument(e => {
             if (vscode.window.activeTextEditor && e.document === vscode.window.activeTextEditor.document) {
                 updateDecorations(vscode.window.activeTextEditor);

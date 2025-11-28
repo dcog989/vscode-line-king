@@ -5,18 +5,26 @@ let crlfDecoration: vscode.TextEditorDecorationType | undefined;
 let isEnabled = false;
 
 /**
- * Toggles the visibility of line ending characters
- * Shows LF (↓) and CRLF (↵) markers at the end of each line
+ * Returns whether line endings are currently visible
  */
-export function toggleLineEndings(): void {
-    isEnabled = !isEnabled;
+export function isLineEndingsVisible(): boolean {
+    return isEnabled;
+}
+
+/**
+ * Toggles or sets the visibility of line ending characters
+ * Shows LF (↓) and CRLF (↵) markers at the end of each line
+ * @param forceState Optional boolean to force enable (true) or disable (false)
+ */
+export function toggleLineEndings(forceState?: boolean): void {
+    isEnabled = forceState !== undefined ? forceState : !isEnabled;
     
     if (isEnabled) {
         updateDecorations(vscode.window.activeTextEditor);
-        vscode.window.showInformationMessage('Line Endings Visibility: ON');
+        vscode.window.showInformationMessage('Line Endings: Visible');
     } else {
         clearDecorations();
-        vscode.window.showInformationMessage('Line Endings Visibility: OFF');
+        vscode.window.showInformationMessage('Line Endings: Hidden');
     }
 }
 
@@ -64,34 +72,54 @@ function clearDecorations(): void {
 
 /**
  * Updates line ending decorations for the given editor
- * Detects and visualizes both LF and CRLF line endings
+ * Detects and visualizes both LF and CRLF line endings at the END of lines
  * 
  * @param editor The text editor to update decorations for
  */
 export function updateDecorations(editor: vscode.TextEditor | undefined): void {
-    if (!editor || !isEnabled) return;
+    if (!editor || !isEnabled) {
+        if (!isEnabled) {
+            clearDecorations();
+        }
+        return;
+    }
     
     initDecorations();
 
     const lfRanges: vscode.Range[] = [];
     const crlfRanges: vscode.Range[] = [];
-    const text = editor.document.getText();
+    const document = editor.document;
 
-    // Scan the text manually to detect line endings
-    // This allows us to visualize mixed endings if they exist in the file
-    // (document.eol only represents the file's primary line ending)
-    const regex = /\r\n|\n/g;
-    let match;
-
-    while ((match = regex.exec(text)) !== null) {
-        const startPos = editor.document.positionAt(match.index);
-        const endPos = editor.document.positionAt(match.index + match[0].length);
-        const range = new vscode.Range(startPos, endPos);
-
-        if (match[0] === '\r\n') {
-            crlfRanges.push(range);
+    // Iterate through each line and add decoration at the end
+    for (let i = 0; i < document.lineCount; i++) {
+        const line = document.lineAt(i);
+        const lineText = line.text;
+        
+        // Place decoration at the end of visible text
+        const endPos = line.range.end;
+        const decorationRange = new vscode.Range(endPos, endPos);
+        
+        // Detect line ending type
+        // For the last line, check if it ends with a line break
+        if (i < document.lineCount - 1) {
+            // Check the actual line ending in the document
+            const lineEnd = document.offsetAt(new vscode.Position(i + 1, 0)) - document.offsetAt(line.range.end);
+            
+            if (lineEnd === 2) {
+                // CRLF (\r\n)
+                crlfRanges.push(decorationRange);
+            } else if (lineEnd === 1) {
+                // LF (\n)
+                lfRanges.push(decorationRange);
+            }
         } else {
-            lfRanges.push(range);
+            // Last line - check if file ends with a newline
+            const text = document.getText();
+            if (text.endsWith('\r\n')) {
+                crlfRanges.push(decorationRange);
+            } else if (text.endsWith('\n')) {
+                lfRanges.push(decorationRange);
+            }
         }
     }
 
