@@ -30,10 +30,17 @@ export function activate(context: vscode.ExtensionContext) {
     };
 
     // Register event listeners
+    let selectionTimeout: NodeJS.Timeout | undefined;
+
     context.subscriptions.push(
         vscode.window.onDidChangeTextEditorSelection(e => {
-            // Use immediate update when selection changes
-            updateContextKeys();
+            // Debounce context updates to prevent thrashing on rapid cursor movement
+            if (selectionTimeout) {
+                clearTimeout(selectionTimeout);
+            }
+            selectionTimeout = setTimeout(() => {
+                updateContextKeys();
+            }, 50);
         }),
         vscode.window.onDidChangeActiveTextEditor(editor => {
             updateContextKeys();

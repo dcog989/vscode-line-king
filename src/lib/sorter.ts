@@ -1,10 +1,13 @@
+import * as vscode from 'vscode';
+
 /**
  * Line sorting utilities
  */
 
 // Create reusable collators for performance
-const naturalCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
-const caseInsensitiveCollator = new Intl.Collator(undefined, { sensitivity: 'base' });
+// Uses vscode.env.language to respect the user's UI language preference
+const naturalCollator = new Intl.Collator(vscode.env.language, { numeric: true, sensitivity: 'base' });
+const caseInsensitiveCollator = new Intl.Collator(vscode.env.language, { sensitivity: 'base' });
 
 // Reusable IP regex (compiled once)
 const IP_REGEX = /\b(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\b/;
