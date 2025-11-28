@@ -73,6 +73,7 @@ function clearDecorations(): void {
 /**
  * Updates line ending decorations for the given editor
  * Detects and visualizes both LF and CRLF line endings at the END of lines
+ * Optimized: Only processes visible ranges
  *
  * @param editor The text editor to update decorations for
  */
@@ -90,35 +91,40 @@ export function updateDecorations(editor: vscode.TextEditor | undefined): void {
     const crlfRanges: vscode.Range[] = [];
     const document = editor.document;
 
-    // Iterate through each line and add decoration at the end
-    for (let i = 0; i < document.lineCount; i++) {
-        const line = document.lineAt(i);
-        const lineText = line.text;
+    // Only process lines that are currently visible to the user
+    for (const visibleRange of editor.visibleRanges) {
+        // Iterate through lines in this visible range
+        for (let i = visibleRange.start.line; i <= visibleRange.end.line; i++) {
+            // Safety check for invalid lines
+            if (i >= document.lineCount) continue;
 
-        // Place decoration at the end of visible text
-        const endPos = line.range.end;
-        const decorationRange = new vscode.Range(endPos, endPos);
+            const line = document.lineAt(i);
 
-        // Detect line ending type
-        // For the last line, check if it ends with a line break
-        if (i < document.lineCount - 1) {
-            // Check the actual line ending in the document
-            const lineEnd = document.offsetAt(new vscode.Position(i + 1, 0)) - document.offsetAt(line.range.end);
+            // Place decoration at the end of visible text
+            const endPos = line.range.end;
+            const decorationRange = new vscode.Range(endPos, endPos);
 
-            if (lineEnd === 2) {
-                // CRLF (\r\n)
-                crlfRanges.push(decorationRange);
-            } else if (lineEnd === 1) {
-                // LF (\n)
-                lfRanges.push(decorationRange);
-            }
-        } else {
-            // Last line - check if file ends with a newline
-            const text = document.getText();
-            if (text.endsWith('\r\n')) {
-                crlfRanges.push(decorationRange);
-            } else if (text.endsWith('\n')) {
-                lfRanges.push(decorationRange);
+            // Detect line ending type
+            if (i < document.lineCount - 1) {
+                // Check the actual line ending in the document
+                const nextLineStart = new vscode.Position(i + 1, 0);
+                const lineEndOffset = document.offsetAt(nextLineStart) - document.offsetAt(line.range.end);
+
+                if (lineEndOffset === 2) {
+                    // CRLF (\r\n)
+                    crlfRanges.push(decorationRange);
+                } else if (lineEndOffset === 1) {
+                    // LF (\n)
+                    lfRanges.push(decorationRange);
+                }
+            } else {
+                // Last line - check if file ends with a newline
+                const text = document.getText();
+                if (text.endsWith('\r\n')) {
+                    crlfRanges.push(decorationRange);
+                } else if (text.endsWith('\n')) {
+                    lfRanges.push(decorationRange);
+                }
             }
         }
     }

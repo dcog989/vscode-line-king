@@ -40,39 +40,18 @@ function toTitle(str: string): string {
 // --- Browser-compatible Base64 helpers ---
 
 /**
- * Encodes a string to base64 in a browser-compatible way
+ * Encodes a string to base64 using Node Buffer
+ * Prevents stack overflow on large strings
  */
 function base64Encode(str: string): string {
-    try {
-        // Use TextEncoder for proper UTF-8 handling
-        const encoder = new TextEncoder();
-        const data = encoder.encode(str);
-        // Convert to base64
-        return btoa(String.fromCharCode(...data));
-    } catch (err) {
-        // Fallback for simpler ASCII strings
-        return btoa(str);
-    }
+    return Buffer.from(str, 'utf-8').toString('base64');
 }
 
 /**
- * Decodes a base64 string in a browser-compatible way
+ * Decodes a base64 string using Node Buffer
  */
 function base64Decode(str: string): string {
-    try {
-        const decoded = atob(str);
-        // Convert back to UTF-8
-        const bytes = new Uint8Array(decoded.split('').map(c => c.charCodeAt(0)));
-        const decoder = new TextDecoder();
-        return decoder.decode(bytes);
-    } catch (err) {
-        // Fallback or return original on error
-        try {
-            return atob(str);
-        } catch {
-            return str;
-        }
-    }
+    return Buffer.from(str, 'base64').toString('utf-8');
 }
 
 // --- Transformers ---
@@ -137,7 +116,11 @@ export const transformJsonUnescape = (lines: string[]): string[] =>
         try {
             return JSON.parse(`"${l}"`);
         } catch {
-            return l;
+            try {
+                return JSON.parse(l);
+            } catch {
+                return l;
+            }
         }
     });
 

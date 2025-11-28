@@ -17,9 +17,11 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
     let propertyBlockEnd = -1;
 
     // Regex for a CSS property line
-    // Matches: property: value; or --custom-prop: value;
-    // Must not contain { or } (which would indicate rule boundaries)
-    const propertyRegex = /^\s*[a-zA-Z0-9_-]+\s*:[^;{}]*;\s*$/;
+    // Matches: property: value; followed by optional comments or whitespace
+    const propertyRegex = /^\s*[a-zA-Z0-9_-]+\s*:[^;{}]*;.*$/;
+
+    // Regex to exclude comments
+    const commentRegex = /^\s*(\/\/|\/\*)/;
 
     /**
      * Sorts and applies the current property block
@@ -57,7 +59,8 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
 
-        if (propertyRegex.test(line)) {
+        // Check if line is a valid property AND not a comment
+        if (propertyRegex.test(line) && !commentRegex.test(line)) {
             // This line is a CSS property
             if (propertyBlockStart === -1) {
                 propertyBlockStart = i;

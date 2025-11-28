@@ -176,6 +176,12 @@ export function activate(context: vscode.ExtensionContext) {
             updateDecorations(editor);
             updateContextKeys();
         }),
+        // Update decorations when scrolling
+        vscode.window.onDidChangeTextEditorVisibleRanges(e => {
+            if (e.textEditor === vscode.window.activeTextEditor) {
+                updateDecorations(e.textEditor);
+            }
+        }),
         vscode.workspace.onDidChangeTextDocument(e => {
             if (vscode.window.activeTextEditor && e.document === vscode.window.activeTextEditor.document) {
                 updateDecorations(vscode.window.activeTextEditor);
