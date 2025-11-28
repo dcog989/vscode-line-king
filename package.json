@@ -1,7 +1,7 @@
 {
     "name": "line-king",
     "displayName": "Line King",
-    "description": "Manipulate all the line things. Sort, tidy, clean, duplicate, transform.",
+    "description": "Manipulate all the line things. Sort, tidy, clean, duplicate, transform, encode / decode.",
     "version": "0.0.9",
     "publisher": "dcog989",
     "icon": "assets/icon.png",
