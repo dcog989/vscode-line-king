@@ -2,7 +2,7 @@
 
 The best Line Manipulation Tool for VS Code ever? Many people are saying so.
 
-Line King replaces multiple single-purpose extensions by combining sorting, tidying, cleaning, and text manipulation into a single, fast, lightweight utility. It's smart - only displays what is relevant to what is selected, and polite - only loads if you use it.
+Line King replaces multiple single-purpose extensions by combining sorting, tidying, cleaning, and text manipulation into a single, fast, lightweight utility. It's smart - only displays what is relevant to what is selected.
 
 ![Version](https://img.shields.io/badge/version-0.0.2-blue.svg)
 ![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.106.1-brightgreen.svg)
