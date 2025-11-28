@@ -1,5 +1,13 @@
 # ![Line King logo](https://raw.githubusercontent.com/dcog989/vscode-line-king/main/assets/icon-64.png) Line King
 
+## PRE-RELEASE / BETA
+
+This is a new arrival. It is fully functional and has been tested, but edge cases likely exist.
+
+Please report any issues on [GitHub](https://github.com/dcog989/vscode-line-king/issues).
+
+---
+
 The best Line Manipulation Tool for VS Code ever? Many people are saying so.
 
 Line King replaces multiple single-purpose extensions by combining sorting, tidying, cleaning, and text manipulation into a single, fast, lightweight utility. It's smart - only displays what is relevant to what is selected.
