@@ -1,30 +1,41 @@
 import * as vscode from 'vscode';
-import { getJoinSeparator } from '../utils/editor';
+import { getJoinSeparator, applyLineAction } from '../utils/editor';
 
 // --- Text Case Helpers ---
 
 function toCamel(str: string): string {
-    return str.replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) =>
-        index === 0 ? word.toLowerCase() : word.toUpperCase()
-    ).replace(/\s+/g, '');
+    if (!str) return str;
+    // Split on word boundaries, handling consecutive capitals
+    const words = str.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g);
+    if (!words || words.length === 0) return str;
+    
+    return words.map((word, index) => {
+        const lower = word.toLowerCase();
+        return index === 0 ? lower : lower.charAt(0).toUpperCase() + lower.slice(1);
+    }).join('');
 }
 
 function toKebab(str: string): string {
-    return str
-        .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
-        ?.map(x => x.toLowerCase())
-        .join('-') || str;
+    if (!str) return str;
+    const words = str.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g);
+    return words ? words.map(x => x.toLowerCase()).join('-') : str;
 }
 
 function toSnake(str: string): string {
-    return str
-        .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
-        ?.map(x => x.toLowerCase())
-        .join('_') || str;
+    if (!str) return str;
+    const words = str.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g);
+    return words ? words.map(x => x.toLowerCase()).join('_') : str;
 }
 
 function toPascal(str: string): string {
-    return str.replace(/(?:^\w|[A-Z]|\b\w)/g, (word) => word.toUpperCase()).replace(/\s+/g, '');
+    if (!str) return str;
+    const words = str.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g);
+    if (!words || words.length === 0) return str;
+    
+    return words.map(word => {
+        const lower = word.toLowerCase();
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+    }).join('');
 }
 
 function toSentence(str: string): string {
@@ -142,7 +153,6 @@ export async function splitLinesInteractive(editor: vscode.TextEditor): Promise<
 
     if (!separator) return;
 
-    const { applyLineAction } = await import('../utils/editor');
     await applyLineAction(editor, (lines) => {
         const result: string[] = [];
         for (const line of lines) {
@@ -156,7 +166,6 @@ export async function splitLinesInteractive(editor: vscode.TextEditor): Promise<
  * Inserts a numeric sequence that prefixes selected text/lines
  */
 export async function insertNumericSequence(editor: vscode.TextEditor): Promise<void> {
-    const { applyLineAction } = await import('../utils/editor');
     await applyLineAction(editor, (lines) => {
         return lines.map((line, i) => `${i + 1} ${line}`);
     });
@@ -173,7 +182,6 @@ export async function alignToSeparatorInteractive(editor: vscode.TextEditor): Pr
 
     if (!separator) return;
 
-    const { applyLineAction } = await import('../utils/editor');
     await applyLineAction(editor, (lines) => {
         // Find max position of separator
         let maxPos = 0;

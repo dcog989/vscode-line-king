@@ -5,6 +5,7 @@ import { ContextManager } from './context-manager';
 import * as cleaner from './lib/cleaner';
 import { sortCssProperties } from './lib/css-sorter';
 import { applyLineAction } from './utils/editor';
+import { configCache, disposeConfigCache } from './utils/config-cache';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -18,8 +19,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // 3. Register Save Handler
     context.subscriptions.push(vscode.workspace.onWillSaveTextDocument(event => {
-        const config = vscode.workspace.getConfiguration(CONFIG.NAMESPACE);
-        const action = config.get<string>(CONFIG.CLEANUP_ON_SAVE);
+        const action = configCache.get<string>(CONFIG.CLEANUP_ON_SAVE, 'none');
         const editor = vscode.window.activeTextEditor;
 
         if (!editor || event.document !== editor.document || action === 'none') return;
@@ -34,4 +34,6 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 }
 
-export function deactivate() { }
+export function deactivate() {
+    disposeConfigCache();
+}

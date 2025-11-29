@@ -2,6 +2,10 @@
  * Line cleaning and tidying utilities
  */
 
+// Reusable regex patterns (compiled once)
+const TRAILING_WHITESPACE_REGEX = /\s+$/;
+const LEADING_WHITESPACE_REGEX = /^\s+/;
+
 /**
  * Removes all blank lines from the input
  */
@@ -65,30 +69,36 @@ export const removeDuplicateLines = (lines: string[]): string[] => {
 /**
  * Keeps only duplicate lines (removes unique lines)
  * Preserves original order and all occurrences of duplicates
+ * Note: Blank lines are excluded from duplicate detection
  */
 export const keepOnlyDuplicates = (lines: string[]): string[] => {
     const counts = new Map<string, number>();
 
-    // Count occurrences
+    // Count occurrences (excluding blank lines)
     for (const line of lines) {
-        counts.set(line, (counts.get(line) || 0) + 1);
+        if (line.trim().length > 0) {
+            counts.set(line, (counts.get(line) || 0) + 1);
+        }
     }
 
-    // Filter to keep only lines that appear more than once
-    return lines.filter(line => (counts.get(line) || 0) > 1);
+    // Filter to keep only non-blank lines that appear more than once
+    return lines.filter(line => {
+        if (line.trim().length === 0) return false;
+        return (counts.get(line) || 0) > 1;
+    });
 };
 
 /**
  * Removes trailing whitespace from each line
  */
 export const trimTrailingWhitespace = (lines: string[]): string[] =>
-    lines.map(line => line.replace(/\s+$/, ''));
+    lines.map(line => line.replace(TRAILING_WHITESPACE_REGEX, ''));
 
 /**
  * Removes leading whitespace from each line
  */
 export const trimLeadingWhitespace = (lines: string[]): string[] =>
-    lines.map(line => line.replace(/^\s+/, ''));
+    lines.map(line => line.replace(LEADING_WHITESPACE_REGEX, ''));
 
 /**
  * Removes both leading and trailing whitespace from each line

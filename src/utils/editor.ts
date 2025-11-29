@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import { CONFIG } from '../constants';
+import { configCache } from './config-cache';
+import { splitLines, joinLines } from './text-utils';
 
 type LineProcessor = (lines: string[]) => string[];
 
@@ -54,30 +56,27 @@ export async function applyLineAction(
                 const text = document.getText(range);
 
                 // Split into lines (handles both CRLF and LF)
-                const lines = text.split(/\r?\n/);
+                const lines = splitLines(text);
 
                 // Apply the transformation
                 const processedLines = processor(lines);
 
                 // Use the document's line ending format
-                const eol = document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n';
-
-                editBuilder.replace(range, processedLines.join(eol));
+                editBuilder.replace(range, joinLines(processedLines, document));
             }
         }
 
         // Fallback: No selection means process the entire document
         if (!hasSelection) {
             const text = document.getText();
-            const lines = text.split(/\r?\n/);
+            const lines = splitLines(text);
             const processedLines = processor(lines);
-            const eol = document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n';
 
             const fullRange = new vscode.Range(
                 document.positionAt(0),
                 document.positionAt(text.length)
             );
-            editBuilder.replace(fullRange, processedLines.join(eol));
+            editBuilder.replace(fullRange, joinLines(processedLines, document));
         }
     });
 }
@@ -87,5 +86,5 @@ export async function applyLineAction(
  * Default is a space character
  */
 export function getJoinSeparator(): string {
-    return vscode.workspace.getConfiguration(CONFIG.NAMESPACE).get<string>(CONFIG.JOIN_SEPARATOR, ' ');
+    return configCache.get<string>(CONFIG.JOIN_SEPARATOR, ' ');
 }

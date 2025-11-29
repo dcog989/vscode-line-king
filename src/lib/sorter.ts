@@ -65,34 +65,32 @@ export const sortReverse = (lines: string[]): string[] =>
 
 /**
  * Sorts lines by IPv4 address (if present in the line)
- * Optimized: Caches IP extraction and numeric conversion
+ * Optimized: Only parses lines with IPs, avoiding unnecessary object creation
  */
 export const sortIP = (lines: string[]): string[] => {
-    // Pre-process: Extract and parse IPs once
-    const parsed = lines.map(line => {
+    // Separate lines with IPs from those without for efficiency
+    const withIPs: Array<{ line: string; octets: number[] }> = [];
+    const withoutIPs: string[] = [];
+
+    for (const line of lines) {
         const match = line.match(IP_REGEX);
-        if (!match) {
-            return { line, octets: null };
+        if (match) {
+            withIPs.push({
+                line,
+                octets: [
+                    parseInt(match[1], 10),
+                    parseInt(match[2], 10),
+                    parseInt(match[3], 10),
+                    parseInt(match[4], 10)
+                ]
+            });
+        } else {
+            withoutIPs.push(line);
         }
-        return {
-            line,
-            octets: [
-                parseInt(match[1], 10),
-                parseInt(match[2], 10),
-                parseInt(match[3], 10),
-                parseInt(match[4], 10)
-            ]
-        };
-    });
+    }
 
-    // Sort using pre-parsed data
-    parsed.sort((a, b) => {
-        // If either doesn't have an IP, fall back to string comparison
-        if (!a.octets || !b.octets) {
-            return a.line.localeCompare(b.line);
-        }
-
-        // Compare each octet numerically
+    // Sort lines with IPs numerically
+    withIPs.sort((a, b) => {
         for (let i = 0; i < 4; i++) {
             if (a.octets[i] !== b.octets[i]) {
                 return a.octets[i] - b.octets[i];
@@ -101,7 +99,11 @@ export const sortIP = (lines: string[]): string[] => {
         return 0;
     });
 
-    return parsed.map(p => p.line);
+    // Sort lines without IPs alphabetically
+    withoutIPs.sort((a, b) => a.localeCompare(b));
+
+    // Combine: IPs first, then non-IPs
+    return [...withIPs.map(p => p.line), ...withoutIPs];
 };
 
 /**

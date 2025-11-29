@@ -10,6 +10,20 @@ export const CONTEXT_KEYS = {
     LINE_ENDINGS_VISIBLE: 'lineKing.lineEndingsVisible'
 };
 
+// Timing constants
+export const TIMING = {
+    SELECTION_DEBOUNCE_MS: 50,
+    DECORATION_DEBOUNCE_MS: 150,
+    CONTEXT_INIT_DELAY_MS: 100
+};
+
+// Line ending detection constants
+export const LINE_ENDINGS = {
+    LF_BYTE_LENGTH: 1,
+    CRLF_BYTE_LENGTH: 2
+};
+
+// Command identifiers
 export const COMMANDS = {
     DEBUG_CONTEXT: 'lineKing.debug.checkContext',
     SHOW_LINE_ENDINGS: 'lineKing.util.showLineEndings',

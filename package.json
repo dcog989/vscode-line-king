@@ -2,7 +2,7 @@
     "name": "line-king",
     "displayName": "Line King",
     "description": "**PRE-RELEASE**. Manipulate all the line things. Sort, tidy, clean, duplicate, transform, encode / decode.",
-    "version": "0.1.7",
+    "version": "0.1.10",
     "publisher": "dcog989",
     "icon": "assets/icon.png",
     "repository": {
@@ -358,23 +358,33 @@
                     "when": "lineKing.isMultiLine || !editorHasSelection"
                 },
                 {
-                    "command": "lineKing.tidy.removeDuplicates",
+                    "command": "lineKing.tidy.condenseBlank",
                     "group": "3_tidy@2",
                     "when": "lineKing.isMultiLine || !editorHasSelection"
                 },
                 {
-                    "command": "lineKing.tidy.trimTrailing",
+                    "command": "lineKing.tidy.removeDuplicates",
                     "group": "3_tidy@3",
                     "when": "lineKing.isMultiLine || !editorHasSelection"
                 },
                 {
-                    "command": "lineKing.tidy.trimLeading",
+                    "command": "lineKing.tidy.keepDuplicates",
                     "group": "3_tidy@4",
                     "when": "lineKing.isMultiLine || !editorHasSelection"
                 },
                 {
-                    "command": "lineKing.tidy.trimBoth",
+                    "command": "lineKing.tidy.trimTrailing",
                     "group": "3_tidy@5",
+                    "when": "lineKing.isMultiLine || !editorHasSelection"
+                },
+                {
+                    "command": "lineKing.tidy.trimLeading",
+                    "group": "3_tidy@6",
+                    "when": "lineKing.isMultiLine || !editorHasSelection"
+                },
+                {
+                    "command": "lineKing.tidy.trimBoth",
+                    "group": "3_tidy@7",
                     "when": "lineKing.isMultiLine || !editorHasSelection"
                 },
                 {

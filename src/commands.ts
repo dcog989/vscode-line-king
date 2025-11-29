@@ -31,6 +31,7 @@ export function registerCommands(context: vscode.ExtensionContext, updateContext
     register('lineKing.sort.shuffle', sorter.sortShuffle);
 
     context.subscriptions.push(vscode.commands.registerTextEditorCommand(COMMANDS.SORT_CSS, async (editor) => {
+        if (!editor || !editor.document) return;
         return sortCssProperties(editor);
     }));
 
@@ -64,16 +65,20 @@ export function registerCommands(context: vscode.ExtensionContext, updateContext
 
     // --- Interactive & Tools ---
     context.subscriptions.push(vscode.commands.registerTextEditorCommand(COMMANDS.SPLIT_LINES, async (editor) => {
+        if (!editor || !editor.document) return;
         return transformer.splitLinesInteractive(editor);
     }));
     context.subscriptions.push(vscode.commands.registerTextEditorCommand(COMMANDS.ALIGN_LINES, async (editor) => {
+        if (!editor || !editor.document) return;
         return transformer.alignToSeparatorInteractive(editor);
     }));
     context.subscriptions.push(vscode.commands.registerTextEditorCommand(COMMANDS.INSERT_SEQUENCE, async (editor) => {
+        if (!editor || !editor.document) return;
         return transformer.insertNumericSequence(editor);
     }));
 
     context.subscriptions.push(vscode.commands.registerTextEditorCommand(COMMANDS.DUPLICATE_SELECTION, async (editor) => {
+        if (!editor || !editor.document) return;
         const selections = [...editor.selections].sort((a, b) => b.start.compareTo(a.start));
         await editor.edit(editBuilder => {
             for (const selection of selections) {
@@ -87,9 +92,11 @@ export function registerCommands(context: vscode.ExtensionContext, updateContext
 
     // --- Utilities ---
     context.subscriptions.push(vscode.commands.registerTextEditorCommand(COMMANDS.CONVERT_LF, (editor) => {
+        if (!editor || !editor.document) return;
         return editor.edit(eb => eb.setEndOfLine(vscode.EndOfLine.LF));
     }));
     context.subscriptions.push(vscode.commands.registerTextEditorCommand(COMMANDS.CONVERT_CRLF, (editor) => {
+        if (!editor || !editor.document) return;
         return editor.edit(eb => eb.setEndOfLine(vscode.EndOfLine.CRLF));
     }));
 

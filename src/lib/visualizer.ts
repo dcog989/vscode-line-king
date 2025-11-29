@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { LINE_ENDINGS } from '../constants';
 
 class LineEndingVisualizer {
     private lfDecoration: vscode.TextEditorDecorationType | undefined;
@@ -40,34 +41,37 @@ class LineEndingVisualizer {
         const lfRanges: vscode.Range[] = [];
         const crlfRanges: vscode.Range[] = [];
         const document = editor.document;
+        const lastLineIndex = document.lineCount - 1;
 
         // Optimization: Only process lines that are currently visible to the user
         for (const visibleRange of editor.visibleRanges) {
-            for (let i = visibleRange.start.line; i <= visibleRange.end.line; i++) {
-                if (i >= document.lineCount) continue;
-
+            for (let i = visibleRange.start.line; i <= Math.min(visibleRange.end.line, lastLineIndex); i++) {
                 const line = document.lineAt(i);
                 const endPos = line.range.end;
                 const decorationRange = new vscode.Range(endPos, endPos);
 
                 // Detect line ending type
-                if (i < document.lineCount - 1) {
+                if (i < lastLineIndex) {
                     const nextLineStart = new vscode.Position(i + 1, 0);
                     const lineEndOffset = document.offsetAt(nextLineStart) - document.offsetAt(line.range.end);
 
-                    if (lineEndOffset === 2) {
+                    if (lineEndOffset === LINE_ENDINGS.CRLF_BYTE_LENGTH) {
                         crlfRanges.push(decorationRange);
-                    } else if (lineEndOffset === 1) {
+                    } else if (lineEndOffset === LINE_ENDINGS.LF_BYTE_LENGTH) {
                         lfRanges.push(decorationRange);
                     }
                 } else {
-                    // Last line
-                    const text = document.getText();
-                    if (text.endsWith('\r\n')) {
+                    // Last line - check if it has a line ending
+                    const lineEndPos = document.offsetAt(line.range.end);
+                    const docEndPos = document.offsetAt(new vscode.Position(lastLineIndex + 1, 0));
+                    const lineEndOffset = docEndPos - lineEndPos;
+                    
+                    if (lineEndOffset === LINE_ENDINGS.CRLF_BYTE_LENGTH) {
                         crlfRanges.push(decorationRange);
-                    } else if (text.endsWith('\n')) {
+                    } else if (lineEndOffset === LINE_ENDINGS.LF_BYTE_LENGTH) {
                         lfRanges.push(decorationRange);
                     }
+                    // If lineEndOffset === 0, no line ending on last line (don't decorate)
                 }
             }
         }

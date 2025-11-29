@@ -1,5 +1,11 @@
 import * as vscode from 'vscode';
 import { CONFIG } from '../constants';
+import { configCache } from '../utils/config-cache';
+import { splitLines, getEOL } from '../utils/text-utils';
+
+// Pre-compiled regexes for performance
+const PROPERTY_REGEX = /^\s*[a-zA-Z0-9_-]+\s*:[^;{}]*;.*$/;
+const COMMENT_REGEX = /^\s*(\/\/|\/\*)/;
 
 /**
  * Sorts CSS properties within rule blocks
@@ -8,20 +14,13 @@ import { CONFIG } from '../constants';
 export async function sortCssProperties(editor: vscode.TextEditor): Promise<void> {
     const document = editor.document;
     const text = document.getText();
-    const config = vscode.workspace.getConfiguration(CONFIG.NAMESPACE);
-    const strategy = config.get<string>(CONFIG.CSS_SORT_STRATEGY, 'alphabetical');
+    const strategy = configCache.get<string>(CONFIG.CSS_SORT_STRATEGY, 'alphabetical');
     const edits: vscode.TextEdit[] = [];
-    const lines = text.split(/\r?\n/);
+    const lines = splitLines(text);
+    const eol = getEOL(document);
 
     let propertyBlockStart = -1;
     let propertyBlockEnd = -1;
-
-    // Regex for a CSS property line
-    // Matches: property: value; followed by optional comments or whitespace
-    const propertyRegex = /^\s*[a-zA-Z0-9_-]+\s*:[^;{}]*;.*$/;
-
-    // Regex to exclude comments
-    const commentRegex = /^\s*(\/\/|\/\*)/;
 
     /**
      * Sorts and applies the current property block
@@ -45,7 +44,6 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
                 new vscode.Position(propertyBlockEnd, lines[propertyBlockEnd].length)
             );
 
-            const eol = document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n';
             const newText = slice.join(eol);
             edits.push(vscode.TextEdit.replace(range, newText));
         }
@@ -60,7 +58,7 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
         const line = lines[i];
 
         // Check if line is a valid property AND not a comment
-        if (propertyRegex.test(line) && !commentRegex.test(line)) {
+        if (PROPERTY_REGEX.test(line) && !COMMENT_REGEX.test(line)) {
             // This line is a CSS property
             if (propertyBlockStart === -1) {
                 propertyBlockStart = i;

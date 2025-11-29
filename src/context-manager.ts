@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
-import { CONTEXT_KEYS } from './constants';
+import { CONTEXT_KEYS, TIMING } from './constants';
 import { isLineEndingsVisible, updateDecorations } from './lib/visualizer';
 
 export class ContextManager {
     private context: vscode.ExtensionContext;
     private selectionTimeout: NodeJS.Timeout | undefined;
+    private decorationTimeout: NodeJS.Timeout | undefined;
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
@@ -29,13 +30,36 @@ export class ContextManager {
             }),
             vscode.workspace.onDidChangeTextDocument(e => {
                 if (vscode.window.activeTextEditor && e.document === vscode.window.activeTextEditor.document) {
-                    updateDecorations(vscode.window.activeTextEditor);
+                    // Debounce decoration updates during typing
+                    this.scheduleDecorationUpdate(vscode.window.activeTextEditor);
                 }
-            })
+            }),
+            // Cleanup on disposal
+            { dispose: () => this.dispose() }
         );
 
         // Safety update after delay
-        setTimeout(() => this.update(), 100);
+        setTimeout(() => this.update(), TIMING.CONTEXT_INIT_DELAY_MS);
+    }
+
+    private scheduleDecorationUpdate(editor: vscode.TextEditor): void {
+        if (this.decorationTimeout) {
+            clearTimeout(this.decorationTimeout);
+        }
+        this.decorationTimeout = setTimeout(() => {
+            updateDecorations(editor);
+        }, TIMING.DECORATION_DEBOUNCE_MS);
+    }
+
+    private dispose(): void {
+        if (this.selectionTimeout) {
+            clearTimeout(this.selectionTimeout);
+            this.selectionTimeout = undefined;
+        }
+        if (this.decorationTimeout) {
+            clearTimeout(this.decorationTimeout);
+            this.decorationTimeout = undefined;
+        }
     }
 
     public update(): void {
@@ -60,6 +84,7 @@ export class ContextManager {
         }
         this.selectionTimeout = setTimeout(() => {
             this.update();
-        }, 50);
+            this.selectionTimeout = undefined;
+        }, TIMING.SELECTION_DEBOUNCE_MS);
     }
 }
