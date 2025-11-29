@@ -38,25 +38,25 @@ export const condenseBlankLines = (lines: string[]): string[] => {
 export const removeDuplicateLines = (lines: string[]): string[] => {
     const seen = new Set<string>();
     const result: string[] = [];
-    let previousLine = '';
+    let previousWasBlank = false;
 
     for (const line of lines) {
         const isBlank = line.trim().length === 0;
 
         if (isBlank) {
-            // For blank lines, only remove if it's consecutive
-            if (line !== previousLine) {
+            // For blank lines, only keep one if the previous line wasn't blank
+            if (!previousWasBlank) {
                 result.push(line);
             }
+            previousWasBlank = true;
         } else {
             // For non-blank lines, remove all duplicates
             if (!seen.has(line)) {
                 seen.add(line);
                 result.push(line);
             }
+            previousWasBlank = false;
         }
-
-        previousLine = line;
     }
 
     return result;
