@@ -2,7 +2,7 @@
     "name": "line-king",
     "displayName": "Line King",
     "description": "Sort, remove dups, change case, clean, encode / decode. Do all the things to line and text.",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "publisher": "dcog989",
     "icon": "assets/icon.png",
     "repository": {
@@ -239,7 +239,7 @@
             },
             {
                 "command": "lineKing.manipulate.split",
-                "title": "Split Lines...",
+                "title": "Split Selection...",
                 "category": "Line King: Tools"
             },
             {

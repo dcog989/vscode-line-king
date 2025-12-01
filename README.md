@@ -49,7 +49,7 @@ The best line manipulation extension for VS Code ever? Many people are saying so
 
 - **Duplicate Line/Selection** - Smarter duplication that handles newlines correctly
 - **Join Lines** - Combines selected lines using a configurable separator
-- **Split Lines** - Splits text based on a custom separator you specify
+- **Split Selection** - Splits text based on a custom separator you specify
 - **Align to Separator** - Aligns text around a separator (e.g., `=`, `:`, `,`)
 - **Insert Numeric Sequence** - Replaces selection with sequential numbers (1, 2, 3...)
 - **Show Whitespace Characters** - Display line endings `LF` (↓), `CRLF` (↵), spaces (·), and tabs (→)
@@ -152,7 +152,7 @@ All commands are available through the Command Palette (`Ctrl+Shift+P` / `Cmd+Sh
 ### Utility Commands
 - `Line King: Tools: Duplicate Selection`
 - `Line King: Tools: Join Lines`
-- `Line King: Tools: Split Lines...`
+- `Line King: Tools: Split Selection...`
 - `Line King: Tools: Align to Separator...`
 - `Line King: Tools: Insert Numeric Sequence (1,2,3...)`
 - `Line King: Util: Show Whitespace Characters`
