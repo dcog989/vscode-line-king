@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
 import { LINE_ENDINGS } from '../constants';
 
-class LineEndingVisualizer {
+class WhitespaceCharsVisualizer {
     private lfDecoration: vscode.TextEditorDecorationType | undefined;
     private crlfDecoration: vscode.TextEditorDecorationType | undefined;
+    private spaceDecoration: vscode.TextEditorDecorationType | undefined;
+    private tabDecoration: vscode.TextEditorDecorationType | undefined;
     private _isEnabled = false;
 
     public get isEnabled(): boolean {
@@ -18,10 +20,10 @@ class LineEndingVisualizer {
 
         if (this._isEnabled) {
             this.update(vscode.window.activeTextEditor);
-            vscode.window.showInformationMessage('Line Endings: Visible');
+            vscode.window.showInformationMessage('Whitespace Characters: Visible');
         } else {
             this.clear();
-            vscode.window.showInformationMessage('Line Endings: Hidden');
+            vscode.window.showInformationMessage('Whitespace Characters: Hidden');
         }
     }
 
@@ -40,6 +42,8 @@ class LineEndingVisualizer {
 
         const lfRanges: vscode.Range[] = [];
         const crlfRanges: vscode.Range[] = [];
+        const spaceRanges: vscode.Range[] = [];
+        const tabRanges: vscode.Range[] = [];
         const document = editor.document;
         const lastLineIndex = document.lineCount - 1;
 
@@ -47,8 +51,21 @@ class LineEndingVisualizer {
         for (const visibleRange of editor.visibleRanges) {
             for (let i = visibleRange.start.line; i <= Math.min(visibleRange.end.line, lastLineIndex); i++) {
                 const line = document.lineAt(i);
+                const lineText = line.text;
                 const endPos = line.range.end;
-                const decorationRange = new vscode.Range(endPos, endPos);
+                const lineEndDecorationRange = new vscode.Range(endPos, endPos);
+
+                // Detect spaces and tabs in the line
+                for (let charIndex = 0; charIndex < lineText.length; charIndex++) {
+                    const char = lineText[charIndex];
+                    if (char === ' ') {
+                        const pos = new vscode.Position(i, charIndex);
+                        spaceRanges.push(new vscode.Range(pos, pos));
+                    } else if (char === '\t') {
+                        const pos = new vscode.Position(i, charIndex);
+                        tabRanges.push(new vscode.Range(pos, pos));
+                    }
+                }
 
                 // Detect line ending type
                 if (i < lastLineIndex) {
@@ -56,20 +73,20 @@ class LineEndingVisualizer {
                     const lineEndOffset = document.offsetAt(nextLineStart) - document.offsetAt(line.range.end);
 
                     if (lineEndOffset === LINE_ENDINGS.CRLF_BYTE_LENGTH) {
-                        crlfRanges.push(decorationRange);
+                        crlfRanges.push(lineEndDecorationRange);
                     } else if (lineEndOffset === LINE_ENDINGS.LF_BYTE_LENGTH) {
-                        lfRanges.push(decorationRange);
+                        lfRanges.push(lineEndDecorationRange);
                     }
                 } else {
                     // Last line - check if it has a line ending
                     const lineEndPos = document.offsetAt(line.range.end);
                     const docEndPos = document.offsetAt(new vscode.Position(lastLineIndex + 1, 0));
                     const lineEndOffset = docEndPos - lineEndPos;
-                    
+
                     if (lineEndOffset === LINE_ENDINGS.CRLF_BYTE_LENGTH) {
-                        crlfRanges.push(decorationRange);
+                        crlfRanges.push(lineEndDecorationRange);
                     } else if (lineEndOffset === LINE_ENDINGS.LF_BYTE_LENGTH) {
-                        lfRanges.push(decorationRange);
+                        lfRanges.push(lineEndDecorationRange);
                     }
                     // If lineEndOffset === 0, no line ending on last line (don't decorate)
                 }
@@ -78,6 +95,8 @@ class LineEndingVisualizer {
 
         if (this.lfDecoration) editor.setDecorations(this.lfDecoration, lfRanges);
         if (this.crlfDecoration) editor.setDecorations(this.crlfDecoration, crlfRanges);
+        if (this.spaceDecoration) editor.setDecorations(this.spaceDecoration, spaceRanges);
+        if (this.tabDecoration) editor.setDecorations(this.tabDecoration, tabRanges);
     }
 
     private clear(): void {
@@ -85,14 +104,16 @@ class LineEndingVisualizer {
         for (const editor of editors) {
             if (this.lfDecoration) editor.setDecorations(this.lfDecoration, []);
             if (this.crlfDecoration) editor.setDecorations(this.crlfDecoration, []);
+            if (this.spaceDecoration) editor.setDecorations(this.spaceDecoration, []);
+            if (this.tabDecoration) editor.setDecorations(this.tabDecoration, []);
         }
     }
 
     private initDecorations(): void {
-        if (this.lfDecoration && this.crlfDecoration) return;
+        if (this.lfDecoration && this.crlfDecoration && this.spaceDecoration && this.tabDecoration) return;
 
         const color = new vscode.ThemeColor('editorCodeLens.foreground');
-        const options = (text: string): vscode.DecorationRenderOptions => ({
+        const lineEndOptions = (text: string): vscode.DecorationRenderOptions => ({
             after: {
                 contentText: text,
                 color: color,
@@ -101,20 +122,30 @@ class LineEndingVisualizer {
             }
         });
 
-        this.lfDecoration = vscode.window.createTextEditorDecorationType(options('↓'));
-        this.crlfDecoration = vscode.window.createTextEditorDecorationType(options('↵'));
+        const charOptions = (text: string): vscode.DecorationRenderOptions => ({
+            before: {
+                contentText: text,
+                color: color,
+                fontWeight: 'bold'
+            }
+        });
+
+        this.lfDecoration = vscode.window.createTextEditorDecorationType(lineEndOptions('↓'));
+        this.crlfDecoration = vscode.window.createTextEditorDecorationType(lineEndOptions('↵'));
+        this.spaceDecoration = vscode.window.createTextEditorDecorationType(charOptions('·'));
+        this.tabDecoration = vscode.window.createTextEditorDecorationType(charOptions('→'));
     }
 }
 
 // Export Singleton Instance
-export const visualizer = new LineEndingVisualizer();
+export const visualizer = new WhitespaceCharsVisualizer();
 
 // --- Export Wrappers for Compatibility ---
-export function isLineEndingsVisible(): boolean {
+export function iswhitespaceCharsVisible(): boolean {
     return visualizer.isEnabled;
 }
 
-export function toggleLineEndings(forceState?: boolean): void {
+export function toggleWhitespaceChars(forceState?: boolean): void {
     visualizer.toggle(forceState);
 }
 

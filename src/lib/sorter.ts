@@ -4,10 +4,24 @@ import * as vscode from 'vscode';
  * Line sorting utilities
  */
 
-// Create reusable collators for performance
+// Lazy-initialized collators for performance
 // Uses vscode.env.language to respect the user's UI language preference
-const naturalCollator = new Intl.Collator(vscode.env.language, { numeric: true, sensitivity: 'base' });
-const caseInsensitiveCollator = new Intl.Collator(vscode.env.language, { sensitivity: 'base' });
+let naturalCollator: Intl.Collator | undefined;
+let caseInsensitiveCollator: Intl.Collator | undefined;
+
+function getNaturalCollator(): Intl.Collator {
+    if (!naturalCollator) {
+        naturalCollator = new Intl.Collator(vscode.env.language, { numeric: true, sensitivity: 'base' });
+    }
+    return naturalCollator;
+}
+
+function getCaseInsensitiveCollator(): Intl.Collator {
+    if (!caseInsensitiveCollator) {
+        caseInsensitiveCollator = new Intl.Collator(vscode.env.language, { sensitivity: 'base' });
+    }
+    return caseInsensitiveCollator;
+}
 
 // Reusable IP regex (compiled once)
 const IP_REGEX = /\b(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\b/;
@@ -24,7 +38,7 @@ export const sortAsc = (lines: string[]): string[] =>
  * Optimized: Uses cached collator instead of creating new one per comparison
  */
 export const sortAscInsensitive = (lines: string[]): string[] =>
-    [...lines].sort((a, b) => caseInsensitiveCollator.compare(a, b));
+    [...lines].sort((a, b) => getCaseInsensitiveCollator().compare(a, b));
 
 /**
  * Sorts lines in descending order (Z-A)
@@ -37,13 +51,13 @@ export const sortDesc = (lines: string[]): string[] =>
  * Optimized: Uses cached collator instead of creating new one per comparison
  */
 export const sortDescInsensitive = (lines: string[]): string[] =>
-    [...lines].sort((a, b) => caseInsensitiveCollator.compare(b, a));
+    [...lines].sort((a, b) => getCaseInsensitiveCollator().compare(b, a));
 
 /**
  * Natural sort - handles numbers intelligently (e.g., file2.txt before file10.txt)
  */
 export const sortNatural = (lines: string[]): string[] =>
-    [...lines].sort((a, b) => naturalCollator.compare(a, b));
+    [...lines].sort((a, b) => getNaturalCollator().compare(a, b));
 
 /**
  * Sorts lines by length (shortest first)
@@ -141,6 +155,6 @@ export const sortUniqueInsensitive = (lines: string[]): string[] => {
         }
     }
 
-    tempArr.sort((a, b) => caseInsensitiveCollator.compare(a.lower, b.lower));
+    tempArr.sort((a, b) => getCaseInsensitiveCollator().compare(a.lower, b.lower));
     return tempArr.map(x => x.original);
 };

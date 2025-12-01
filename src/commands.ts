@@ -4,7 +4,7 @@ import * as cleaner from './lib/cleaner';
 import { sortCssProperties } from './lib/css-sorter';
 import * as sorter from './lib/sorter';
 import * as transformer from './lib/transformer';
-import { toggleLineEndings } from './lib/visualizer';
+import { toggleWhitespaceChars } from './lib/visualizer';
 import { applyLineAction } from './utils/editor';
 
 export function registerCommands(context: vscode.ExtensionContext, updateContextCallback: () => void): void {
@@ -100,13 +100,13 @@ export function registerCommands(context: vscode.ExtensionContext, updateContext
         return editor.edit(eb => eb.setEndOfLine(vscode.EndOfLine.CRLF));
     }));
 
-    // Line ending visibility
-    context.subscriptions.push(vscode.commands.registerCommand(COMMANDS.SHOW_LINE_ENDINGS, () => {
-        toggleLineEndings(true);
+    // Whitespace characters visibility (line endings, spaces, tabs)
+    context.subscriptions.push(vscode.commands.registerCommand(COMMANDS.SHOW_ALL_CHARS, () => {
+        toggleWhitespaceChars(true);
         updateContextCallback();
     }));
-    context.subscriptions.push(vscode.commands.registerCommand(COMMANDS.HIDE_LINE_ENDINGS, () => {
-        toggleLineEndings(false);
+    context.subscriptions.push(vscode.commands.registerCommand(COMMANDS.HIDE_ALL_CHARS, () => {
+        toggleWhitespaceChars(false);
         updateContextCallback();
     }));
 

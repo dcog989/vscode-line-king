@@ -1,16 +1,8 @@
 # ![Line King logo](https://raw.githubusercontent.com/dcog989/vscode-line-king/main/assets/icon-64.png) Line King
 
-## PRE-RELEASE
+*Line King* sorts, changes case, removes dups, removes blank lines, splits and joins lines, encodes to Base64, etc. It's the ultimate toolbox for line / text manipulation.  It's also smart, only displaying what is relevant to what is selected.
 
-This is a new arrival. It is fully functional and has been tested, but edge cases likely exist, and functionality will need refining.
-
-Please report any issues on [GitHub](https://github.com/dcog989/vscode-line-king/issues).
-
----
-
-The best Line Manipulation Tool for VS Code ever? Many people are saying so.
-
-Line King replaces multiple single-purpose extensions by combining sorting, tidying, cleaning, and text manipulation into a single, fast, lightweight utility. It's smart - only displays what is relevant to what is selected.
+The best line manipulation extension for VS Code ever? Many people are saying so.
 
 ![Line King screenshot](https://raw.githubusercontent.com/dcog989/vscode-line-king/main/assets/screen-1.png)
 
@@ -31,7 +23,7 @@ Line King replaces multiple single-purpose extensions by combining sorting, tidy
 ### Tidying & Cleaning
 
 - **Remove Blank Lines** - Deletes all empty lines
-- **Condense Blank Lines** - Reduces multiple consecutive blank lines to a single one
+- **Condense Blank Lines** - Reduces multiple consecutive blank lines to just one
 - **Remove Duplicates** - Keeps the first occurrence, removes the rest (preserves order)
 - **Keep Only Duplicates** - Useful for finding repeated data; removes all unique lines
 - **Trim Whitespace** - Remove leading, trailing, or both from each line
@@ -60,7 +52,7 @@ Line King replaces multiple single-purpose extensions by combining sorting, tidy
 - **Split Lines** - Splits text based on a custom separator you specify
 - **Align to Separator** - Aligns text around a separator (e.g., `=`, `:`, `,`)
 - **Insert Numeric Sequence** - Replaces selection with sequential numbers (1, 2, 3...)
-- **Toggle Line Endings** - Visualizes `LF` (↓) and `CRLF` (↵) characters to help debug mixed line endings
+- **Show Whitespace Characters** - Display line endings `LF` (↓), `CRLF` (↵), spaces (·), and tabs (→)
 - **Convert Line Endings** - Convert between LF (Unix) and CRLF (Windows) formats
 - **Cleanup on Save** - Automatically tidy files when you save
 
@@ -163,7 +155,8 @@ All commands are available through the Command Palette (`Ctrl+Shift+P` / `Cmd+Sh
 - `Line King: Tools: Split Lines...`
 - `Line King: Tools: Align to Separator...`
 - `Line King: Tools: Insert Numeric Sequence (1,2,3...)`
-- `Line King: Util: Toggle Line Endings Visibility`
+- `Line King: Util: Show Whitespace Characters`
+- `Line King: Util: Hide Whitespace Characters`
 - `Line King: Util: Convert to LF (Unix)`
 - `Line King: Util: Convert to CRLF (Windows)`
 
@@ -237,18 +230,10 @@ Line King is designed to work in:
 - ✅ Virtual Workspaces
 - ✅ Untrusted Workspaces
 
-## Known Issues
+## Support
 
-None currently. Please report issues on [GitHub](https://github.com/dcog989/vscode-line-king/issues).
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+Please report issues and feature requests to [Line King issues](https://github.com/dcog989/vscode-line-king/issues).
 
 ## License
 
 MIT.
-
-## Support
-
-If you encounter any issues or have feature requests, please file them on the [GitHub repository](https://github.com/dcog989/vscode-line-king/issues).

@@ -7,7 +7,7 @@ export const CONFIG = {
 
 export const CONTEXT_KEYS = {
     IS_MULTI_LINE: 'lineKing.isMultiLine',
-    LINE_ENDINGS_VISIBLE: 'lineKing.lineEndingsVisible'
+    ALL_CHARS_VISIBLE: 'lineKing.whitespaceCharsVisible'
 };
 
 // Timing constants
@@ -26,8 +26,8 @@ export const LINE_ENDINGS = {
 // Command identifiers
 export const COMMANDS = {
     DEBUG_CONTEXT: 'lineKing.debug.checkContext',
-    SHOW_LINE_ENDINGS: 'lineKing.util.showLineEndings',
-    HIDE_LINE_ENDINGS: 'lineKing.util.hideLineEndings',
+    SHOW_ALL_CHARS: 'lineKing.util.showWhitespaceChars',
+    HIDE_ALL_CHARS: 'lineKing.util.hideWhitespaceChars',
     SORT_CSS: 'lineKing.sort.css',
     SPLIT_LINES: 'lineKing.manipulate.split',
     ALIGN_LINES: 'lineKing.manipulate.align',

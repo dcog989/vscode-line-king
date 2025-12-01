@@ -34,51 +34,69 @@ export async function applyLineAction(
     // This preserves ranges during edits when there are multiple selections
     const sortedSelections = [...selections].sort((a, b) => b.start.compareTo(a.start));
 
-    await editor.edit(editBuilder => {
-        let hasSelection = false;
+    // Collect changes before applying to avoid marking document as changed if nothing changes
+    const changes: Array<{ range: vscode.Range; oldText: string; newText: string }> = [];
+    let hasSelection = false;
 
-        for (const selection of sortedSelections) {
-            if (!selection.isEmpty) {
-                hasSelection = true;
+    for (const selection of sortedSelections) {
+        if (!selection.isEmpty) {
+            hasSelection = true;
 
-                let range: vscode.Range;
+            let range: vscode.Range;
 
-                if (options.expandSelection) {
-                    // Get the full lines for the selection
-                    const startLine = document.lineAt(selection.start.line);
-                    const endLine = document.lineAt(selection.end.line);
-                    range = new vscode.Range(startLine.range.start, endLine.range.end);
-                } else {
-                    // Use the exact selection range
-                    range = selection;
-                }
-
-                const text = document.getText(range);
-
-                // Split into lines (handles both CRLF and LF)
-                const lines = splitLines(text);
-
-                // Apply the transformation
-                const processedLines = processor(lines);
-
-                // Use the document's line ending format
-                editBuilder.replace(range, joinLines(processedLines, document));
+            if (options.expandSelection) {
+                // Get the full lines for the selection
+                const startLine = document.lineAt(selection.start.line);
+                const endLine = document.lineAt(selection.end.line);
+                range = new vscode.Range(startLine.range.start, endLine.range.end);
+            } else {
+                // Use the exact selection range
+                range = selection;
             }
-        }
 
-        // Fallback: No selection means process the entire document
-        if (!hasSelection) {
-            const text = document.getText();
+            const text = document.getText(range);
+
+            // Split into lines (handles both CRLF and LF)
             const lines = splitLines(text);
+
+            // Apply the transformation
             const processedLines = processor(lines);
 
+            // Use the document's line ending format
+            const newText = joinLines(processedLines, document);
+
+            // Only add to changes if text actually changed
+            if (text !== newText) {
+                changes.push({ range, oldText: text, newText });
+            }
+        }
+    }
+
+    // Fallback: No selection means process the entire document
+    if (!hasSelection) {
+        const text = document.getText();
+        const lines = splitLines(text);
+        const processedLines = processor(lines);
+        const newText = joinLines(processedLines, document);
+
+        // Only add to changes if text actually changed
+        if (text !== newText) {
             const fullRange = new vscode.Range(
                 document.positionAt(0),
                 document.positionAt(text.length)
             );
-            editBuilder.replace(fullRange, joinLines(processedLines, document));
+            changes.push({ range: fullRange, oldText: text, newText });
         }
-    });
+    }
+
+    // Only perform edit if there are actual changes
+    if (changes.length > 0) {
+        await editor.edit(editBuilder => {
+            for (const change of changes) {
+                editBuilder.replace(change.range, change.newText);
+            }
+        });
+    }
 }
 
 /**

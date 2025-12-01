@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { CONTEXT_KEYS, TIMING } from './constants';
-import { isLineEndingsVisible, updateDecorations } from './lib/visualizer';
+import { iswhitespaceCharsVisible, updateDecorations } from './lib/visualizer';
 
 export class ContextManager {
     private context: vscode.ExtensionContext;
@@ -66,7 +66,7 @@ export class ContextManager {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             vscode.commands.executeCommand('setContext', CONTEXT_KEYS.IS_MULTI_LINE, false);
-            vscode.commands.executeCommand('setContext', CONTEXT_KEYS.LINE_ENDINGS_VISIBLE, false);
+            vscode.commands.executeCommand('setContext', CONTEXT_KEYS.ALL_CHARS_VISIBLE, false);
             return;
         }
 
@@ -75,7 +75,7 @@ export class ContextManager {
         const isMulti = hasMultipleSelections || hasMultiLineSelection;
 
         vscode.commands.executeCommand('setContext', CONTEXT_KEYS.IS_MULTI_LINE, isMulti);
-        vscode.commands.executeCommand('setContext', CONTEXT_KEYS.LINE_ENDINGS_VISIBLE, isLineEndingsVisible());
+        vscode.commands.executeCommand('setContext', CONTEXT_KEYS.ALL_CHARS_VISIBLE, iswhitespaceCharsVisible());
     }
 
     private onSelectionChange(e: vscode.TextEditorSelectionChangeEvent): void {

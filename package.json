@@ -2,7 +2,7 @@
     "name": "line-king",
     "displayName": "Line King",
     "description": "**PRE-RELEASE**. Manipulate all the line things. Sort, tidy, clean, duplicate, transform, encode / decode.",
-    "version": "0.1.10",
+    "version": "1.0.3",
     "publisher": "dcog989",
     "icon": "assets/icon.png",
     "repository": {
@@ -283,13 +283,13 @@
                 "category": "Line King: Dev"
             },
             {
-                "command": "lineKing.util.showLineEndings",
-                "title": "Show Line Endings",
+                "command": "lineKing.util.showWhitespaceChars",
+                "title": "Show Whitespace Characters",
                 "category": "Line King: Util"
             },
             {
-                "command": "lineKing.util.hideLineEndings",
-                "title": "Hide Line Endings",
+                "command": "lineKing.util.hideWhitespaceChars",
+                "title": "Hide Whitespace Characters",
                 "category": "Line King: Util"
             },
             {
@@ -421,14 +421,14 @@
                     "group": "5_eof@2"
                 },
                 {
-                    "command": "lineKing.util.showLineEndings",
+                    "command": "lineKing.util.showWhitespaceChars",
                     "group": "5_eof@3",
-                    "when": "!lineKing.lineEndingsVisible"
+                    "when": "!lineKing.whitespaceCharsVisible"
                 },
                 {
-                    "command": "lineKing.util.hideLineEndings",
+                    "command": "lineKing.util.hideWhitespaceChars",
                     "group": "5_eof@3",
-                    "when": "lineKing.lineEndingsVisible"
+                    "when": "lineKing.whitespaceCharsVisible"
                 }
             ],
             "lineKing.sortMenu": [
