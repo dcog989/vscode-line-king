@@ -7,6 +7,10 @@ export class ContextManager {
     private selectionTimeout: NodeJS.Timeout | undefined;
     private decorationTimeout: NodeJS.Timeout | undefined;
 
+    // Cache to prevent redundant context updates
+    private lastIsMultiLine: boolean | undefined;
+    private lastAllCharsVisible: boolean | undefined;
+
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
     }
@@ -65,8 +69,14 @@ export class ContextManager {
     public update(): void {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
-            vscode.commands.executeCommand('setContext', CONTEXT_KEYS.IS_MULTI_LINE, false);
-            vscode.commands.executeCommand('setContext', CONTEXT_KEYS.ALL_CHARS_VISIBLE, false);
+            if (this.lastIsMultiLine !== false) {
+                vscode.commands.executeCommand('setContext', CONTEXT_KEYS.IS_MULTI_LINE, false);
+                this.lastIsMultiLine = false;
+            }
+            if (this.lastAllCharsVisible !== false) {
+                vscode.commands.executeCommand('setContext', CONTEXT_KEYS.ALL_CHARS_VISIBLE, false);
+                this.lastAllCharsVisible = false;
+            }
             return;
         }
 
@@ -74,8 +84,16 @@ export class ContextManager {
         const hasMultiLineSelection = editor.selections.some(s => s.start.line !== s.end.line);
         const isMulti = hasMultipleSelections || hasMultiLineSelection;
 
-        vscode.commands.executeCommand('setContext', CONTEXT_KEYS.IS_MULTI_LINE, isMulti);
-        vscode.commands.executeCommand('setContext', CONTEXT_KEYS.ALL_CHARS_VISIBLE, iswhitespaceCharsVisible());
+        if (isMulti !== this.lastIsMultiLine) {
+            vscode.commands.executeCommand('setContext', CONTEXT_KEYS.IS_MULTI_LINE, isMulti);
+            this.lastIsMultiLine = isMulti;
+        }
+
+        const areCharsVisible = iswhitespaceCharsVisible();
+        if (areCharsVisible !== this.lastAllCharsVisible) {
+            vscode.commands.executeCommand('setContext', CONTEXT_KEYS.ALL_CHARS_VISIBLE, areCharsVisible);
+            this.lastAllCharsVisible = areCharsVisible;
+        }
     }
 
     private onSelectionChange(e: vscode.TextEditorSelectionChangeEvent): void {

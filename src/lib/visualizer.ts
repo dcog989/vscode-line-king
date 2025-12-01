@@ -16,13 +16,17 @@ class WhitespaceCharsVisualizer {
      * Toggles visibility state
      */
     public toggle(forceState?: boolean): void {
+        const previousState = this._isEnabled;
         this._isEnabled = forceState !== undefined ? forceState : !this._isEnabled;
 
         if (this._isEnabled) {
             this.update(vscode.window.activeTextEditor);
             vscode.window.showInformationMessage('Whitespace Characters: Visible');
         } else {
-            this.clear();
+            // Only clear if we were previously enabled
+            if (previousState) {
+                this.clear();
+            }
             vscode.window.showInformationMessage('Whitespace Characters: Hidden');
         }
     }
@@ -32,9 +36,6 @@ class WhitespaceCharsVisualizer {
      */
     public update(editor: vscode.TextEditor | undefined): void {
         if (!editor || !this._isEnabled) {
-            if (!this._isEnabled) {
-                this.clear();
-            }
             return;
         }
 
@@ -88,7 +89,6 @@ class WhitespaceCharsVisualizer {
                     } else if (lineEndOffset === LINE_ENDINGS.LF_BYTE_LENGTH) {
                         lfRanges.push(lineEndDecorationRange);
                     }
-                    // If lineEndOffset === 0, no line ending on last line (don't decorate)
                 }
             }
         }
