@@ -2,7 +2,7 @@
     "name": "line-king",
     "displayName": "Line King",
     "description": "Sort, remove dups, change case, clean, encode / decode. Do all the things to line and text.",
-    "version": "1.0.5",
+    "version": "1.1.0",
     "publisher": "dcog989",
     "icon": "assets/icon.png",
     "repository": {
@@ -14,7 +14,7 @@
     },
     "homepage": "https://github.com/dcog989/vscode-line-king/blob/main/README.md",
     "engines": {
-        "vscode": "^1.106.1"
+        "vscode": "^1.107.1"
     },
     "categories": [
         "Formatters",
@@ -557,13 +557,11 @@
         "clean": "node -e \"const fs = require('fs'); ['dist', 'out'].forEach(dir => { try { fs.rmSync(dir, {recursive:true, force:true}); } catch(e) { console.log('Skipped:', dir); } });\""
     },
     "devDependencies": {
-        "@types/glob": "^8.1.0",
-        "@types/mocha": "^10.0.10",
-        "@types/node": "^24.10.1",
-        "@types/vscode": "^1.106.1",
-        "@vscode/test-electron": "^2.5.2",
-        "glob": "^13.0.0",
-        "mocha": "^11.7.5",
-        "typescript": "^5.9.3"
+        "@types/node": "^25.0",
+        "@types/vscode": "^1.107.1",
+        "@vscode/test-electron": "^2.5",
+        "glob": "^13.0",
+        "mocha": "^11.7",
+        "typescript": "^5.9"
     }
 }
