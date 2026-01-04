@@ -1,13 +1,27 @@
 import * as vscode from 'vscode';
-import { CONFIG } from '../constants';
-import { configCache } from './config-cache';
-import { splitLines, joinLines } from './text-utils';
+import { CONFIG } from '../constants.js';
+import { configCache } from './config-cache.js';
+import { getEOL, joinLinesEfficient, shouldUseStreaming, splitLines, streamLines } from './text-utils.js';
 
 type LineProcessor = (lines: string[]) => string[];
+type StreamLineProcessor = (lines: Iterable<string>) => Generator<string, void, undefined>;
 
 export interface LineActionOptions {
     expandSelection?: boolean;
 }
+
+/**
+ * Threshold for switching to chunk-based processing (in lines)
+ * Reduced from 100k to 50k for better memory management
+ * Files with more lines than this will be processed with optimization
+ */
+const LARGE_FILE_THRESHOLD = 50000;
+
+/**
+ * Threshold for using streaming processing (in bytes)
+ * Files larger than 1MB will use streaming to minimize memory allocations
+ */
+const STREAMING_THRESHOLD = 1024 * 1024;
 
 /**
  * Applies a transformation function to selected lines or the entire document
@@ -17,6 +31,7 @@ export interface LineActionOptions {
  * - If no text is selected: Applies transformation to the entire document
  * - Handles multiple selections
  * - Preserves the document's line ending format (LF or CRLF)
+ * - For large files, uses optimized streaming processing to minimize memory allocations
  *
  * @param editor The active text editor
  * @param processor Function that transforms an array of lines and returns the result
@@ -35,7 +50,7 @@ export async function applyLineAction(
     const sortedSelections = [...selections].sort((a, b) => b.start.compareTo(a.start));
 
     // Collect changes before applying to avoid marking document as changed if nothing changes
-    const changes: Array<{ range: vscode.Range; oldText: string; newText: string }> = [];
+    const changes: Array<{ range: vscode.Range; newText: string }> = [];
     let hasSelection = false;
 
     for (const selection of sortedSelections) {
@@ -56,28 +71,41 @@ export async function applyLineAction(
 
             const text = document.getText(range);
 
-            // Split into lines (handles both CRLF and LF)
-            const lines = splitLines(text);
+            // Use streaming for large selections
+            if (shouldUseStreaming(text)) {
+                const newText = await processTextStreaming(text, processor, document);
+                if (text !== newText) {
+                    changes.push({ range, newText });
+                }
+            } else {
+                const lines = splitLines(text);
+                const processedLines = processor(lines);
+                const eol = getEOL(document);
+                const newText = processedLines.join(eol);
 
-            // Apply the transformation
-            const processedLines = processor(lines);
-
-            // Use the document's line ending format
-            const newText = joinLines(processedLines, document);
-
-            // Only add to changes if text actually changed
-            if (text !== newText) {
-                changes.push({ range, oldText: text, newText });
+                if (text !== newText) {
+                    changes.push({ range, newText });
+                }
             }
         }
     }
 
     // Fallback: No selection means process the entire document
     if (!hasSelection) {
+        const lineCount = document.lineCount;
         const text = document.getText();
+
+        // For very large files, use optimized processing
+        if (lineCount > LARGE_FILE_THRESHOLD || shouldUseStreaming(text)) {
+            await processLargeDocument(editor, processor);
+            return;
+        }
+
+        // For smaller files, use the standard in-memory approach
         const lines = splitLines(text);
         const processedLines = processor(lines);
-        const newText = joinLines(processedLines, document);
+        const eol = getEOL(document);
+        const newText = processedLines.join(eol);
 
         // Only add to changes if text actually changed
         if (text !== newText) {
@@ -85,7 +113,7 @@ export async function applyLineAction(
                 document.positionAt(0),
                 document.positionAt(text.length)
             );
-            changes.push({ range: fullRange, oldText: text, newText });
+            changes.push({ range: fullRange, newText });
         }
     }
 
@@ -100,9 +128,113 @@ export async function applyLineAction(
 }
 
 /**
+ * Process text using streaming to minimize memory allocations
+ * Used for selections or documents larger than STREAMING_THRESHOLD
+ */
+async function processTextStreaming(
+    text: string,
+    processor: LineProcessor,
+    document: vscode.TextDocument
+): Promise<string> {
+    const eol = getEOL(document);
+
+    // Check if the processor has a streaming variant
+    const processorName = processor.name;
+    let streamProcessor: StreamLineProcessor | null = null;
+
+    // Try to import streaming version dynamically
+    try {
+        const cleanerModule = await import('../lib/cleaner.js');
+        const streamFunctionName = `${processorName}Stream`;
+
+        if (streamFunctionName in cleanerModule) {
+            streamProcessor = (cleanerModule as any)[streamFunctionName];
+        }
+    } catch (error) {
+        // Streaming version not available, fall back to array processing
+    }
+
+    if (streamProcessor) {
+        // Use streaming processor for maximum memory efficiency
+        const lineStream = streamLines(text);
+        const processedStream = streamProcessor(lineStream);
+        return joinLinesEfficient(processedStream, eol);
+    } else {
+        // Fall back to standard array processing
+        const lines = splitLines(text);
+        const processedLines = processor(lines);
+        return processedLines.join(eol);
+    }
+}
+
+/**
+ * Processes large documents with optimized memory usage
+ * Reads line-by-line and performs single-pass processing
+ */
+async function processLargeDocument(
+    editor: vscode.TextEditor,
+    processor: LineProcessor
+): Promise<void> {
+    const document = editor.document;
+    const lineCount = document.lineCount;
+    const eol = getEOL(document);
+    const text = document.getText();
+
+    // Estimate if we should use streaming
+    if (shouldUseStreaming(text)) {
+        const newText = await processTextStreaming(text, processor, document);
+
+        // Check if anything changed
+        if (text !== newText) {
+            await editor.edit(editBuilder => {
+                const fullRange = new vscode.Range(
+                    document.positionAt(0),
+                    document.positionAt(text.length)
+                );
+                editBuilder.replace(fullRange, newText);
+            });
+        }
+        return;
+    }
+
+    // For files that are large in line count but not byte size,
+    // use iterative line reading
+    const allLines: string[] = [];
+    for (let i = 0; i < lineCount; i++) {
+        allLines.push(document.lineAt(i).text);
+    }
+
+    // Process the lines
+    const processedLines = processor(allLines);
+
+    // Check if anything changed (early exit optimization)
+    if (allLines.length === processedLines.length) {
+        let hasChanges = false;
+        for (let i = 0; i < allLines.length; i++) {
+            if (allLines[i] !== processedLines[i]) {
+                hasChanges = true;
+                break;
+            }
+        }
+        if (!hasChanges) {
+            return;
+        }
+    }
+
+    // Apply changes - replace entire document
+    await editor.edit(editBuilder => {
+        const fullRange = new vscode.Range(
+            document.positionAt(0),
+            document.positionAt(text.length)
+        );
+        editBuilder.replace(fullRange, processedLines.join(eol));
+    });
+}
+
+/**
  * Gets the configured join separator from extension settings
  * Default is a space character
  */
 export function getJoinSeparator(): string {
-    return configCache.get<string>(CONFIG.JOIN_SEPARATOR, ' ');
+    return configCache.get(CONFIG.JOIN_SEPARATOR, ' ');
 }

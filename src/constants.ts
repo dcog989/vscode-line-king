@@ -3,7 +3,7 @@ export const CONFIG = {
     JOIN_SEPARATOR: 'joinSeparator',
     CLEANUP_ON_SAVE: 'cleanupOnSave',
     CSS_SORT_STRATEGY: 'cssSortStrategy'
-};
+} as const;
 
 export const CONTEXT_KEYS = {
     IS_MULTI_LINE: 'lineKing.isMultiLine',
@@ -13,8 +13,7 @@ export const CONTEXT_KEYS = {
 // Timing constants
 export const TIMING = {
     SELECTION_DEBOUNCE_MS: 50,
-    DECORATION_DEBOUNCE_MS: 150,
-    CONTEXT_INIT_DELAY_MS: 100
+    DECORATION_DEBOUNCE_MS: 150
 };
 
 // Line ending detection constants

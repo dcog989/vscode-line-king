@@ -1,11 +1,14 @@
 import * as vscode from 'vscode';
-import { CONTEXT_KEYS, TIMING } from './constants';
-import { iswhitespaceCharsVisible, updateDecorations } from './lib/visualizer';
+import { CONTEXT_KEYS, TIMING } from './constants.js';
+import { isWhitespaceCharsVisible, updateDecorations } from './lib/visualizer.js';
 
 export class ContextManager {
     private context: vscode.ExtensionContext;
     private selectionTimeout: NodeJS.Timeout | undefined;
     private decorationTimeout: NodeJS.Timeout | undefined;
+    private disposables: vscode.Disposable[] = [];
+    private isDisposed = false;
+    private isRegistered = false;
 
     // Cache to prevent redundant context updates
     private lastIsMultiLine: boolean | undefined;
@@ -16,93 +19,166 @@ export class ContextManager {
     }
 
     public register(): void {
-        // Initial update
-        this.update();
+        if (this.isDisposed || this.isRegistered) {
+            return;
+        }
+
+        this.isRegistered = true;
+
+        // Defer initial update to avoid blocking
+        setImmediate(() => {
+            if (!this.isDisposed) {
+                this.update();
+            }
+        });
 
         // Register event listeners
-        this.context.subscriptions.push(
-            vscode.window.onDidChangeTextEditorSelection(e => this.onSelectionChange(e)),
+        this.disposables.push(
+            vscode.window.onDidChangeTextEditorSelection(() => {
+                this.scheduleUpdate();
+            }),
             vscode.window.onDidChangeActiveTextEditor(editor => {
-                this.update();
-                updateDecorations(editor);
+                if (!this.isDisposed) {
+                    this.scheduleUpdate();
+                    if (editor) {
+                        this.scheduleDecorationUpdate(editor);
+                    }
+                }
             }),
             // Update decorations when scrolling
             vscode.window.onDidChangeTextEditorVisibleRanges(e => {
-                if (e.textEditor === vscode.window.activeTextEditor) {
-                    updateDecorations(e.textEditor);
+                if (!this.isDisposed && e.textEditor === vscode.window.activeTextEditor) {
+                    this.scheduleDecorationUpdate(e.textEditor);
                 }
             }),
             vscode.workspace.onDidChangeTextDocument(e => {
-                if (vscode.window.activeTextEditor && e.document === vscode.window.activeTextEditor.document) {
-                    // Debounce decoration updates during typing
-                    this.scheduleDecorationUpdate(vscode.window.activeTextEditor);
+                if (this.isDisposed) {
+                    return;
+                }
+                const editor = vscode.window.activeTextEditor;
+                if (editor && e.document === editor.document) {
+                    this.scheduleDecorationUpdate(editor);
                 }
             }),
-            // Cleanup on disposal
-            { dispose: () => this.dispose() }
+            // Update context when workspace folders change
+            vscode.workspace.onDidChangeWorkspaceFolders(() => {
+                if (!this.isDisposed) {
+                    this.scheduleUpdate();
+                }
+            }),
+            // Update context when configuration changes
+            vscode.workspace.onDidChangeConfiguration(e => {
+                if (!this.isDisposed && e.affectsConfiguration('lineKing')) {
+                    this.scheduleUpdate();
+                }
+            })
         );
 
-        // Safety update after delay
-        setTimeout(() => this.update(), TIMING.CONTEXT_INIT_DELAY_MS);
+        // Register the disposables with the extension context
+        this.context.subscriptions.push(...this.disposables);
+    }
+
+    private scheduleUpdate(): void {
+        if (this.isDisposed) {
+            return;
+        }
+
+        if (this.selectionTimeout) {
+            clearTimeout(this.selectionTimeout);
+        }
+
+        this.selectionTimeout = setTimeout(() => {
+            if (!this.isDisposed) {
+                this.update();
+            }
+            this.selectionTimeout = undefined;
+        }, TIMING.SELECTION_DEBOUNCE_MS);
     }
 
     private scheduleDecorationUpdate(editor: vscode.TextEditor): void {
+        if (this.isDisposed) {
+            return;
+        }
+        
         if (this.decorationTimeout) {
             clearTimeout(this.decorationTimeout);
         }
+        
         this.decorationTimeout = setTimeout(() => {
-            updateDecorations(editor);
+            if (!this.isDisposed) {
+                updateDecorations(editor);
+            }
+            this.decorationTimeout = undefined;
         }, TIMING.DECORATION_DEBOUNCE_MS);
     }
 
-    private dispose(): void {
+    public dispose(): void {
+        if (this.isDisposed) {
+            return;
+        }
+        
+        this.isDisposed = true;
+
         if (this.selectionTimeout) {
             clearTimeout(this.selectionTimeout);
             this.selectionTimeout = undefined;
         }
+        
         if (this.decorationTimeout) {
             clearTimeout(this.decorationTimeout);
             this.decorationTimeout = undefined;
         }
+        
+        // Dispose all registered listeners
+        for (const disposable of this.disposables) {
+            try {
+                disposable.dispose();
+            } catch (error) {
+                // Silently ignore disposal errors
+                console.error('[Line King] Error disposing context manager resource:', error);
+            }
+        }
+        this.disposables = [];
     }
 
     public update(): void {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            if (this.lastIsMultiLine !== false) {
-                vscode.commands.executeCommand('setContext', CONTEXT_KEYS.IS_MULTI_LINE, false);
-                this.lastIsMultiLine = false;
-            }
-            if (this.lastAllCharsVisible !== false) {
-                vscode.commands.executeCommand('setContext', CONTEXT_KEYS.ALL_CHARS_VISIBLE, false);
-                this.lastAllCharsVisible = false;
-            }
+        if (this.isDisposed) {
             return;
         }
 
-        const hasMultipleSelections = editor.selections.length > 1;
-        const hasMultiLineSelection = editor.selections.some(s => s.start.line !== s.end.line);
-        const isMulti = hasMultipleSelections || hasMultiLineSelection;
+        try {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) {
+                this.setContext(CONTEXT_KEYS.IS_MULTI_LINE, false);
+                this.setContext(CONTEXT_KEYS.ALL_CHARS_VISIBLE, false);
+                return;
+            }
 
-        if (isMulti !== this.lastIsMultiLine) {
-            vscode.commands.executeCommand('setContext', CONTEXT_KEYS.IS_MULTI_LINE, isMulti);
-            this.lastIsMultiLine = isMulti;
-        }
+            const hasMultipleSelections = editor.selections.length > 1;
+            const hasMultiLineSelection = editor.selections.some(s => s.start.line !== s.end.line);
+            const isMulti = hasMultipleSelections || hasMultiLineSelection;
 
-        const areCharsVisible = iswhitespaceCharsVisible();
-        if (areCharsVisible !== this.lastAllCharsVisible) {
-            vscode.commands.executeCommand('setContext', CONTEXT_KEYS.ALL_CHARS_VISIBLE, areCharsVisible);
-            this.lastAllCharsVisible = areCharsVisible;
+            this.setContext(CONTEXT_KEYS.IS_MULTI_LINE, isMulti);
+
+            const areCharsVisible = isWhitespaceCharsVisible();
+            this.setContext(CONTEXT_KEYS.ALL_CHARS_VISIBLE, areCharsVisible);
+        } catch (error) {
+            console.error('[Line King] Error updating context:', error);
         }
     }
 
-    private onSelectionChange(e: vscode.TextEditorSelectionChangeEvent): void {
-        if (this.selectionTimeout) {
-            clearTimeout(this.selectionTimeout);
+    private setContext(key: string, value: boolean): void {
+        if (this.isDisposed) {
+            return;
         }
-        this.selectionTimeout = setTimeout(() => {
-            this.update();
-            this.selectionTimeout = undefined;
-        }, TIMING.SELECTION_DEBOUNCE_MS);
+
+        const cacheKey = key === CONTEXT_KEYS.IS_MULTI_LINE ? 'lastIsMultiLine' : 'lastAllCharsVisible';
+        const lastValue = this[cacheKey as 'lastIsMultiLine' | 'lastAllCharsVisible'];
+
+        if (value !== lastValue) {
+            // Use void to explicitly ignore the promise
+            void vscode.commands.executeCommand('setContext', key, value);
+            this[cacheKey as 'lastIsMultiLine' | 'lastAllCharsVisible'] = value;
+        }
     }
 }

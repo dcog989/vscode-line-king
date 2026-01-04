@@ -18,18 +18,22 @@
 **/*.ts
 **/*.tsbuildinfo
 assets/
+coverage/
+esbuild.config.js
 node_modules/
-out/test/
+out/
 repomix.config.json
 src/
 tests/
 tsconfig.json
+vitest.config.ts
 vsc-extension-quickstart.md
 
 # ---------------------------------------------------------
 # Include
 # ---------------------------------------------------------
 !dist/
+!dist/extension.js
 !package.json
 !README.md
 !assets/icon.png

@@ -2,12 +2,14 @@ import * as vscode from 'vscode';
 
 /**
  * Line sorting utilities
+ * Optimized for performance with minimal array allocations
  */
 
 // Lazy-initialized collators for performance
 // Uses vscode.env.language to respect the user's UI language preference
 let naturalCollator: Intl.Collator | undefined;
 let caseInsensitiveCollator: Intl.Collator | undefined;
+let defaultCollator: Intl.Collator | undefined;
 
 function getNaturalCollator(): Intl.Collator {
     if (!naturalCollator) {
@@ -23,138 +25,180 @@ function getCaseInsensitiveCollator(): Intl.Collator {
     return caseInsensitiveCollator;
 }
 
+function getDefaultCollator(): Intl.Collator {
+    if (!defaultCollator) {
+        defaultCollator = new Intl.Collator(vscode.env.language);
+    }
+    return defaultCollator;
+}
+
 // Reusable IP regex (compiled once)
 const IP_REGEX = /\b(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\b/;
 
 /**
  * Sorts lines in ascending order (A-Z)
- * Optimized: Uses Collator for consistent, faster locale-aware sorting
+ * Uses cached Collator for better performance than localeCompare
  */
-export const sortAsc = (lines: string[]): string[] =>
-    [...lines].sort((a, b) => a.localeCompare(b));
+export function sortAsc(lines: string[]): string[] {
+    const sorted = [...lines];
+    const collator = getDefaultCollator();
+    sorted.sort(collator.compare);
+    return sorted;
+}
 
 /**
  * Sorts lines in ascending order, case-insensitive
- * Optimized: Uses cached collator instead of creating new one per comparison
+ * Uses cached collator for optimal performance
  */
-export const sortAscInsensitive = (lines: string[]): string[] =>
-    [...lines].sort((a, b) => getCaseInsensitiveCollator().compare(a, b));
+export function sortAscInsensitive(lines: string[]): string[] {
+    const sorted = [...lines];
+    const collator = getCaseInsensitiveCollator();
+    sorted.sort(collator.compare);
+    return sorted;
+}
 
 /**
  * Sorts lines in descending order (Z-A)
  */
-export const sortDesc = (lines: string[]): string[] =>
-    [...lines].sort((a, b) => b.localeCompare(a));
+export function sortDesc(lines: string[]): string[] {
+    const sorted = [...lines];
+    const collator = getDefaultCollator();
+    sorted.sort((a, b) => collator.compare(b, a));
+    return sorted;
+}
 
 /**
  * Sorts lines in descending order, case-insensitive
- * Optimized: Uses cached collator instead of creating new one per comparison
+ * Uses cached collator for optimal performance
  */
-export const sortDescInsensitive = (lines: string[]): string[] =>
-    [...lines].sort((a, b) => getCaseInsensitiveCollator().compare(b, a));
+export function sortDescInsensitive(lines: string[]): string[] {
+    const sorted = [...lines];
+    const collator = getCaseInsensitiveCollator();
+    sorted.sort((a, b) => collator.compare(b, a));
+    return sorted;
+}
 
 /**
  * Natural sort - handles numbers intelligently (e.g., file2.txt before file10.txt)
  */
-export const sortNatural = (lines: string[]): string[] =>
-    [...lines].sort((a, b) => getNaturalCollator().compare(a, b));
+export function sortNatural(lines: string[]): string[] {
+    const sorted = [...lines];
+    const collator = getNaturalCollator();
+    sorted.sort(collator.compare);
+    return sorted;
+}
 
 /**
  * Sorts lines by length (shortest first)
  */
-export const sortLengthAsc = (lines: string[]): string[] =>
-    [...lines].sort((a, b) => a.length - b.length);
+export function sortLengthAsc(lines: string[]): string[] {
+    const sorted = [...lines];
+    sorted.sort((a, b) => a.length - b.length);
+    return sorted;
+}
 
 /**
  * Sorts lines by length (longest first)
  */
-export const sortLengthDesc = (lines: string[]): string[] =>
-    [...lines].sort((a, b) => b.length - a.length);
+export function sortLengthDesc(lines: string[]): string[] {
+    const sorted = [...lines];
+    sorted.sort((a, b) => b.length - a.length);
+    return sorted;
+}
 
 /**
  * Reverses the order of lines
+ * Most efficient - no sorting needed
  */
-export const sortReverse = (lines: string[]): string[] =>
-    [...lines].reverse();
+export function sortReverse(lines: string[]): string[] {
+    const reversed = [...lines];
+    reversed.reverse();
+    return reversed;
+}
 
 /**
  * Sorts lines by IPv4 address (if present in the line)
- * Optimized: Only parses lines with IPs, avoiding unnecessary object creation
+ * Optimized to parse IPs once (O(N)) instead of during every comparison (O(N log N))
  */
-export const sortIP = (lines: string[]): string[] => {
-    // Separate lines with IPs from those without for efficiency
-    const withIPs: Array<{ line: string; octets: number[] }> = [];
-    const withoutIPs: string[] = [];
-
-    for (const line of lines) {
+export function sortIP(lines: string[]): string[] {
+    // Schwartzian transform: Map -> Sort -> Map
+    const mapped = lines.map(line => {
         const match = line.match(IP_REGEX);
         if (match) {
-            withIPs.push({
-                line,
-                octets: [
-                    parseInt(match[1], 10),
-                    parseInt(match[2], 10),
-                    parseInt(match[3], 10),
-                    parseInt(match[4], 10)
-                ]
-            });
-        } else {
-            withoutIPs.push(line);
+            // Convert IP to numeric value: (a << 24) | (b << 16) | (c << 8) | d
+            // Use unsigned right shift (>>> 0) to handle 32-bit integer overflow correctly in JS
+            const ipValue = (
+                (parseInt(match[1], 10) << 24) |
+                (parseInt(match[2], 10) << 16) |
+                (parseInt(match[3], 10) << 8) |
+                parseInt(match[4], 10)
+            ) >>> 0;
+            return { line, hasIp: true, ipValue };
         }
-    }
-
-    // Sort lines with IPs numerically
-    withIPs.sort((a, b) => {
-        for (let i = 0; i < 4; i++) {
-            if (a.octets[i] !== b.octets[i]) {
-                return a.octets[i] - b.octets[i];
-            }
-        }
-        return 0;
+        return { line, hasIp: false, ipValue: 0 };
     });
 
-    // Sort lines without IPs alphabetically
-    withoutIPs.sort((a, b) => a.localeCompare(b));
+    const collator = getDefaultCollator();
 
-    // Combine: IPs first, then non-IPs
-    return [...withIPs.map(p => p.line), ...withoutIPs];
-};
+    mapped.sort((a, b) => {
+        // Both have IPs
+        if (a.hasIp && b.hasIp) {
+            return a.ipValue - b.ipValue;
+        }
+        // Only A has IP (A comes first)
+        if (a.hasIp) return -1;
+        // Only B has IP (B comes first)
+        if (b.hasIp) return 1;
+
+        // Fallback to standard sort for non-IP lines
+        return collator.compare(a.line, b.line);
+    });
+
+    return mapped.map(item => item.line);
+}
 
 /**
  * Randomly shuffles lines using Fisher-Yates algorithm
+ * Provides uniform random distribution
  */
-export const sortShuffle = (lines: string[]): string[] => {
+export function sortShuffle(lines: string[]): string[] {
     const array = [...lines];
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
-};
+}
 
 /**
  * Sorts lines and removes duplicates (case-sensitive)
+ * Uses Set for O(n) deduplication, then sorts
  */
-export const sortUnique = (lines: string[]): string[] =>
-    [...new Set(lines)].sort((a, b) => a.localeCompare(b));
+export function sortUnique(lines: string[]): string[] {
+    const unique = [...new Set(lines)];
+    const collator = getDefaultCollator();
+    unique.sort(collator.compare);
+    return unique;
+}
 
 /**
  * Sorts lines and removes duplicates (case-insensitive)
  * Preserves the original case of the first occurrence
- * Optimized: Uses cached collator for sorting
+ * Uses cached collator for optimal sorting performance
  */
-export const sortUniqueInsensitive = (lines: string[]): string[] => {
+export function sortUniqueInsensitive(lines: string[]): string[] {
     const seen = new Set<string>();
-    const tempArr: { original: string, lower: string }[] = [];
+    const unique: { original: string; lower: string }[] = [];
 
     for (const line of lines) {
         const lower = line.toLowerCase();
         if (!seen.has(lower)) {
             seen.add(lower);
-            tempArr.push({ original: line, lower });
+            unique.push({ original: line, lower });
         }
     }
 
-    tempArr.sort((a, b) => getCaseInsensitiveCollator().compare(a.lower, b.lower));
-    return tempArr.map(x => x.original);
-};
+    const collator = getCaseInsensitiveCollator();
+    unique.sort((a, b) => collator.compare(a.lower, b.lower));
+    return unique.map(x => x.original);
+}

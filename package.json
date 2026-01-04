@@ -36,8 +36,8 @@
     "activationEvents": [
         "onStartupFinished"
     ],
-    "main": "./out/extension.js",
-    "browser": "./out/extension.js",
+    "main": "./dist/extension.js",
+    "type": "module",
     "capabilities": {
         "virtualWorkspaces": true,
         "untrustedWorkspaces": {
@@ -548,20 +548,33 @@
         }
     },
     "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
+        "vscode:prepublish": "npm run package",
+        "compile": "tsc -p ./ && node esbuild.config.mjs",
+        "watch": "npm-run-all -p watch:*",
+        "watch:esbuild": "node esbuild.config.mjs --watch",
+        "watch:tsc": "tsc -p ./ --watch",
+        "package": "npm run check-types && node esbuild.config.mjs --production",
         "check-types": "tsc --noEmit",
         "lint": "eslint src --ext ts",
         "test": "npm run compile && node ./out/test/runTest.js",
-        "clean": "node -e \"const fs = require('fs'); ['dist', 'out'].forEach(dir => { try { fs.rmSync(dir, {recursive:true, force:true}); } catch(e) { console.log('Skipped:', dir); } });\""
+        "migrate": "node scripts/migrate.js",
+        "clean": "node -e \"const fs = require('fs'); ['dist', 'out', 'coverage'].forEach(dir => { try { fs.rmSync(dir, {recursive:true, force:true}); } catch(e) { console.log('Skipped:', dir); } });\""
+    },
+    "dependencies": {
+        "change-case": "^5.4",
+        "postcss": "^8.5",
+        "postcss-values-parser": "^7.0",
+        "zod": "^4.3"
     },
     "devDependencies": {
+        "@types/mocha": "^10.0",
         "@types/node": "^25.0",
-        "@types/vscode": "^1.107.1",
+        "@types/vscode": "^1.107",
         "@vscode/test-electron": "^2.5",
+        "esbuild": "^0.27",
         "glob": "^13.0",
         "mocha": "^11.7",
+        "npm-run-all": "^4.1",
         "typescript": "^5.9"
     }
 }
