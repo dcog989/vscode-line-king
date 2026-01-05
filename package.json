@@ -34,7 +34,13 @@
         "encoding"
     ],
     "activationEvents": [
-        "onStartupFinished"
+        "onLanguage:css",
+        "onLanguage:scss",
+        "onLanguage:less",
+        "onCommand:lineKing.manipulate.insertSequence",
+        "onCommand:lineKing.util.convertLF",
+        "onCommand:lineKing.util.convertCRLF",
+        "onCommand:lineKing.util.debugContext"
     ],
     "main": "./dist/extension.js",
     "type": "module",

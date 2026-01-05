@@ -29,6 +29,7 @@ async function main() {
         entryPoints: ['src/extension.ts'],
         bundle: true,
         format: 'esm',
+        minify: true,
         platform: 'node',
         outfile: 'dist/extension.js',
         // Externalize both prefixed and non-prefixed node modules to satisfy all dependencies
