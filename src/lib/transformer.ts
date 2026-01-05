@@ -198,10 +198,10 @@ export async function alignToSeparatorInteractive(editor: vscode.TextEditor): Pr
             if (item.idx === -1) {
                 return item.line;
             }
-            const before = item.line.substring(0, item.idx).trimEnd();
-            const after = item.line.substring(item.idx + separator.length).trimStart();
-            const spaces = ' '.repeat(maxPos - before.length);
-            return `${before}${spaces} ${separator} ${after}`;
+            const before = item.line.substring(0, item.idx);
+            const after = item.line.substring(item.idx + separator.length);
+            const spaces = Math.max(0, maxPos - before.length); // Prevent negative padding
+            return `${before}${' '.repeat(spaces)} ${separator} ${after}`;
         });
     });
 }

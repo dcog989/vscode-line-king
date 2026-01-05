@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { CONFIG } from '../constants.js';
 import { configCache } from './config-cache.js';
-import { getEOL, joinLinesEfficient, shouldUseStreaming, splitLines, streamLines } from './text-utils.js';
+import { getEOL, joinLinesEfficient, shouldUseStreaming, streamLines } from './text-utils.js';
 
 type LineProcessor = (lines: string[]) => string[];
 type StreamLineProcessor = (lines: Iterable<string>) => Generator<string, void, undefined>;
@@ -44,6 +44,7 @@ export async function applyLineAction(
 ): Promise<void> {
     const document = editor.document;
     const selections = editor.selections;
+    const eol = getEOL(document); // Cache EOL once
 
     // Sort selections to process from bottom to top
     // This preserves ranges during edits when there are multiple selections
@@ -73,14 +74,13 @@ export async function applyLineAction(
 
             // Use streaming for large selections
             if (shouldUseStreaming(text)) {
-                const newText = await processTextStreaming(text, processor, document);
+                const newText = await processTextStreaming(text, processor, eol);
                 if (text !== newText) {
                     changes.push({ range, newText });
                 }
             } else {
-                const lines = splitLines(text);
+                const lines = text.split(eol === '\r\n' ? '\r\n' : '\n');
                 const processedLines = processor(lines);
-                const eol = getEOL(document);
                 const newText = processedLines.join(eol);
 
                 if (text !== newText) {
@@ -97,14 +97,13 @@ export async function applyLineAction(
 
         // For very large files, use optimized processing
         if (lineCount > LARGE_FILE_THRESHOLD || shouldUseStreaming(text)) {
-            await processLargeDocument(editor, processor);
+            await processLargeDocument(editor, processor, eol);
             return;
         }
 
         // For smaller files, use the standard in-memory approach
-        const lines = splitLines(text);
+        const lines = text.split(eol === '\r\n' ? '\r\n' : '\n');
         const processedLines = processor(lines);
-        const eol = getEOL(document);
         const newText = processedLines.join(eol);
 
         // Only add to changes if text actually changed
@@ -134,9 +133,8 @@ export async function applyLineAction(
 async function processTextStreaming(
     text: string,
     processor: LineProcessor,
-    document: vscode.TextDocument
+    eol: string
 ): Promise<string> {
-    const eol = getEOL(document);
 
     // Check if the processor has a streaming variant
     const processorName = processor.name;
@@ -161,7 +159,7 @@ async function processTextStreaming(
         return joinLinesEfficient(processedStream, eol);
     } else {
         // Fall back to standard array processing
-        const lines = splitLines(text);
+        const lines = text.split(eol === '\r\n' ? '\r\n' : '\n');
         const processedLines = processor(lines);
         return processedLines.join(eol);
     }
@@ -173,16 +171,16 @@ async function processTextStreaming(
  */
 async function processLargeDocument(
     editor: vscode.TextEditor,
-    processor: LineProcessor
+    processor: LineProcessor,
+    eol: string
 ): Promise<void> {
     const document = editor.document;
     const lineCount = document.lineCount;
-    const eol = getEOL(document);
     const text = document.getText();
 
     // Estimate if we should use streaming
     if (shouldUseStreaming(text)) {
-        const newText = await processTextStreaming(text, processor, document);
+        const newText = await processTextStreaming(text, processor, eol);
 
         // Check if anything changed
         if (text !== newText) {

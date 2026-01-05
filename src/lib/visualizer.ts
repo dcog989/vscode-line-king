@@ -7,9 +7,6 @@ class WhitespaceCharsVisualizer {
     private spaceDecoration: vscode.TextEditorDecorationType | undefined;
     private tabDecoration: vscode.TextEditorDecorationType | undefined;
     private _isEnabled = false;
-    private updateScheduled = false;
-    private lastUpdateTime = 0;
-    private readonly THROTTLE_MS = 50; // Throttle updates to max 20fps
 
     public get isEnabled(): boolean {
         return this._isEnabled;
@@ -38,27 +35,14 @@ class WhitespaceCharsVisualizer {
 
     /**
      * Updates decorations for the specific editor based on visible ranges
-     * Throttled to prevent excessive updates during rapid scrolling/typing
+     * Immediate update without throttling for better responsiveness
      */
     public update(editor: vscode.TextEditor | undefined): void {
         if (!editor || !this._isEnabled) {
             return;
         }
 
-        // Throttle rapid updates
-        const now = Date.now();
-        if (this.updateScheduled || (now - this.lastUpdateTime) < this.THROTTLE_MS) {
-            return;
-        }
-        
-        this.updateScheduled = true;
-        this.lastUpdateTime = now;
-
-        // Use requestAnimationFrame-like behavior with setTimeout
-        setTimeout(() => {
-            this.performUpdate(editor);
-            this.updateScheduled = false;
-        }, 0);
+        this.performUpdate(editor);
     }
 
     /**
@@ -136,10 +120,18 @@ class WhitespaceCharsVisualizer {
     private clear(): void {
         const editors = vscode.window.visibleTextEditors;
         for (const editor of editors) {
-            if (this.lfDecoration) editor.setDecorations(this.lfDecoration, []);
-            if (this.crlfDecoration) editor.setDecorations(this.crlfDecoration, []);
-            if (this.spaceDecoration) editor.setDecorations(this.spaceDecoration, []);
-            if (this.tabDecoration) editor.setDecorations(this.tabDecoration, []);
+            if (this.lfDecoration) {
+                editor.setDecorations(this.lfDecoration, []);
+            }
+            if (this.crlfDecoration) {
+                editor.setDecorations(this.crlfDecoration, []);
+            }
+            if (this.spaceDecoration) {
+                editor.setDecorations(this.spaceDecoration, []);
+            }
+            if (this.tabDecoration) {
+                editor.setDecorations(this.tabDecoration, []);
+            }
         }
     }
 

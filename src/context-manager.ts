@@ -91,7 +91,6 @@ export class ContextManager {
             if (!this.isDisposed) {
                 this.update();
             }
-            this.selectionTimeout = undefined;
         }, TIMING.SELECTION_DEBOUNCE_MS);
     }
 
@@ -108,7 +107,6 @@ export class ContextManager {
             if (!this.isDisposed) {
                 updateDecorations(editor);
             }
-            this.decorationTimeout = undefined;
         }, TIMING.DECORATION_DEBOUNCE_MS);
     }
 
