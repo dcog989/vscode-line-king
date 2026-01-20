@@ -3,26 +3,13 @@
         "module": "NodeNext",
         "moduleResolution": "NodeNext",
         "target": "ES2024",
-        "outDir": "out",
-        "lib": [
-            "ES2024"
-        ],
-        "sourceMap": true,
+        "lib": ["ES2024"],
         "rootDir": "src",
         "strict": true,
         "noImplicitReturns": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
-        "types": [
-            "node",
-            "mocha"
-        ]
+        "types": ["node"]
     },
-    "exclude": [
-        "node_modules",
-        "dist",
-        "out",
-        ".vscode-test",
-        "esbuild.config.mjs"
-    ]
+    "exclude": ["node_modules", "dist", ".vscode-test", "esbuild.config.mjs"]
 }

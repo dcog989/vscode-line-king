@@ -17,60 +17,46 @@ export async function run(): Promise<void> {
         // Allow tests to run slower in CI without failing
         slow: 10000, // Mark tests as slow if they take > 10s
         // ESM loader configuration - critical for proper module resolution
-        require: [] // Don't use require hooks in ESM mode
+        require: [], // Don't use require hooks in ESM mode
     });
 
     const testsRoot = path.resolve(__dirname, '..');
 
-    try {
-        // Find all test files using glob
-        const files = await glob('**/**.test.js', {
-            cwd: testsRoot,
-            absolute: true,
-            // Ensure we're getting platform-specific paths
-            windowsPathsNoEscape: true
-        });
+    // Find all test files using glob
+    const files = await glob('**/**.test.js', {
+        cwd: testsRoot,
+        absolute: true,
+        // Ensure we're getting platform-specific paths
+        windowsPathsNoEscape: true,
+    });
 
-        if (files.length === 0) {
-            throw new Error(`No test files found in ${testsRoot}`);
-        }
-
-        console.log(`Found ${files.length} test file(s)`);
-
-        // IMPORTANT: Manually inject Mocha globals (suite, test, etc.) into the global namespace
-        // This is required because we are manually importing files in an ESM context
-        // instead of using Mocha's internal file loader.
-        mocha.suite.emit('pre-require', global, 'nofile', mocha);
-
-        // For ESM, we need to convert file paths to file:// URLs
-        // and dynamically import them rather than using Mocha's file loader
-        for (const file of files) {
-            try {
-                // Convert Windows paths to file:// URLs for ESM import
-                const fileUrl = pathToFileURL(file).href;
-
-                // Dynamic import will properly resolve .js extensions in ESM
-                await import(fileUrl);
-
-                console.log(`Loaded: ${path.basename(file)}`);
-            } catch (err) {
-                console.error(`Failed to load test file ${file}:`, err);
-                throw err;
-            }
-        }
-
-        // Run the tests after all modules are loaded
-        return new Promise((resolve, reject) => {
-            mocha.run(failures => {
-                if (failures > 0) {
-                    reject(new Error(`${failures} tests failed.`));
-                } else {
-                    resolve();
-                }
-            });
-        });
-    } catch (err) {
-        console.error('Failed to load or run tests:', err);
-        throw err;
+    if (files.length === 0) {
+        throw new Error(`No test files found in ${testsRoot}`);
     }
+
+    // IMPORTANT: Manually inject Mocha globals (suite, test, etc.) into the global namespace
+    // This is required because we are manually importing files in an ESM context
+    // instead of using Mocha's internal file loader.
+    mocha.suite.emit('pre-require', global, 'nofile', mocha);
+
+    // For ESM, we need to convert file paths to file:// URLs
+    // and dynamically import them rather than using Mocha's file loader
+    for (const file of files) {
+        // Convert Windows paths to file:// URLs for ESM import
+        const fileUrl = pathToFileURL(file).href;
+
+        // Dynamic import will properly resolve .js extensions in ESM
+        await import(fileUrl);
+    }
+
+    // Run the tests after all modules are loaded
+    return new Promise((resolve, reject) => {
+        mocha.run((failures) => {
+            if (failures > 0) {
+                reject(new Error(`${failures} tests failed.`));
+            } else {
+                resolve();
+            }
+        });
+    });
 }

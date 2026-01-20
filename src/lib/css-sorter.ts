@@ -34,7 +34,7 @@ function sortDeclarationsPlugin(opts: SortOptions = { strategy: 'alphabetical' }
                 nodes.push({
                     node,
                     index,
-                    type: node.type
+                    type: node.type,
                 });
                 if (node.type === 'decl') {
                     declarationCount++;
@@ -98,7 +98,7 @@ function sortDeclarationsPlugin(opts: SortOptions = { strategy: 'alphabetical' }
                     }
                 }
             }
-        }
+        },
     };
 }
 
@@ -108,14 +108,17 @@ sortDeclarationsPlugin.postcss = true;
  * Find the CSS rule block containing the cursor/selection
  * Returns the range of the rule block or null if not found
  */
-function findCssRuleBlock(document: vscode.TextDocument, position: vscode.Position): vscode.Range | null {
+function findCssRuleBlock(
+    document: vscode.TextDocument,
+    position: vscode.Position,
+): vscode.Range | null {
     const text = document.getText();
     const offset = document.offsetAt(position);
-    
+
     // Find the opening brace before the cursor
     let openBracePos = -1;
     let braceDepth = 0;
-    
+
     for (let i = offset; i >= 0; i--) {
         const char = text[i];
         if (char === '}') {
@@ -128,15 +131,15 @@ function findCssRuleBlock(document: vscode.TextDocument, position: vscode.Positi
             braceDepth--;
         }
     }
-    
+
     if (openBracePos === -1) {
         return null; // Not inside a rule block
     }
-    
+
     // Find the closing brace after the cursor
     let closeBracePos = -1;
     braceDepth = 0;
-    
+
     for (let i = offset; i < text.length; i++) {
         const char = text[i];
         if (char === '{') {
@@ -149,11 +152,11 @@ function findCssRuleBlock(document: vscode.TextDocument, position: vscode.Positi
             braceDepth--;
         }
     }
-    
+
     if (closeBracePos === -1) {
         return null; // Unclosed rule block
     }
-    
+
     // Find the start of the rule (selector) by going back from the opening brace
     let ruleStartPos = openBracePos;
     for (let i = openBracePos - 1; i >= 0; i--) {
@@ -167,15 +170,15 @@ function findCssRuleBlock(document: vscode.TextDocument, position: vscode.Positi
             break;
         }
     }
-    
+
     // Skip leading whitespace in the selector
     while (ruleStartPos < openBracePos && /\s/.test(text[ruleStartPos])) {
         ruleStartPos++;
     }
-    
+
     return new vscode.Range(
         document.positionAt(ruleStartPos),
-        document.positionAt(closeBracePos + 1)
+        document.positionAt(closeBracePos + 1),
     );
 }
 
@@ -193,33 +196,26 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
     try {
         let textToProcess: string;
         let rangeToReplace: vscode.Range;
-        let shouldOptimize = false;
 
         // Optimization: For large files, only process the selection or current rule block
         if (documentSize > SELECTION_OPTIMIZATION_THRESHOLD) {
-            shouldOptimize = true;
-
             if (!selection.isEmpty) {
                 // User has selected text - only process the selection
                 const startLine = document.lineAt(selection.start.line);
                 const endLine = document.lineAt(selection.end.line);
                 rangeToReplace = new vscode.Range(startLine.range.start, endLine.range.end);
                 textToProcess = document.getText(rangeToReplace);
-                
-                console.log(`[Line King] Large file detected (${(documentSize / 1024).toFixed(1)}KB) - processing selection only (${(textToProcess.length / 1024).toFixed(1)}KB)`);
             } else {
                 // No selection - find and process only the rule block containing the cursor
                 const cursorRuleBlock = findCssRuleBlock(document, selection.active);
-                
+
                 if (cursorRuleBlock) {
                     rangeToReplace = cursorRuleBlock;
                     textToProcess = document.getText(cursorRuleBlock);
-                    
-                    console.log(`[Line King] Large file detected (${(documentSize / 1024).toFixed(1)}KB) - processing cursor rule block only (${(textToProcess.length / 1024).toFixed(1)}KB)`);
                 } else {
                     // Cursor not in a rule block - inform user
                     vscode.window.showInformationMessage(
-                        'Line King: Place cursor inside a CSS rule block to sort properties.'
+                        'Line King: Place cursor inside a CSS rule block to sort properties.',
                     );
                     return;
                 }
@@ -229,18 +225,19 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
             textToProcess = documentText;
             rangeToReplace = new vscode.Range(
                 document.positionAt(0),
-                document.positionAt(documentText.length)
+                document.positionAt(documentText.length),
             );
         }
 
         // Process with PostCSS
-        const result = await postcss([
-            sortDeclarationsPlugin({ strategy })
-        ]).process(textToProcess, {
-            from: undefined,
-            // PostCSS options for better error handling
-            map: false
-        });
+        const result = await postcss([sortDeclarationsPlugin({ strategy })]).process(
+            textToProcess,
+            {
+                from: undefined,
+                // PostCSS options for better error handling
+                map: false,
+            },
+        );
 
         // Only update if content changed
         if (result.css === textToProcess) {
@@ -248,23 +245,15 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
         }
 
         // Apply the transformation
-        await editor.edit(editBuilder => {
+        await editor.edit((editBuilder) => {
             editBuilder.replace(rangeToReplace, result.css);
         });
-
-        // Show performance feedback for optimized operations
-        if (shouldOptimize) {
-            const reduction = ((1 - (textToProcess.length / documentSize)) * 100).toFixed(0);
-            console.log(`[Line King] Optimization: Processed ${reduction}% less content`);
-        }
-
     } catch (error) {
         // PostCSS parsing failed - likely invalid CSS syntax
-        console.error('[Line King] CSS parsing failed:', error);
-        
+
         const errorMessage = error instanceof Error ? error.message : String(error);
         vscode.window.showErrorMessage(
-            `Line King: Unable to parse CSS. ${errorMessage.substring(0, 100)}`
+            `Line King: Unable to parse CSS. ${errorMessage.substring(0, 100)}`,
         );
     }
 }

@@ -1,6 +1,6 @@
 # ![Line King logo](https://raw.githubusercontent.com/dcog989/vscode-line-king/main/assets/icon-64.png) Line King
 
-*Line King* sorts, changes case, removes dups, removes blank lines, splits and joins lines, encodes to Base64, etc. It's the ultimate toolbox for line / text manipulation.  It's also smart, only displaying what is relevant to what is selected.
+_Line King_ sorts, changes case, removes dups, removes blank lines, splits and joins lines, encodes to Base64, etc. It's the ultimate toolbox for line / text manipulation. It's also smart, only displaying what is relevant to what is selected.
 
 The best line manipulation extension for VS Code ever? Many people are saying so.
 
@@ -9,7 +9,8 @@ The best line manipulation extension for VS Code ever? Many people are saying so
 ## Features
 
 ### Sorting
-*Works on selection or entire document.*
+
+_Works on selection or entire document._
 
 - **Sort Ascending/Descending** - Standard alphabetical sort (case-sensitive or case-insensitive)
 - **Natural Sort** - Intelligently sorts numbers (e.g., `A2` comes before `A10`)
@@ -31,19 +32,19 @@ The best line manipulation extension for VS Code ever? Many people are saying so
 ### Text Transformation
 
 - **Case Conversion**:
-  - UPPERCASE
-  - lowercase
-  - Sentence case
-  - Title Case
-  - camelCase
-  - PascalCase
-  - kebab-case
-  - snake_case
+    - UPPERCASE
+    - lowercase
+    - Sentence case
+    - Title Case
+    - camelCase
+    - PascalCase
+    - kebab-case
+    - snake_case
 
 - **Encoding/Decoding**:
-  - URL Encode/Decode
-  - Base64 Encode/Decode
-  - JSON String Escape/Unescape
+    - URL Encode/Decode
+    - Base64 Encode/Decode
+    - JSON String Escape/Unescape
 
 ### Utilities
 
@@ -74,12 +75,12 @@ The best line manipulation extension for VS Code ever? Many people are saying so
 ### Behavior
 
 - **Line Operations (Sort, Tidy, Join, Align)**:
-  - **With selection**: Automatically expands selection to encompass the full lines.
-  - **Without selection**: Operates on the entire document.
+    - **With selection**: Automatically expands selection to encompass the full lines.
+    - **Without selection**: Operates on the entire document.
 
 - **Text Operations (Case, Encode, Transform)**:
-  - **With selection**: Operates **strictly** on the selected text characters.
-  - **Without selection**: Operates on the entire document.
+    - **With selection**: Operates **strictly** on the selected text characters.
+    - **Without selection**: Operates on the entire document.
 
 - **Multiple selections**: All commands handle multiple cursors/selections intelligently.
 
@@ -97,9 +98,9 @@ Access settings via: File > Preferences > Settings > Extensions > Line King
 
 ```json
 {
-  "lineKing.joinSeparator": ", ",
-  "lineKing.cleanupOnSave": "trimTrailingWhitespace",
-  "lineKing.cssSortStrategy": "alphabetical"
+    "lineKing.joinSeparator": ", ",
+    "lineKing.cleanupOnSave": "trimTrailingWhitespace",
+    "lineKing.cssSortStrategy": "alphabetical"
 }
 ```
 
@@ -108,6 +109,7 @@ Access settings via: File > Preferences > Settings > Extensions > Line King
 All commands are available through the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`):
 
 ### Sort Commands
+
 - `Line King: Sort: Ascending (A-Z)`
 - `Line King: Sort: Ascending (Case Insensitive)`
 - `Line King: Sort: Descending (Z-A)`
@@ -123,6 +125,7 @@ All commands are available through the Command Palette (`Ctrl+Shift+P` / `Cmd+Sh
 - `Line King: Sort: Sort CSS Properties`
 
 ### Tidy Commands
+
 - `Line King: Tidy: Remove Blank Lines`
 - `Line King: Tidy: Condense Blank Lines`
 - `Line King: Tidy: Remove Duplicate Lines`
@@ -132,6 +135,7 @@ All commands are available through the Command Palette (`Ctrl+Shift+P` / `Cmd+Sh
 - `Line King: Tidy: Trim Both Ends`
 
 ### Case Commands
+
 - `Line King: Case: UPPERCASE`
 - `Line King: Case: lowercase`
 - `Line King: Case: Sentence case`
@@ -142,6 +146,7 @@ All commands are available through the Command Palette (`Ctrl+Shift+P` / `Cmd+Sh
 - `Line King: Case: PascalCase`
 
 ### Dev Tools Commands
+
 - `Line King: Dev: URL Encode`
 - `Line King: Dev: URL Decode`
 - `Line King: Dev: Base64 Encode`
@@ -150,6 +155,7 @@ All commands are available through the Command Palette (`Ctrl+Shift+P` / `Cmd+Sh
 - `Line King: Dev: JSON String Unescape`
 
 ### Utility Commands
+
 - `Line King: Tools: Duplicate Selection`
 - `Line King: Tools: Join Lines`
 - `Line King: Tools: Split Selection...`
@@ -163,7 +169,9 @@ All commands are available through the Command Palette (`Ctrl+Shift+P` / `Cmd+Sh
 ## Examples
 
 ### Sorting a List
+
 **Before:**
+
 ```
 Zebra
 Apple
@@ -172,6 +180,7 @@ Cherry
 ```
 
 **After** (Ascending, Case Insensitive):
+
 ```
 Apple
 banana
@@ -180,7 +189,9 @@ Zebra
 ```
 
 ### Sorting CSS Properties
+
 **Before:**
+
 ```css
 .container {
     z-index: 10;
@@ -192,6 +203,7 @@ Zebra
 ```
 
 **After**:
+
 ```css
 .container {
     background-color: white;
@@ -203,7 +215,9 @@ Zebra
 ```
 
 ### Aligning to Separator
+
 **Before:**
+
 ```
 name = "John"
 age = 30
@@ -211,6 +225,7 @@ email = "john@example.com"
 ```
 
 **After** (Align to `=`):
+
 ```
 name  = John
 age   = 30
@@ -219,12 +234,13 @@ email = john@example.com
 
 ## Requirements
 
-- Visual Studio Code version 1.106.1 or higher
+- Visual Studio Code v1.107+
 - No additional dependencies required
 
 ## Extension Compatibility
 
 Line King is designed to work in:
+
 - ✅ Local VS Code
 - ✅ VS Code Web (browser)
 - ✅ Virtual Workspaces

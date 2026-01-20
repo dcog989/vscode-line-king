@@ -1,8 +1,12 @@
 import esbuild from 'esbuild';
 import process from 'node:process';
+import fs from 'node:fs';
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
+
+console.log(`[esbuild] Mode: ${production ? 'PRODUCTION' : 'DEVELOPMENT'}`);
+console.log(`[esbuild] Watch: ${watch ? 'YES' : 'NO'}`);
 
 /**
  * @type {import('esbuild').Plugin}
@@ -24,36 +28,211 @@ const esbuildProblemMatcherPlugin = {
     },
 };
 
+/**
+ * Plugin to automatically externalize all Node.js built-in modules
+ * This prevents bundling Node.js APIs that are already provided by the runtime
+ *
+ * @type {import('esbuild').Plugin}
+ */
+const externalizeNodeBuiltins = {
+    name: 'externalize-node-builtins',
+    setup(build) {
+        // List of Node.js built-in module names
+        const nodeBuiltins = new Set([
+            'assert', 'buffer', 'child_process', 'cluster', 'crypto',
+            'dgram', 'dns', 'events', 'fs', 'http', 'http2', 'https',
+            'inspector', 'module', 'net', 'os', 'path', 'perf_hooks',
+            'process', 'querystring', 'readline', 'repl', 'stream',
+            'string_decoder', 'sys', 'timers', 'tls', 'trace_events',
+            'tty', 'url', 'util', 'v8', 'vm', 'worker_threads', 'zlib'
+        ]);
+
+        // Externalize both 'node:*' prefixed and non-prefixed imports
+        build.onResolve({ filter: /.*/ }, args => {
+            // Handle 'node:' prefixed imports (modern style)
+            if (args.path.startsWith('node:')) {
+                return { path: args.path, external: true };
+            }
+
+            // Handle non-prefixed Node.js built-ins (legacy style)
+            if (nodeBuiltins.has(args.path)) {
+                return { path: args.path, external: true };
+            }
+
+            // Also handle deep imports like 'fs/promises'
+            const rootModule = args.path.split('/')[0];
+            if (nodeBuiltins.has(rootModule)) {
+                return { path: args.path, external: true };
+            }
+
+            // Let esbuild handle other modules normally
+            return null;
+        });
+    }
+};
+
+/**
+ * Plugin to enforce bundle size limits
+ * Fails the build if bundle exceeds target size
+ *
+ * @param {number} maxSizeKB - Maximum bundle size in KB
+ */
+const bundleSizeLimitPlugin = (maxSizeKB) => ({
+    name: 'bundle-size-limit',
+    setup(build) {
+        build.onEnd(result => {
+            if (!result.outputFiles || result.outputFiles.length === 0) {
+                return;
+            }
+
+            for (const file of result.outputFiles) {
+                const sizeKB = file.contents.byteLength / 1024;
+
+                if (sizeKB > maxSizeKB) {
+                    console.error(`\n✘ [ERROR] Bundle size limit exceeded!`);
+                    console.error(`   File: ${file.path}`);
+                    console.error(`   Size: ${sizeKB.toFixed(1)} KB`);
+                    console.error(`   Limit: ${maxSizeKB} KB`);
+                    console.error(`   Exceeded by: ${(sizeKB - maxSizeKB).toFixed(1)} KB\n`);
+
+                    // Fail the build
+                    process.exit(1);
+                }
+            }
+        });
+    }
+});
+
 async function main() {
     const ctx = await esbuild.context({
         entryPoints: ['src/extension.ts'],
         bundle: true,
         format: 'esm',
-        minify: true,
         platform: 'node',
         outfile: 'dist/extension.js',
-        // Externalize both prefixed and non-prefixed node modules to satisfy all dependencies
+
+        /**
+         * External modules that should NEVER be bundled
+         */
         external: [
-            'vscode',
-            'node:path', 'path',
-            'node:fs', 'fs',
-            'node:os', 'os',
-            'node:process', 'process',
-            'node:util', 'util',
-            'node:events', 'events'
+            'vscode', // VS Code API - always provided by host
         ],
+
+        /**
+         * Code splitting for better tree-shaking and caching
+         * Enables separate chunks for dependencies
+         */
+        splitting: production,
+
+        /**
+         * CRITICAL: Only minify and remove sourcemaps in production
+         */
+        minify: production,
+        sourcemap: production ? false : 'inline',  // No sourcemap in production!
+
+        /**
+         * Aggressive minification settings for production
+         */
+        ...(production && {
+            minifyWhitespace: true,
+            minifyIdentifiers: true,
+            minifySyntax: true,
+            drop: ['console', 'debugger'],  // Remove console.logs and debuggers
+            pure: ['console.log', 'console.debug'],  // Mark as side-effect free
+            mangleProps: /^_/,  // Mangle private properties (starting with _)
+            mangleQuoted: true,  // Mangle quoted properties
+            reserveProps: /^vscode/,  // Don't mangle VSCode API properties
+            keepNames: false,  // Remove function/variable names in production
+            dropLabels: ['DEV', 'TEST'],  // Remove labeled statements with DEV or TEST labels
+        }),
+
+        /**
+         * Tree shaking - Remove unused code
+         */
+        treeShaking: true,
+
+        /**
+         * Target modern Node.js for smaller output
+         */
+        target: 'node20',
+
+        /**
+         * Remove legal comments in production (they add size)
+         */
+        legalComments: production ? 'none' : 'inline',
+
+        /**
+         * Charset - use utf8 for smaller output
+         */
+        charset: 'utf8',
+
+        /**
+         * Aggressive dependency optimizations
+         */
+        mainFields: ['module', 'main'],
+        conditions: ['import', 'node'],
+
+        /**
+         * Inline all imports for smaller bundle size
+         * Only disable if code splitting causes issues
+         */
         logLevel: 'silent',
-        plugins: [esbuildProblemMatcherPlugin],
-        // Add banner to shim 'require' for CJS dependencies bundled into ESM
+
+        plugins: [
+            externalizeNodeBuiltins,
+            esbuildProblemMatcherPlugin,
+            // Only enforce bundle size limit in production
+            ...(production ? [bundleSizeLimitPlugin(400)] : []),
+        ],
+
+        /**
+         * Shim 'require' for CJS dependencies bundled into ESM
+         */
         banner: {
             js: `import { createRequire } from 'module';const require = createRequire(import.meta.url);`
-        }
+        },
+
+        /**
+         * Metafile for bundle analysis (production only)
+         */
+        metafile: production,
     });
 
     if (watch) {
         await ctx.watch();
     } else {
         await ctx.rebuild();
+
+        // Output bundle analysis in production mode
+        if (production && ctx.metafile) {
+            const analysis = await esbuild.analyzeMetafile(ctx.metafile, {
+                verbose: true,
+            });
+            console.log('\n📦 Bundle Analysis:\n');
+            console.log(analysis);
+
+            // Show largest dependencies
+            const outputs = Object.values(ctx.metafile.outputs)[0];
+            const inputs = outputs?.inputs || {};
+
+            console.log('\n📊 Output file size:');
+            const stats = fs.statSync('dist/extension.js');
+            const sizeKB = (stats.size / 1024).toFixed(1);
+            console.log(`   dist/extension.js: ${sizeKB} KB`);
+
+            // Calculate bundle size score
+            const sizeScore = parseFloat(sizeKB);
+            if (sizeScore < 250) {
+                console.log('   🟢 Excellent: Bundle size is optimized');
+            } else if (sizeScore < 300) {
+                console.log('   🟡 Good: Bundle size is acceptable');
+            } else if (sizeScore < 400) {
+                console.log('   🟠 Fair: Consider reducing bundle size');
+            } else {
+                console.log('   🔴 Poor: Bundle size should be reduced');
+            }
+        }
+
         await ctx.dispose();
     }
 }

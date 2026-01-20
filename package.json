@@ -1,586 +1,586 @@
 {
-    "name": "line-king",
-    "displayName": "Line King",
-    "description": "Sort, remove dups, change case, clean, encode / decode. Do all the things to line and text.",
-    "version": "1.1.0",
-    "publisher": "dcog989",
-    "icon": "assets/icon.png",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/dcog989/vscode-line-king.git"
-    },
-    "bugs": {
-        "url": "https://github.com/dcog989/vscode-line-king/issues"
-    },
-    "homepage": "https://github.com/dcog989/vscode-line-king/blob/main/README.md",
-    "engines": {
-        "vscode": "^1.107.1"
-    },
-    "categories": [
-        "Formatters",
-        "Other"
-    ],
-    "keywords": [
-        "sort",
-        "lines",
-        "text",
-        "manipulation",
-        "format",
-        "tidy",
-        "clean",
-        "duplicate",
-        "transform",
-        "case",
-        "encoding"
-    ],
-    "activationEvents": [
-        "onLanguage:css",
-        "onLanguage:scss",
-        "onLanguage:less",
-        "onCommand:lineKing.manipulate.insertSequence",
-        "onCommand:lineKing.util.convertLF",
-        "onCommand:lineKing.util.convertCRLF",
-        "onCommand:lineKing.util.debugContext"
-    ],
-    "main": "./dist/extension.js",
-    "type": "module",
-    "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-            "supported": true
-        }
-    },
-    "contributes": {
-        "configuration": {
-            "type": "object",
-            "title": "Line King",
-            "properties": {
-                "lineKing.joinSeparator": {
-                    "type": "string",
-                    "default": " ",
-                    "description": "The character or string used when joining lines together."
-                },
-                "lineKing.cleanupOnSave": {
-                    "type": "string",
-                    "enum": [
-                        "none",
-                        "removeBlankLines",
-                        "trimTrailingWhitespace",
-                        "sortCssProperties"
-                    ],
-                    "enumDescriptions": [
-                        "Do not perform any automatic cleanup",
-                        "Automatically remove all blank lines when saving",
-                        "Automatically trim trailing whitespace when saving",
-                        "Automatically sort CSS properties alphabetically when saving"
-                    ],
-                    "default": "none",
-                    "description": "Automatically perform a cleanup action when saving a file."
-                },
-                "lineKing.cssSortStrategy": {
-                    "type": "string",
-                    "enum": [
-                        "alphabetical",
-                        "length"
-                    ],
-                    "enumDescriptions": [
-                        "Sort CSS properties alphabetically by property name",
-                        "Sort CSS properties by line length (shortest first)"
-                    ],
-                    "default": "alphabetical",
-                    "description": "Strategy for sorting CSS properties within rule blocks."
-                }
-            }
-        },
-        "commands": [
-            {
-                "command": "lineKing.sort.asc",
-                "title": "Ascending (A-Z)",
-                "category": "Line King: Sort"
-            },
-            {
-                "command": "lineKing.sort.asc.insensitive",
-                "title": "Ascending (Case Insensitive)",
-                "category": "Line King: Sort"
-            },
-            {
-                "command": "lineKing.sort.desc",
-                "title": "Descending (Z-A)",
-                "category": "Line King: Sort"
-            },
-            {
-                "command": "lineKing.sort.desc.insensitive",
-                "title": "Descending (Case Insensitive)",
-                "category": "Line King: Sort"
-            },
-            {
-                "command": "lineKing.sort.unique",
-                "title": "Unique (Remove Duplicates)",
-                "category": "Line King: Sort"
-            },
-            {
-                "command": "lineKing.sort.unique.insensitive",
-                "title": "Unique (Case Insensitive)",
-                "category": "Line King: Sort"
-            },
-            {
-                "command": "lineKing.sort.natural",
-                "title": "Natural (Alphanumeric)",
-                "category": "Line King: Sort"
-            },
-            {
-                "command": "lineKing.sort.length.asc",
-                "title": "By Length (Shortest)",
-                "category": "Line King: Sort"
-            },
-            {
-                "command": "lineKing.sort.length.desc",
-                "title": "By Length (Longest)",
-                "category": "Line King: Sort"
-            },
-            {
-                "command": "lineKing.sort.reverse",
-                "title": "Reverse Order",
-                "category": "Line King: Sort"
-            },
-            {
-                "command": "lineKing.sort.ip",
-                "title": "By IP Address",
-                "category": "Line King: Sort"
-            },
-            {
-                "command": "lineKing.sort.shuffle",
-                "title": "Shuffle",
-                "category": "Line King: Sort"
-            },
-            {
-                "command": "lineKing.sort.css",
-                "title": "Sort CSS Properties",
-                "category": "Line King: Sort"
-            },
-            {
-                "command": "lineKing.tidy.removeBlank",
-                "title": "Remove Blank Lines",
-                "category": "Line King: Tidy"
-            },
-            {
-                "command": "lineKing.tidy.condenseBlank",
-                "title": "Condense Blank Lines",
-                "category": "Line King: Tidy"
-            },
-            {
-                "command": "lineKing.tidy.removeDuplicates",
-                "title": "Remove Duplicate Lines",
-                "category": "Line King: Tidy"
-            },
-            {
-                "command": "lineKing.tidy.keepDuplicates",
-                "title": "Keep Only Duplicates",
-                "category": "Line King: Tidy"
-            },
-            {
-                "command": "lineKing.tidy.trimTrailing",
-                "title": "Trim Trailing Whitespace",
-                "category": "Line King: Tidy"
-            },
-            {
-                "command": "lineKing.tidy.trimLeading",
-                "title": "Trim Leading Whitespace",
-                "category": "Line King: Tidy"
-            },
-            {
-                "command": "lineKing.tidy.trimBoth",
-                "title": "Trim Both Ends",
-                "category": "Line King: Tidy"
-            },
-            {
-                "command": "lineKing.manipulate.upper",
-                "title": "UPPERCASE",
-                "category": "Line King: Case"
-            },
-            {
-                "command": "lineKing.manipulate.lower",
-                "title": "lowercase",
-                "category": "Line King: Case"
-            },
-            {
-                "command": "lineKing.manipulate.sentence",
-                "title": "Sentence case",
-                "category": "Line King: Case"
-            },
-            {
-                "command": "lineKing.manipulate.title",
-                "title": "Title Case",
-                "category": "Line King: Case"
-            },
-            {
-                "command": "lineKing.manipulate.camel",
-                "title": "camelCase",
-                "category": "Line King: Case"
-            },
-            {
-                "command": "lineKing.manipulate.kebab",
-                "title": "kebab-case",
-                "category": "Line King: Case"
-            },
-            {
-                "command": "lineKing.manipulate.snake",
-                "title": "snake_case",
-                "category": "Line King: Case"
-            },
-            {
-                "command": "lineKing.manipulate.pascal",
-                "title": "PascalCase",
-                "category": "Line King: Case"
-            },
-            {
-                "command": "lineKing.manipulate.duplicate",
-                "title": "Duplicate Selection",
-                "category": "Line King: Tools"
-            },
-            {
-                "command": "lineKing.manipulate.join",
-                "title": "Join Lines",
-                "category": "Line King: Tools"
-            },
-            {
-                "command": "lineKing.manipulate.split",
-                "title": "Split Selection...",
-                "category": "Line King: Tools"
-            },
-            {
-                "command": "lineKing.manipulate.align",
-                "title": "Align to Separator...",
-                "category": "Line King: Tools"
-            },
-            {
-                "command": "lineKing.manipulate.sequence",
-                "title": "Insert Numeric Sequence (1,2,3...)",
-                "category": "Line King: Tools"
-            },
-            {
-                "command": "lineKing.dev.urlEncode",
-                "title": "URL Encode",
-                "category": "Line King: Dev"
-            },
-            {
-                "command": "lineKing.dev.urlDecode",
-                "title": "URL Decode",
-                "category": "Line King: Dev"
-            },
-            {
-                "command": "lineKing.dev.base64Encode",
-                "title": "Base64 Encode",
-                "category": "Line King: Dev"
-            },
-            {
-                "command": "lineKing.dev.base64Decode",
-                "title": "Base64 Decode",
-                "category": "Line King: Dev"
-            },
-            {
-                "command": "lineKing.dev.jsonEscape",
-                "title": "JSON String Escape",
-                "category": "Line King: Dev"
-            },
-            {
-                "command": "lineKing.dev.jsonUnescape",
-                "title": "JSON String Unescape",
-                "category": "Line King: Dev"
-            },
-            {
-                "command": "lineKing.util.showWhitespaceChars",
-                "title": "Show Whitespace Characters",
-                "category": "Line King: Util"
-            },
-            {
-                "command": "lineKing.util.hideWhitespaceChars",
-                "title": "Hide Whitespace Characters",
-                "category": "Line King: Util"
-            },
-            {
-                "command": "lineKing.util.eol.lf",
-                "title": "Convert to LF (Unix)",
-                "category": "Line King: Util"
-            },
-            {
-                "command": "lineKing.util.eol.crlf",
-                "title": "Convert to CRLF (Windows)",
-                "category": "Line King: Util"
-            },
-            {
-                "command": "lineKing.debug.checkContext",
-                "title": "Debug: Check Context State",
-                "category": "Line King"
-            }
-        ],
-        "submenus": [
-            {
-                "id": "lineKing.mainMenu",
-                "label": "Line King"
-            },
-            {
-                "id": "lineKing.sortMenu",
-                "label": "Sort Lines",
-                "icon": "$(sort-precedence)"
-            },
-            {
-                "id": "lineKing.caseMenu",
-                "label": "Change Case",
-                "icon": "$(case-change)"
-            },
-            {
-                "id": "lineKing.devMenu",
-                "label": "Dev Tools",
-                "icon": "$(code)"
-            }
-        ],
-        "menus": {
-            "editor/context": [
-                {
-                    "submenu": "lineKing.mainMenu",
-                    "group": "modification",
-                    "when": "editorTextFocus"
-                }
-            ],
-            "lineKing.mainMenu": [
-                {
-                    "submenu": "lineKing.sortMenu",
-                    "group": "1_sort",
-                    "when": "lineKing.isMultiLine || !editorHasSelection"
-                },
-                {
-                    "submenu": "lineKing.caseMenu",
-                    "group": "2_transform"
-                },
-                {
-                    "submenu": "lineKing.devMenu",
-                    "group": "2_transform",
-                    "when": "editorHasSelection"
-                },
-                {
-                    "command": "lineKing.tidy.removeBlank",
-                    "group": "3_tidy@1",
-                    "when": "lineKing.isMultiLine || !editorHasSelection"
-                },
-                {
-                    "command": "lineKing.tidy.condenseBlank",
-                    "group": "3_tidy@2",
-                    "when": "lineKing.isMultiLine || !editorHasSelection"
-                },
-                {
-                    "command": "lineKing.tidy.removeDuplicates",
-                    "group": "3_tidy@3",
-                    "when": "lineKing.isMultiLine || !editorHasSelection"
-                },
-                {
-                    "command": "lineKing.tidy.keepDuplicates",
-                    "group": "3_tidy@4",
-                    "when": "lineKing.isMultiLine || !editorHasSelection"
-                },
-                {
-                    "command": "lineKing.tidy.trimTrailing",
-                    "group": "3_tidy@5",
-                    "when": "lineKing.isMultiLine || !editorHasSelection"
-                },
-                {
-                    "command": "lineKing.tidy.trimLeading",
-                    "group": "3_tidy@6",
-                    "when": "lineKing.isMultiLine || !editorHasSelection"
-                },
-                {
-                    "command": "lineKing.tidy.trimBoth",
-                    "group": "3_tidy@7",
-                    "when": "lineKing.isMultiLine || !editorHasSelection"
-                },
-                {
-                    "command": "lineKing.manipulate.duplicate",
-                    "group": "4_util@1",
-                    "when": "editorHasSelection"
-                },
-                {
-                    "command": "lineKing.manipulate.join",
-                    "group": "4_util@2",
-                    "when": "lineKing.isMultiLine"
-                },
-                {
-                    "command": "lineKing.manipulate.split",
-                    "group": "4_util@3",
-                    "when": "editorHasSelection"
-                },
-                {
-                    "command": "lineKing.manipulate.align",
-                    "group": "4_util@4",
-                    "when": "lineKing.isMultiLine"
-                },
-                {
-                    "command": "lineKing.manipulate.sequence",
-                    "group": "4_util@5",
-                    "when": "lineKing.isMultiLine"
-                },
-                {
-                    "command": "lineKing.util.eol.lf",
-                    "group": "5_eof@1"
-                },
-                {
-                    "command": "lineKing.util.eol.crlf",
-                    "group": "5_eof@2"
-                },
-                {
-                    "command": "lineKing.util.showWhitespaceChars",
-                    "group": "5_eof@3",
-                    "when": "!lineKing.whitespaceCharsVisible"
-                },
-                {
-                    "command": "lineKing.util.hideWhitespaceChars",
-                    "group": "5_eof@3",
-                    "when": "lineKing.whitespaceCharsVisible"
-                }
-            ],
-            "lineKing.sortMenu": [
-                {
-                    "command": "lineKing.sort.asc",
-                    "group": "1_basic@1"
-                },
-                {
-                    "command": "lineKing.sort.asc.insensitive",
-                    "group": "1_basic@2"
-                },
-                {
-                    "command": "lineKing.sort.desc",
-                    "group": "1_basic@3"
-                },
-                {
-                    "command": "lineKing.sort.desc.insensitive",
-                    "group": "1_basic@4"
-                },
-                {
-                    "command": "lineKing.sort.natural",
-                    "group": "1_basic@5"
-                },
-                {
-                    "command": "lineKing.sort.reverse",
-                    "group": "1_basic@6"
-                },
-                {
-                    "command": "lineKing.sort.length.asc",
-                    "group": "2_len@1"
-                },
-                {
-                    "command": "lineKing.sort.length.desc",
-                    "group": "2_len@2"
-                },
-                {
-                    "command": "lineKing.sort.unique",
-                    "group": "3_unique@1"
-                },
-                {
-                    "command": "lineKing.sort.unique.insensitive",
-                    "group": "3_unique@2"
-                },
-                {
-                    "command": "lineKing.sort.ip",
-                    "group": "3_unique@3"
-                },
-                {
-                    "command": "lineKing.sort.shuffle",
-                    "group": "3_unique@4"
-                },
-                {
-                    "command": "lineKing.sort.css",
-                    "group": "4_css"
-                }
-            ],
-            "lineKing.caseMenu": [
-                {
-                    "command": "lineKing.manipulate.upper",
-                    "group": "1_basic@1"
-                },
-                {
-                    "command": "lineKing.manipulate.lower",
-                    "group": "1_basic@2"
-                },
-                {
-                    "command": "lineKing.manipulate.sentence",
-                    "group": "1_basic@3"
-                },
-                {
-                    "command": "lineKing.manipulate.title",
-                    "group": "1_basic@4"
-                },
-                {
-                    "command": "lineKing.manipulate.camel",
-                    "group": "2_code@1"
-                },
-                {
-                    "command": "lineKing.manipulate.pascal",
-                    "group": "2_code@2"
-                },
-                {
-                    "command": "lineKing.manipulate.kebab",
-                    "group": "2_code@3"
-                },
-                {
-                    "command": "lineKing.manipulate.snake",
-                    "group": "2_code@4"
-                }
-            ],
-            "lineKing.devMenu": [
-                {
-                    "command": "lineKing.dev.urlEncode",
-                    "group": "1_enc"
-                },
-                {
-                    "command": "lineKing.dev.urlDecode",
-                    "group": "1_enc"
-                },
-                {
-                    "command": "lineKing.dev.base64Encode",
-                    "group": "2_base"
-                },
-                {
-                    "command": "lineKing.dev.base64Decode",
-                    "group": "2_base"
-                },
-                {
-                    "command": "lineKing.dev.jsonEscape",
-                    "group": "3_json"
-                },
-                {
-                    "command": "lineKing.dev.jsonUnescape",
-                    "group": "3_json"
-                }
-            ]
-        }
-    },
-    "scripts": {
-        "vscode:prepublish": "npm run package",
-        "compile": "tsc -p ./ && node esbuild.config.mjs",
-        "watch": "npm-run-all -p watch:*",
-        "watch:esbuild": "node esbuild.config.mjs --watch",
-        "watch:tsc": "tsc -p ./ --watch",
-        "package": "npm run check-types && node esbuild.config.mjs --production",
-        "check-types": "tsc --noEmit",
-        "lint": "eslint src --ext ts",
-        "test": "npm run compile && node ./out/test/runTest.js",
-        "migrate": "node scripts/migrate.js",
-        "clean": "node -e \"const fs = require('fs'); ['dist', 'out', 'coverage'].forEach(dir => { try { fs.rmSync(dir, {recursive:true, force:true}); } catch(e) { console.log('Skipped:', dir); } });\""
-    },
-    "dependencies": {
-        "change-case": "^5.4",
-        "postcss": "^8.5",
-        "postcss-values-parser": "^7.0",
-        "zod": "^4.3"
-    },
-    "devDependencies": {
-        "@types/mocha": "^10.0",
-        "@types/node": "^25.0",
-        "@types/vscode": "^1.107",
-        "@vscode/test-electron": "^2.5",
-        "esbuild": "^0.27",
-        "glob": "^13.0",
-        "mocha": "^11.7",
-        "npm-run-all": "^4.1",
-        "typescript": "^5.9"
+  "name": "line-king",
+  "displayName": "Line King",
+  "description": "Sort, remove dups, change case, clean, encode / decode. Do all the things to line and text.",
+  "version": "1.1.0",
+  "publisher": "dcog989",
+  "icon": "assets/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dcog989/vscode-line-king.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dcog989/vscode-line-king/issues"
+  },
+  "homepage": "https://github.com/dcog989/vscode-line-king/blob/main/README.md",
+  "engines": {
+    "vscode": "^1.108.1"
+  },
+  "categories": [
+    "Formatters",
+    "Other"
+  ],
+  "keywords": [
+    "sort",
+    "lines",
+    "text",
+    "manipulation",
+    "format",
+    "tidy",
+    "clean",
+    "duplicate",
+    "transform",
+    "case",
+    "encoding"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "type": "module",
+  "capabilities": {
+    "virtualWorkspaces": true,
+    "untrustedWorkspaces": {
+      "supported": true
     }
+  },
+  "scripts": {
+    "audit": "bun pm audit",
+    "bun:build": "bun run check-types && bun --bun bun.config.mjs",
+    "bun:build:dev": "bun --bun bun.config.mjs",
+    "check-types": "bunx tsc --noEmit",
+    "clean": "bun -e \"const fs = require('fs'); ['dist', 'coverage'].forEach(dir => { try { fs.rmSync(dir, {recursive:true, force:true}); } catch(e) { console.log('Skipped:', dir); } });\"",
+    "compile": "bun esbuild.config.mjs",
+    "lint": "bunx eslint src --ext ts",
+    "lint:fix": "bunx eslint src --ext ts --fix",
+    "migrate": "bun scripts/migrate.js",
+    "package": "bun run check-types && bun esbuild.config.mjs --production",
+    "prepare": "bunx husky install",
+    "size": "bunx bundlesize --files dist/extension.js --max-size 400kb",
+    "test": "bun test",
+    "vscode:prepublish": "bun run package",
+    "watch": "bun esbuild.config.mjs --watch"
+  },
+  "dependencies": {
+    "postcss": "^8.5.6",
+    "postcss-values-parser": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.9",
+    "@types/vscode": "^1.108.1",
+    "@vscode/test-electron": "^2.5.2",
+    "bundlesize": "^0.18.2",
+    "esbuild": "^0.27.2",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "globals": "^16.5.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.53.1"
+  },
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Line King",
+      "properties": {
+        "lineKing.joinSeparator": {
+          "type": "string",
+          "default": " ",
+          "description": "The character or string used when joining lines together."
+        },
+        "lineKing.cleanupOnSave": {
+          "type": "string",
+          "enum": [
+            "none",
+            "removeBlankLines",
+            "trimTrailingWhitespace",
+            "sortCssProperties"
+          ],
+          "enumDescriptions": [
+            "Do not perform any automatic cleanup",
+            "Automatically remove all blank lines when saving",
+            "Automatically trim trailing whitespace when saving",
+            "Automatically sort CSS properties alphabetically when saving"
+          ],
+          "default": "none",
+          "description": "Automatically perform a cleanup action when saving a file."
+        },
+        "lineKing.cssSortStrategy": {
+          "type": "string",
+          "enum": [
+            "alphabetical",
+            "length"
+          ],
+          "enumDescriptions": [
+            "Sort CSS properties alphabetically by property name",
+            "Sort CSS properties by line length (shortest first)"
+          ],
+          "default": "alphabetical",
+          "description": "Strategy for sorting CSS properties within rule blocks."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "lineKing.sort.asc",
+        "title": "Ascending (A-Z)",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.sort.asc.insensitive",
+        "title": "Ascending (Case Insensitive)",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.sort.desc",
+        "title": "Descending (Z-A)",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.sort.desc.insensitive",
+        "title": "Descending (Case Insensitive)",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.sort.unique",
+        "title": "Unique (Remove Duplicates)",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.sort.unique.insensitive",
+        "title": "Unique (Case Insensitive)",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.sort.natural",
+        "title": "Natural (Alphanumeric)",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.sort.length.asc",
+        "title": "By Length (Shortest)",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.sort.length.desc",
+        "title": "By Length (Longest)",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.sort.reverse",
+        "title": "Reverse Order",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.sort.ip",
+        "title": "By IP Address",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.sort.shuffle",
+        "title": "Shuffle",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.sort.css",
+        "title": "Sort CSS Properties",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.tidy.removeBlank",
+        "title": "Remove Blank Lines",
+        "category": "Line King: Tidy"
+      },
+      {
+        "command": "lineKing.tidy.condenseBlank",
+        "title": "Condense Blank Lines",
+        "category": "Line King: Tidy"
+      },
+      {
+        "command": "lineKing.tidy.removeDuplicates",
+        "title": "Remove Duplicate Lines",
+        "category": "Line King: Tidy"
+      },
+      {
+        "command": "lineKing.tidy.keepDuplicates",
+        "title": "Keep Only Duplicates",
+        "category": "Line King: Tidy"
+      },
+      {
+        "command": "lineKing.tidy.trimTrailing",
+        "title": "Trim Trailing Whitespace",
+        "category": "Line King: Tidy"
+      },
+      {
+        "command": "lineKing.tidy.trimLeading",
+        "title": "Trim Leading Whitespace",
+        "category": "Line King: Tidy"
+      },
+      {
+        "command": "lineKing.tidy.trimBoth",
+        "title": "Trim Both Ends",
+        "category": "Line King: Tidy"
+      },
+      {
+        "command": "lineKing.manipulate.upper",
+        "title": "UPPERCASE",
+        "category": "Line King: Case"
+      },
+      {
+        "command": "lineKing.manipulate.lower",
+        "title": "lowercase",
+        "category": "Line King: Case"
+      },
+      {
+        "command": "lineKing.manipulate.sentence",
+        "title": "Sentence case",
+        "category": "Line King: Case"
+      },
+      {
+        "command": "lineKing.manipulate.title",
+        "title": "Title Case",
+        "category": "Line King: Case"
+      },
+      {
+        "command": "lineKing.manipulate.camel",
+        "title": "camelCase",
+        "category": "Line King: Case"
+      },
+      {
+        "command": "lineKing.manipulate.kebab",
+        "title": "kebab-case",
+        "category": "Line King: Case"
+      },
+      {
+        "command": "lineKing.manipulate.snake",
+        "title": "snake_case",
+        "category": "Line King: Case"
+      },
+      {
+        "command": "lineKing.manipulate.pascal",
+        "title": "PascalCase",
+        "category": "Line King: Case"
+      },
+      {
+        "command": "lineKing.manipulate.duplicate",
+        "title": "Duplicate Selection",
+        "category": "Line King: Tools"
+      },
+      {
+        "command": "lineKing.manipulate.join",
+        "title": "Join Lines",
+        "category": "Line King: Tools"
+      },
+      {
+        "command": "lineKing.manipulate.split",
+        "title": "Split Selection...",
+        "category": "Line King: Tools"
+      },
+      {
+        "command": "lineKing.manipulate.align",
+        "title": "Align to Separator...",
+        "category": "Line King: Tools"
+      },
+      {
+        "command": "lineKing.manipulate.sequence",
+        "title": "Insert Numeric Sequence (1,2,3...)",
+        "category": "Line King: Tools"
+      },
+      {
+        "command": "lineKing.dev.urlEncode",
+        "title": "URL Encode",
+        "category": "Line King: Dev"
+      },
+      {
+        "command": "lineKing.dev.urlDecode",
+        "title": "URL Decode",
+        "category": "Line King: Dev"
+      },
+      {
+        "command": "lineKing.dev.base64Encode",
+        "title": "Base64 Encode",
+        "category": "Line King: Dev"
+      },
+      {
+        "command": "lineKing.dev.base64Decode",
+        "title": "Base64 Decode",
+        "category": "Line King: Dev"
+      },
+      {
+        "command": "lineKing.dev.jsonEscape",
+        "title": "JSON String Escape",
+        "category": "Line King: Dev"
+      },
+      {
+        "command": "lineKing.dev.jsonUnescape",
+        "title": "JSON String Unescape",
+        "category": "Line King: Dev"
+      },
+      {
+        "command": "lineKing.util.showWhitespaceChars",
+        "title": "Show Whitespace Characters",
+        "category": "Line King: Util"
+      },
+      {
+        "command": "lineKing.util.hideWhitespaceChars",
+        "title": "Hide Whitespace Characters",
+        "category": "Line King: Util"
+      },
+      {
+        "command": "lineKing.util.eol.lf",
+        "title": "Convert to LF (Unix)",
+        "category": "Line King: Util"
+      },
+      {
+        "command": "lineKing.util.eol.crlf",
+        "title": "Convert to CRLF (Windows)",
+        "category": "Line King: Util"
+      },
+      {
+        "command": "lineKing.debug.checkContext",
+        "title": "Debug: Check Context State",
+        "category": "Line King"
+      }
+    ],
+    "submenus": [
+      {
+        "id": "lineKing.mainMenu",
+        "label": "Line King"
+      },
+      {
+        "id": "lineKing.sortMenu",
+        "label": "Sort Lines",
+        "icon": "$(sort-precedence)"
+      },
+      {
+        "id": "lineKing.caseMenu",
+        "label": "Change Case",
+        "icon": "$(case-change)"
+      },
+      {
+        "id": "lineKing.devMenu",
+        "label": "Dev Tools",
+        "icon": "$(code)"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "lineKing.mainMenu",
+          "group": "modification",
+          "when": "editorTextFocus"
+        }
+      ],
+      "lineKing.mainMenu": [
+        {
+          "submenu": "lineKing.sortMenu",
+          "group": "1_sort",
+          "when": "lineKing.isMultiLine || !editorHasSelection"
+        },
+        {
+          "submenu": "lineKing.caseMenu",
+          "group": "2_transform"
+        },
+        {
+          "submenu": "lineKing.devMenu",
+          "group": "2_transform",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "lineKing.tidy.removeBlank",
+          "group": "3_tidy@1",
+          "when": "lineKing.isMultiLine || !editorHasSelection"
+        },
+        {
+          "command": "lineKing.tidy.condenseBlank",
+          "group": "3_tidy@2",
+          "when": "lineKing.isMultiLine || !editorHasSelection"
+        },
+        {
+          "command": "lineKing.tidy.removeDuplicates",
+          "group": "3_tidy@3",
+          "when": "lineKing.isMultiLine || !editorHasSelection"
+        },
+        {
+          "command": "lineKing.tidy.keepDuplicates",
+          "group": "3_tidy@4",
+          "when": "lineKing.isMultiLine || !editorHasSelection"
+        },
+        {
+          "command": "lineKing.tidy.trimTrailing",
+          "group": "3_tidy@5",
+          "when": "lineKing.isMultiLine || !editorHasSelection"
+        },
+        {
+          "command": "lineKing.tidy.trimLeading",
+          "group": "3_tidy@6",
+          "when": "lineKing.isMultiLine || !editorHasSelection"
+        },
+        {
+          "command": "lineKing.tidy.trimBoth",
+          "group": "3_tidy@7",
+          "when": "lineKing.isMultiLine || !editorHasSelection"
+        },
+        {
+          "command": "lineKing.manipulate.duplicate",
+          "group": "4_util@1",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "lineKing.manipulate.join",
+          "group": "4_util@2",
+          "when": "lineKing.isMultiLine"
+        },
+        {
+          "command": "lineKing.manipulate.split",
+          "group": "4_util@3",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "lineKing.manipulate.align",
+          "group": "4_util@4",
+          "when": "lineKing.isMultiLine"
+        },
+        {
+          "command": "lineKing.manipulate.sequence",
+          "group": "4_util@5",
+          "when": "lineKing.isMultiLine"
+        },
+        {
+          "command": "lineKing.util.eol.lf",
+          "group": "5_eof@1"
+        },
+        {
+          "command": "lineKing.util.eol.crlf",
+          "group": "5_eof@2"
+        },
+        {
+          "command": "lineKing.util.showWhitespaceChars",
+          "group": "5_eof@3",
+          "when": "!lineKing.whitespaceCharsVisible"
+        },
+        {
+          "command": "lineKing.util.hideWhitespaceChars",
+          "group": "5_eof@3",
+          "when": "lineKing.whitespaceCharsVisible"
+        }
+      ],
+      "lineKing.sortMenu": [
+        {
+          "command": "lineKing.sort.asc",
+          "group": "1_basic@1"
+        },
+        {
+          "command": "lineKing.sort.asc.insensitive",
+          "group": "1_basic@2"
+        },
+        {
+          "command": "lineKing.sort.desc",
+          "group": "1_basic@3"
+        },
+        {
+          "command": "lineKing.sort.desc.insensitive",
+          "group": "1_basic@4"
+        },
+        {
+          "command": "lineKing.sort.natural",
+          "group": "1_basic@5"
+        },
+        {
+          "command": "lineKing.sort.reverse",
+          "group": "1_basic@6"
+        },
+        {
+          "command": "lineKing.sort.length.asc",
+          "group": "2_len@1"
+        },
+        {
+          "command": "lineKing.sort.length.desc",
+          "group": "2_len@2"
+        },
+        {
+          "command": "lineKing.sort.unique",
+          "group": "3_unique@1"
+        },
+        {
+          "command": "lineKing.sort.unique.insensitive",
+          "group": "3_unique@2"
+        },
+        {
+          "command": "lineKing.sort.ip",
+          "group": "3_unique@3"
+        },
+        {
+          "command": "lineKing.sort.shuffle",
+          "group": "3_unique@4"
+        },
+        {
+          "command": "lineKing.sort.css",
+          "group": "4_css"
+        }
+      ],
+      "lineKing.caseMenu": [
+        {
+          "command": "lineKing.manipulate.upper",
+          "group": "1_basic@1"
+        },
+        {
+          "command": "lineKing.manipulate.lower",
+          "group": "1_basic@2"
+        },
+        {
+          "command": "lineKing.manipulate.sentence",
+          "group": "1_basic@3"
+        },
+        {
+          "command": "lineKing.manipulate.title",
+          "group": "1_basic@4"
+        },
+        {
+          "command": "lineKing.manipulate.camel",
+          "group": "2_code@1"
+        },
+        {
+          "command": "lineKing.manipulate.pascal",
+          "group": "2_code@2"
+        },
+        {
+          "command": "lineKing.manipulate.kebab",
+          "group": "2_code@3"
+        },
+        {
+          "command": "lineKing.manipulate.snake",
+          "group": "2_code@4"
+        }
+      ],
+      "lineKing.devMenu": [
+        {
+          "command": "lineKing.dev.urlEncode",
+          "group": "1_enc"
+        },
+        {
+          "command": "lineKing.dev.urlDecode",
+          "group": "1_enc"
+        },
+        {
+          "command": "lineKing.dev.base64Encode",
+          "group": "2_base"
+        },
+        {
+          "command": "lineKing.dev.base64Decode",
+          "group": "2_base"
+        },
+        {
+          "command": "lineKing.dev.jsonEscape",
+          "group": "3_json"
+        },
+        {
+          "command": "lineKing.dev.jsonUnescape",
+          "group": "3_json"
+        }
+      ]
+    }
+  }
 }

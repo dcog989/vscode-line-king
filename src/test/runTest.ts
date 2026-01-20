@@ -17,22 +17,21 @@ async function main() {
         await runTests({
             extensionDevelopmentPath,
             extensionTestsPath,
-            version: '1.107.1',
+            version: '1.108.1',
             launchArgs: [
                 `--user-data-dir=${userDataDir}`,
                 '--disable-gpu',
                 '--disable-updates',
                 '--skip-welcome',
                 '--skip-release-notes',
-                '--disable-workspace-trust'
+                '--disable-workspace-trust',
             ],
             // Environment variables to assist with ESM stability and mark test mode
             extensionTestsEnv: {
-                VSCODE_TEST_MODE: '1'
-            }
+                VSCODE_TEST_MODE: '1',
+            },
         });
-    } catch (err) {
-        console.error('Failed to run tests', err);
+    } catch {
         process.exit(1);
     }
 }

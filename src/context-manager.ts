@@ -1,6 +1,16 @@
 import * as vscode from 'vscode';
 import { CONTEXT_KEYS, TIMING } from './constants.js';
-import { isWhitespaceCharsVisible, updateDecorations } from './lib/visualizer.js';
+
+/**
+ * PERFORMANCE: visualizer is lazy-loaded to avoid loading it during extension activation
+ */
+let visualizerModule: typeof import('./lib/visualizer.js') | null = null;
+async function getVisualizer() {
+    if (!visualizerModule) {
+        visualizerModule = await import('./lib/visualizer.js');
+    }
+    return visualizerModule;
+}
 
 export class ContextManager {
     private context: vscode.ExtensionContext;
@@ -26,9 +36,9 @@ export class ContextManager {
         this.isRegistered = true;
 
         // Defer initial update to avoid blocking
-        setImmediate(() => {
+        setImmediate(async () => {
             if (!this.isDisposed) {
-                this.update();
+                await this.update();
             }
         });
 
@@ -37,7 +47,7 @@ export class ContextManager {
             vscode.window.onDidChangeTextEditorSelection(() => {
                 this.scheduleUpdate();
             }),
-            vscode.window.onDidChangeActiveTextEditor(editor => {
+            vscode.window.onDidChangeActiveTextEditor((editor) => {
                 if (!this.isDisposed) {
                     this.scheduleUpdate();
                     if (editor) {
@@ -46,12 +56,12 @@ export class ContextManager {
                 }
             }),
             // Update decorations when scrolling
-            vscode.window.onDidChangeTextEditorVisibleRanges(e => {
+            vscode.window.onDidChangeTextEditorVisibleRanges((e) => {
                 if (!this.isDisposed && e.textEditor === vscode.window.activeTextEditor) {
                     this.scheduleDecorationUpdate(e.textEditor);
                 }
             }),
-            vscode.workspace.onDidChangeTextDocument(e => {
+            vscode.workspace.onDidChangeTextDocument((e) => {
                 if (this.isDisposed) {
                     return;
                 }
@@ -67,11 +77,11 @@ export class ContextManager {
                 }
             }),
             // Update context when configuration changes
-            vscode.workspace.onDidChangeConfiguration(e => {
+            vscode.workspace.onDidChangeConfiguration((e) => {
                 if (!this.isDisposed && e.affectsConfiguration('lineKing')) {
                     this.scheduleUpdate();
                 }
-            })
+            }),
         );
 
         // Register the disposables with the extension context
@@ -87,9 +97,9 @@ export class ContextManager {
             clearTimeout(this.selectionTimeout);
         }
 
-        this.selectionTimeout = setTimeout(() => {
+        this.selectionTimeout = setTimeout(async () => {
             if (!this.isDisposed) {
-                this.update();
+                await this.update();
             }
         }, TIMING.SELECTION_DEBOUNCE_MS);
     }
@@ -98,14 +108,15 @@ export class ContextManager {
         if (this.isDisposed) {
             return;
         }
-        
+
         if (this.decorationTimeout) {
             clearTimeout(this.decorationTimeout);
         }
-        
-        this.decorationTimeout = setTimeout(() => {
+
+        this.decorationTimeout = setTimeout(async () => {
             if (!this.isDisposed) {
-                updateDecorations(editor);
+                const visualizer = await getVisualizer();
+                visualizer.updateDecorations(editor);
             }
         }, TIMING.DECORATION_DEBOUNCE_MS);
     }
@@ -114,32 +125,31 @@ export class ContextManager {
         if (this.isDisposed) {
             return;
         }
-        
+
         this.isDisposed = true;
 
         if (this.selectionTimeout) {
             clearTimeout(this.selectionTimeout);
             this.selectionTimeout = undefined;
         }
-        
+
         if (this.decorationTimeout) {
             clearTimeout(this.decorationTimeout);
             this.decorationTimeout = undefined;
         }
-        
+
         // Dispose all registered listeners
         for (const disposable of this.disposables) {
             try {
                 disposable.dispose();
-            } catch (error) {
+            } catch {
                 // Silently ignore disposal errors
-                console.error('[Line King] Error disposing context manager resource:', error);
             }
         }
         this.disposables = [];
     }
 
-    public update(): void {
+    public async update(): Promise<void> {
         if (this.isDisposed) {
             return;
         }
@@ -153,15 +163,19 @@ export class ContextManager {
             }
 
             const hasMultipleSelections = editor.selections.length > 1;
-            const hasMultiLineSelection = editor.selections.some(s => s.start.line !== s.end.line);
+            const hasMultiLineSelection = editor.selections.some(
+                (s) => s.start.line !== s.end.line,
+            );
             const isMulti = hasMultipleSelections || hasMultiLineSelection;
 
             this.setContext(CONTEXT_KEYS.IS_MULTI_LINE, isMulti);
 
-            const areCharsVisible = isWhitespaceCharsVisible();
+            // Lazy load visualizer for whitespace check
+            const visualizer = await getVisualizer();
+            const areCharsVisible = visualizer.isWhitespaceCharsVisible();
             this.setContext(CONTEXT_KEYS.ALL_CHARS_VISIBLE, areCharsVisible);
-        } catch (error) {
-            console.error('[Line King] Error updating context:', error);
+        } catch {
+            // Error updating context - silently ignore
         }
     }
 
@@ -170,7 +184,8 @@ export class ContextManager {
             return;
         }
 
-        const cacheKey = key === CONTEXT_KEYS.IS_MULTI_LINE ? 'lastIsMultiLine' : 'lastAllCharsVisible';
+        const cacheKey =
+            key === CONTEXT_KEYS.IS_MULTI_LINE ? 'lastIsMultiLine' : 'lastAllCharsVisible';
         const lastValue = this[cacheKey as 'lastIsMultiLine' | 'lastAllCharsVisible'];
 
         if (value !== lastValue) {

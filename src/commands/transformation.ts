@@ -1,138 +1,223 @@
 import * as vscode from 'vscode';
 import { COMMANDS } from '../constants.js';
-import { getEOL } from '../utils/text-utils.js';
-import * as transformer from '../lib/transformer.js';
 import { createCommandFactory } from './factory.js';
+
+/**
+ * Create a lazy proxy for transformer functions
+ * Ensures the transformer module (and change-case) is only loaded when actually used
+ */
+function createLazyTransformerProxy() {
+    let transformerModule: typeof import('../lib/transformer.js') | null = null;
+
+    const loadTransformer = async () => {
+        if (!transformerModule) {
+            transformerModule = await import('../lib/transformer.js');
+        }
+        return transformerModule;
+    };
+
+    return {
+        transformUpper: async (
+            ...args: Parameters<typeof import('../lib/transformer.js').transformUpper>
+        ) => {
+            const transformer = await loadTransformer();
+            return transformer.transformUpper(...args);
+        },
+        transformLower: async (
+            ...args: Parameters<typeof import('../lib/transformer.js').transformLower>
+        ) => {
+            const transformer = await loadTransformer();
+            return transformer.transformLower(...args);
+        },
+        transformCamel: async (
+            ...args: Parameters<typeof import('../lib/transformer.js').transformCamel>
+        ) => {
+            const transformer = await loadTransformer();
+            return transformer.transformCamel(...args);
+        },
+        transformKebab: async (
+            ...args: Parameters<typeof import('../lib/transformer.js').transformKebab>
+        ) => {
+            const transformer = await loadTransformer();
+            return transformer.transformKebab(...args);
+        },
+        transformSnake: async (
+            ...args: Parameters<typeof import('../lib/transformer.js').transformSnake>
+        ) => {
+            const transformer = await loadTransformer();
+            return transformer.transformSnake(...args);
+        },
+        transformPascal: async (
+            ...args: Parameters<typeof import('../lib/transformer.js').transformPascal>
+        ) => {
+            const transformer = await loadTransformer();
+            return transformer.transformPascal(...args);
+        },
+        transformSentence: async (
+            ...args: Parameters<typeof import('../lib/transformer.js').transformSentence>
+        ) => {
+            const transformer = await loadTransformer();
+            return transformer.transformSentence(...args);
+        },
+        transformTitle: async (
+            ...args: Parameters<typeof import('../lib/transformer.js').transformTitle>
+        ) => {
+            const transformer = await loadTransformer();
+            return transformer.transformTitle(...args);
+        },
+        transformUrlEncode: async (
+            ...args: Parameters<typeof import('../lib/transformer.js').transformUrlEncode>
+        ) => {
+            const transformer = await loadTransformer();
+            return transformer.transformUrlEncode(...args);
+        },
+        transformUrlDecode: async (
+            ...args: Parameters<typeof import('../lib/transformer.js').transformUrlDecode>
+        ) => {
+            const transformer = await loadTransformer();
+            return transformer.transformUrlDecode(...args);
+        },
+        transformBase64Encode: async (
+            ...args: Parameters<typeof import('../lib/transformer.js').transformBase64Encode>
+        ) => {
+            const transformer = await loadTransformer();
+            return transformer.transformBase64Encode(...args);
+        },
+        transformBase64Decode: async (
+            ...args: Parameters<typeof import('../lib/transformer.js').transformBase64Decode>
+        ) => {
+            const transformer = await loadTransformer();
+            return transformer.transformBase64Decode(...args);
+        },
+        transformJsonEscape: async (
+            ...args: Parameters<typeof import('../lib/transformer.js').transformJsonEscape>
+        ) => {
+            const transformer = await loadTransformer();
+            return transformer.transformJsonEscape(...args);
+        },
+        transformJsonUnescape: async (
+            ...args: Parameters<typeof import('../lib/transformer.js').transformJsonUnescape>
+        ) => {
+            const transformer = await loadTransformer();
+            return transformer.transformJsonUnescape(...args);
+        },
+    };
+}
 
 /**
  * Registers all transformation commands (case changes, encoding, etc.)
  * Uses CommandFactory for consistent registration
+ *
+ * PERFORMANCE CRITICAL: transformer module (and change-case) is lazy-loaded
  */
 export function registerTransformationCommands(context: vscode.ExtensionContext): void {
     const factory = createCommandFactory(context);
+    const lazyTransformer = createLazyTransformerProxy();
 
     // Transformation commands DO NOT expand selection (work on exact selection)
-    factory.registerLineCommands([
-        // Case transformations
-        { id: 'lineKing.manipulate.upper', processor: transformer.transformUpper },
-        { id: 'lineKing.manipulate.lower', processor: transformer.transformLower },
-        { id: 'lineKing.manipulate.camel', processor: transformer.transformCamel },
-        { id: 'lineKing.manipulate.kebab', processor: transformer.transformKebab },
-        { id: 'lineKing.manipulate.snake', processor: transformer.transformSnake },
-        { id: 'lineKing.manipulate.pascal', processor: transformer.transformPascal },
-        { id: 'lineKing.manipulate.sentence', processor: transformer.transformSentence },
-        { id: 'lineKing.manipulate.title', processor: transformer.transformTitle },
+    factory.registerLineCommands(
+        [
+            // Case transformations
+            { id: 'lineKing.manipulate.upper', processor: lazyTransformer.transformUpper },
+            { id: 'lineKing.manipulate.lower', processor: lazyTransformer.transformLower },
+            { id: 'lineKing.manipulate.camel', processor: lazyTransformer.transformCamel },
+            { id: 'lineKing.manipulate.kebab', processor: lazyTransformer.transformKebab },
+            { id: 'lineKing.manipulate.snake', processor: lazyTransformer.transformSnake },
+            { id: 'lineKing.manipulate.pascal', processor: lazyTransformer.transformPascal },
+            { id: 'lineKing.manipulate.sentence', processor: lazyTransformer.transformSentence },
+            { id: 'lineKing.manipulate.title', processor: lazyTransformer.transformTitle },
 
-        // Encoding/decoding
-        { id: 'lineKing.dev.urlEncode', processor: transformer.transformUrlEncode },
-        { id: 'lineKing.dev.urlDecode', processor: transformer.transformUrlDecode },
-        { id: 'lineKing.dev.base64Encode', processor: transformer.transformBase64Encode },
-        { id: 'lineKing.dev.base64Decode', processor: transformer.transformBase64Decode },
-        { id: 'lineKing.dev.jsonEscape', processor: transformer.transformJsonEscape },
-        { id: 'lineKing.dev.jsonUnescape', processor: transformer.transformJsonUnescape },
+            // Encoding/Decoding
+            { id: 'lineKing.dev.urlEncode', processor: lazyTransformer.transformUrlEncode },
+            { id: 'lineKing.dev.urlDecode', processor: lazyTransformer.transformUrlDecode },
+            { id: 'lineKing.dev.base64Encode', processor: lazyTransformer.transformBase64Encode },
+            { id: 'lineKing.dev.base64Decode', processor: lazyTransformer.transformBase64Decode },
+            { id: 'lineKing.dev.jsonEscape', processor: lazyTransformer.transformJsonEscape },
+            { id: 'lineKing.dev.jsonUnescape', processor: lazyTransformer.transformJsonUnescape },
+        ],
+        false,
+    ); // expandSelection: false (keep exact selection)
 
-        // Line joining
-        { id: 'lineKing.manipulate.join', processor: transformer.transformJoin },
-    ], false); // expandSelection: false (work on exact selection)
-
-    // Interactive commands (custom handlers)
-    factory.registerAsyncCommands([
-        {
-            id: COMMANDS.SPLIT_LINES,
-            handler: async (editor) => transformer.splitLinesInteractive(editor)
+    // Special commands requiring different handling
+    factory.registerAsyncCommand({
+        id: COMMANDS.DUPLICATE_SELECTION,
+        handler: async (editor) => {
+            // Lazy load text utils
+            const { getEOL } = await import('../utils/text-utils.js');
+            const eol = getEOL(editor.document);
+            await editor.edit((editBuilder) => {
+                editor.selections.forEach((selection) => {
+                    const text = editor.document.getText(selection);
+                    editBuilder.insert(selection.end, eol + text);
+                });
+            });
         },
-        {
-            id: COMMANDS.ALIGN_LINES,
-            handler: async (editor) => transformer.alignToSeparatorInteractive(editor)
-        },
-        {
-            id: COMMANDS.INSERT_SEQUENCE,
-            handler: async (editor) => transformer.insertNumericSequence(editor)
-        },
-        {
-            id: COMMANDS.DUPLICATE_SELECTION,
-            handler: async (editor) => duplicateSelection(editor)
-        }
-    ]);
-}
-
-/**
- * Duplicate selection command - handles multiple selections with offset correction
- */
-async function duplicateSelection(editor: vscode.TextEditor): Promise<void> {
-    const document = editor.document;
-    const selections = [...editor.selections];
-    const eol = getEOL(document);
-    
-    // Group selections by line and track their offsets
-    interface SelectionWithOffset {
-        selection: vscode.Selection;
-        text: string;
-        insertPosition: vscode.Position;
-        isEmpty: boolean;
-        line: number;
-        character: number;
-    }
-    
-    const selectionsWithData: SelectionWithOffset[] = selections.map(selection => {
-        if (selection.isEmpty) {
-            // For empty selections, duplicate the entire line
-            const line = document.lineAt(selection.start.line);
-            return {
-                selection,
-                text: line.text,
-                insertPosition: line.range.end,
-                isEmpty: true,
-                line: selection.start.line,
-                character: line.range.end.character
-            };
-        } else {
-            // For non-empty selections, duplicate the selected text
-            return {
-                selection,
-                text: document.getText(selection),
-                insertPosition: selection.end,
-                isEmpty: false,
-                line: selection.end.line,
-                character: selection.end.character
-            };
-        }
     });
-    
-    // Sort selections: first by line (descending), then by character position (descending)
-    // This ensures we process from bottom-right to top-left
-    selectionsWithData.sort((a, b) => {
-        if (a.line !== b.line) {
-            return b.line - a.line; // Process lower lines first
-        }
-        return b.character - a.character; // Process rightmost positions first on same line
+
+    factory.registerAsyncCommand({
+        id: COMMANDS.SPLIT_LINES,
+        handler: async (editor) => {
+            const separator = await vscode.window.showInputBox({
+                prompt: 'Enter separator character(s) to split on',
+                value: ',',
+                placeHolder: ',',
+            });
+
+            if (separator === undefined) return;
+
+            const { getEOL } = await import('../utils/text-utils.js');
+            const eol = getEOL(editor.document);
+
+            await editor.edit((editBuilder) => {
+                editor.selections.forEach((selection) => {
+                    const text = editor.document.getText(selection);
+                    const lines = text.split(separator).join(eol);
+                    editBuilder.replace(selection, lines);
+                });
+            });
+        },
     });
-    
-    await editor.edit(editBuilder => {
-        // Track cumulative offset adjustments per line
-        const lineOffsets = new Map<number, number>();
-        
-        for (const item of selectionsWithData) {
-            const currentLineOffset = lineOffsets.get(item.line) || 0;
-            
-            if (item.isEmpty) {
-                // Duplicate entire line - insert newline + text
-                // Line duplications don't affect character positions on the same line
-                editBuilder.insert(item.insertPosition, eol + item.text);
-            } else {
-                // Duplicate selection - need to adjust for previous insertions on same line
-                // Create adjusted position accounting for cumulative insertions
-                const adjustedPosition = new vscode.Position(
-                    item.line,
-                    item.character + currentLineOffset
+
+    factory.registerAsyncCommand({
+        id: COMMANDS.ALIGN_LINES,
+        handler: async (editor) => {
+            const separator = await vscode.window.showInputBox({
+                prompt: 'Enter separator to align on',
+                value: '=',
+                placeHolder: '=',
+            });
+
+            if (separator === undefined) return;
+
+            const { applyLineAction } = await import('../utils/editor.js');
+            await applyLineAction(editor, (lines: string[]) => {
+                const parts = lines.map((line) => {
+                    const idx = line.indexOf(separator);
+                    return idx >= 0
+                        ? {
+                              left: line.substring(0, idx),
+                              sep: separator,
+                              right: line.substring(idx + separator.length),
+                          }
+                        : { left: line, sep: '', right: '' };
+                });
+
+                const maxLeft = Math.max(...parts.map((p) => p.left.length));
+
+                return parts.map((p) =>
+                    p.sep ? p.left.padEnd(maxLeft, ' ') + p.sep + p.right : p.left,
                 );
-                
-                editBuilder.insert(adjustedPosition, item.text);
-                
-                // Update the cumulative offset for this line
-                // Each insertion shifts subsequent positions by the length of inserted text
-                lineOffsets.set(item.line, currentLineOffset + item.text.length);
-            }
-        }
+            });
+        },
+    });
+
+    factory.registerAsyncCommand({
+        id: COMMANDS.INSERT_SEQUENCE,
+        handler: async (editor) => {
+            const { applyLineAction } = await import('../utils/editor.js');
+            await applyLineAction(editor, (lines: string[]) => {
+                return lines.map((line, idx) => `${idx + 1}${line}`);
+            });
+        },
     });
 }
