@@ -33,10 +33,10 @@ export function splitLines(text: string): string[] {
 /**
  * Memory-efficient line iterator for large texts
  * Yields lines one at a time without creating a massive array
- * 
+ *
  * @param text - The text to split into lines
  * @yields Individual lines without line endings
- * 
+ *
  * Example:
  * ```typescript
  * for (const line of streamLines(text)) {
@@ -50,20 +50,20 @@ export function* streamLines(text: string): Generator<string, void, undefined> {
     let start = 0;
     let pos = 0;
     const len = text.length;
-    
+
     while (pos < len) {
         const char = text[pos];
-        
+
         if (char === '\n') {
             // Check for \r\n (CRLF)
-            const end = (pos > 0 && text[pos - 1] === '\r') ? pos - 1 : pos;
+            const end = pos > 0 && text[pos - 1] === '\r' ? pos - 1 : pos;
             yield text.substring(start, end);
             start = pos + 1;
         }
-        
+
         pos++;
     }
-    
+
     // Yield the last line if there's content after the last newline
     if (start < len) {
         yield text.substring(start);
@@ -85,52 +85,45 @@ export function splitLinesAuto(text: string): string[] | Generator<string, void,
 
 /**
  * Collects lines from a generator into an array
- * Only use when you actually need the full array in memory
+ * Only use when you actually need full array in memory
  */
 export function collectLines(lineIterator: Generator<string, void, undefined>): string[] {
     return Array.from(lineIterator);
 }
 
 /**
- * Joins lines using the appropriate line ending for the document
- */
-export function joinLines(lines: string[], document: vscode.TextDocument): string {
-    return lines.join(getEOL(document));
-}
-
-/**
  * Memory-efficient line joining for large arrays
  * Uses chunks to reduce memory pressure during concatenation
- * 
+ *
  * @param lines - Array or iterable of lines
  * @param eol - End of line string
  * @param chunkSize - Number of lines to join at once (default: 10000)
  */
 export function joinLinesEfficient(
-    lines: Iterable<string>, 
-    eol: string, 
-    chunkSize: number = 10000
+    lines: Iterable<string>,
+    eol: string,
+    chunkSize: number = 10000,
 ): string {
     const chunks: string[] = [];
     let currentChunk: string[] = [];
     let count = 0;
-    
+
     for (const line of lines) {
         currentChunk.push(line);
         count++;
-        
+
         if (count >= chunkSize) {
             chunks.push(currentChunk.join(eol));
             currentChunk = [];
             count = 0;
         }
     }
-    
+
     // Add remaining lines
     if (currentChunk.length > 0) {
         chunks.push(currentChunk.join(eol));
     }
-    
+
     return chunks.join(eol);
 }
 
