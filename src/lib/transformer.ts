@@ -4,7 +4,7 @@ import {
     kebabCase,
     pascalCase,
     sentenceCase,
-    snakeCase
+    snakeCase,
 } from 'change-case';
 import * as vscode from 'vscode';
 import { applyLineAction, getJoinSeparator } from '../utils/editor.js';
@@ -33,41 +33,41 @@ function base64Decode(str: string): string {
 // --- Case Transformers ---
 
 export function transformUpper(lines: string[]): string[] {
-    return lines.map(l => l.toUpperCase());
+    return lines.map((l) => l.toUpperCase());
 }
 
 export function transformLower(lines: string[]): string[] {
-    return lines.map(l => l.toLowerCase());
+    return lines.map((l) => l.toLowerCase());
 }
 
 export function transformCamel(lines: string[]): string[] {
-    return lines.map(l => camelCase(l));
+    return lines.map((l) => camelCase(l));
 }
 
 export function transformKebab(lines: string[]): string[] {
-    return lines.map(l => kebabCase(l));
+    return lines.map((l) => kebabCase(l));
 }
 
 export function transformSnake(lines: string[]): string[] {
-    return lines.map(l => snakeCase(l));
+    return lines.map((l) => snakeCase(l));
 }
 
 export function transformPascal(lines: string[]): string[] {
-    return lines.map(l => pascalCase(l));
+    return lines.map((l) => pascalCase(l));
 }
 
 export function transformSentence(lines: string[]): string[] {
-    return lines.map(l => sentenceCase(l));
+    return lines.map((l) => sentenceCase(l));
 }
 
 export function transformTitle(lines: string[]): string[] {
-    return lines.map(l => capitalCase(l));
+    return lines.map((l) => capitalCase(l));
 }
 
 // --- Encoding Transformers ---
 
 export function transformUrlEncode(lines: string[]): string[] {
-    return lines.map(l => {
+    return lines.map((l) => {
         try {
             return encodeURIComponent(l);
         } catch {
@@ -77,7 +77,7 @@ export function transformUrlEncode(lines: string[]): string[] {
 }
 
 export function transformUrlDecode(lines: string[]): string[] {
-    return lines.map(l => {
+    return lines.map((l) => {
         try {
             return decodeURIComponent(l);
         } catch {
@@ -87,7 +87,7 @@ export function transformUrlDecode(lines: string[]): string[] {
 }
 
 export function transformBase64Encode(lines: string[]): string[] {
-    return lines.map(l => {
+    return lines.map((l) => {
         try {
             return base64Encode(l);
         } catch {
@@ -97,7 +97,7 @@ export function transformBase64Encode(lines: string[]): string[] {
 }
 
 export function transformBase64Decode(lines: string[]): string[] {
-    return lines.map(l => {
+    return lines.map((l) => {
         try {
             return base64Decode(l);
         } catch {
@@ -107,7 +107,7 @@ export function transformBase64Decode(lines: string[]): string[] {
 }
 
 export function transformJsonEscape(lines: string[]): string[] {
-    return lines.map(l => {
+    return lines.map((l) => {
         try {
             return JSON.stringify(l).slice(1, -1);
         } catch {
@@ -117,17 +117,91 @@ export function transformJsonEscape(lines: string[]): string[] {
 }
 
 export function transformJsonUnescape(lines: string[]): string[] {
-    return lines.map(l => {
+    return lines.map((l) => {
         try {
             return JSON.parse(`"${l}"`);
         } catch {
             try {
                 return JSON.parse(l);
             } catch {
-                return l;
+                return unescapeJsonString(l);
             }
         }
     });
+}
+
+/**
+ * Unescapes a JSON string using a robust state machine
+ * Handles edge cases with double quotes and control characters
+ */
+function unescapeJsonString(str: string): string {
+    let result = '';
+    let i = 0;
+    const len = str.length;
+
+    while (i < len) {
+        const char = str[i];
+
+        if (char === '\\' && i + 1 < len) {
+            const nextChar = str[i + 1];
+            switch (nextChar) {
+                case '"':
+                    result += '"';
+                    i += 2;
+                    break;
+                case '\\':
+                    result += '\\';
+                    i += 2;
+                    break;
+                case '/':
+                    result += '/';
+                    i += 2;
+                    break;
+                case 'b':
+                    result += '\b';
+                    i += 2;
+                    break;
+                case 'f':
+                    result += '\f';
+                    i += 2;
+                    break;
+                case 'n':
+                    result += '\n';
+                    i += 2;
+                    break;
+                case 'r':
+                    result += '\r';
+                    i += 2;
+                    break;
+                case 't':
+                    result += '\t';
+                    i += 2;
+                    break;
+                case 'u':
+                    if (i + 5 < len) {
+                        const hex = str.slice(i + 2, i + 6);
+                        const codePoint = parseInt(hex, 16);
+                        if (!isNaN(codePoint)) {
+                            result += String.fromCharCode(codePoint);
+                            i += 6;
+                            break;
+                        }
+                    }
+                    result += char;
+                    i++;
+                    break;
+                default:
+                    result += char;
+                    i++;
+                    break;
+            }
+        } else {
+            result += char;
+            i++;
+        }
+    }
+
+    return result;
 }
 
 // --- Join / Split / Align ---
@@ -143,7 +217,7 @@ export function transformJoin(lines: string[]): string[] {
 export async function splitLinesInteractive(editor: vscode.TextEditor): Promise<void> {
     const separator = await vscode.window.showInputBox({
         prompt: 'Enter the separator to split by',
-        placeHolder: 'e.g. "," or "|" or " "'
+        placeHolder: 'e.g. "," or "|" or " "',
     });
 
     if (separator === undefined || separator === '') {
@@ -175,7 +249,7 @@ export async function insertNumericSequence(editor: vscode.TextEditor): Promise<
 export async function alignToSeparatorInteractive(editor: vscode.TextEditor): Promise<void> {
     const separator = await vscode.window.showInputBox({
         prompt: 'Enter separator to align',
-        placeHolder: 'e.g. "=" or ":" or ","'
+        placeHolder: 'e.g. "=" or ":" or ","',
     });
 
     if (separator === undefined || separator === '') {
@@ -185,7 +259,7 @@ export async function alignToSeparatorInteractive(editor: vscode.TextEditor): Pr
     await applyLineAction(editor, (lines) => {
         // Find max position of separator
         let maxPos = 0;
-        const splitLines = lines.map(line => {
+        const splitLines = lines.map((line) => {
             const idx = line.indexOf(separator);
             if (idx !== -1 && idx > maxPos) {
                 maxPos = idx;
@@ -194,7 +268,7 @@ export async function alignToSeparatorInteractive(editor: vscode.TextEditor): Pr
         });
 
         // Pad each line to align separators
-        return splitLines.map(item => {
+        return splitLines.map((item) => {
             if (item.idx === -1) {
                 return item.line;
             }
