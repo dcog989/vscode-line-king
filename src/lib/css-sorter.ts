@@ -13,10 +13,17 @@ interface SortOptions {
 }
 
 /**
- * Threshold for using selection-only processing (in characters)
- * If document is larger than this and user has a selection, only process the selection
+ * Threshold for using selection-only processing (in lines)
+ * If document is larger than this, only process selection or current rule block
+ * This matches the LARGE_FILE_THRESHOLD in editor.ts for consistency
  */
-const SELECTION_OPTIMIZATION_THRESHOLD = 50000; // 50KB
+const SELECTION_OPTIMIZATION_THRESHOLD = 50000;
+
+/**
+ * Maximum safe size for PostCSS processing (in lines)
+ * For larger files, we show a warning to avoid potential memory issues
+ */
+const MAX_SAFE_CSS_LINES = 100000;
 
 /**
  * PostCSS plugin to sort CSS declarations within rules
@@ -191,14 +198,27 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
     const selection = editor.selection;
     const strategy = configCache.getCssSortStrategy();
     const documentText = document.getText();
-    const documentSize = documentText.length;
+    const lineCount = document.lineCount;
+
+    // Warn for extremely large files
+    if (lineCount > MAX_SAFE_CSS_LINES) {
+        const continueProcessing = await vscode.window.showWarningMessage(
+            `This CSS file is very large (${lineCount.toLocaleString()} lines). Processing may be slow or cause memory issues. Consider selecting a specific section instead.`,
+            'Continue Anyway',
+            'Cancel',
+        );
+        if (continueProcessing !== 'Continue Anyway') {
+            return;
+        }
+    }
 
     try {
         let textToProcess: string;
         let rangeToReplace: vscode.Range;
 
-        // Optimization: For large files, only process the selection or current rule block
-        if (documentSize > SELECTION_OPTIMIZATION_THRESHOLD) {
+        // Optimization: For large files, only process selection or current rule block
+        // This matches the LARGE_FILE_THRESHOLD in editor.ts for consistency
+        if (lineCount > SELECTION_OPTIMIZATION_THRESHOLD) {
             if (!selection.isEmpty) {
                 // User has selected text - only process the selection
                 const startLine = document.lineAt(selection.start.line);
