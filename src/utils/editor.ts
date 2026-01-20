@@ -3,7 +3,7 @@ import { CONFIG } from '../constants.js';
 import { configCache } from './config-cache.js';
 import { getEOL, joinLinesEfficient, shouldUseStreaming, streamLines } from './text-utils.js';
 
-type LineProcessor = (lines: string[]) => string[];
+type LineProcessor = (lines: string[]) => string[] | Promise<string[]>;
 type StreamLineProcessor = (lines: Iterable<string>) => Generator<string, void, undefined>;
 
 export interface LineActionOptions {
@@ -86,7 +86,7 @@ export async function applyLineAction(
                 }
             } else {
                 const lines = text.split(eol === '\r\n' ? '\r\n' : '\n');
-                const processedLines = processor(lines);
+                const processedLines = await Promise.resolve(processor(lines));
                 const newText = processedLines.join(eol);
 
                 if (text !== newText) {
@@ -110,7 +110,7 @@ export async function applyLineAction(
 
         // For smaller files, use the standard in-memory approach
         const lines = text.split(eol === '\r\n' ? '\r\n' : '\n');
-        const processedLines = processor(lines);
+        const processedLines = await Promise.resolve(processor(lines));
         const newText = processedLines.join(eol);
 
         // Only add to changes if text actually changed
@@ -201,7 +201,7 @@ async function processTextStreaming(
     } else {
         // Fall back to standard array processing
         const lines = text.split(eol === '\r\n' ? '\r\n' : '\n');
-        const processedLines = processor(lines);
+        const processedLines = await Promise.resolve(processor(lines));
         return processedLines.join(eol);
     }
 }
@@ -244,7 +244,7 @@ async function processLargeDocument(
     }
 
     // Process the lines
-    const processedLines = processor(allLines);
+    const processedLines = await Promise.resolve(processor(allLines));
 
     // Check if anything changed (early exit optimization)
     if (allLines.length === processedLines.length) {

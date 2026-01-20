@@ -7,8 +7,8 @@ import { applyLineAction, type LineActionOptions } from '../utils/editor.js';
 interface CommandConfig {
     /** Command identifier */
     id: string;
-    /** Line processing function */
-    processor: (lines: string[]) => string[];
+    /** Line processing function (can be sync or async) */
+    processor: (lines: string[]) => string[] | Promise<string[]>;
     /** Whether to expand selection to full lines (default: true) */
     expandSelection?: boolean;
 }
@@ -32,9 +32,9 @@ export class CommandFactory {
 
     /**
      * Register a single line-based command
-     * 
+     *
      * @param config Command configuration
-     * 
+     *
      * Example:
      * ```typescript
      * factory.registerLineCommand({
@@ -46,23 +46,23 @@ export class CommandFactory {
      */
     public registerLineCommand(config: CommandConfig): void {
         const options: LineActionOptions = {
-            expandSelection: config.expandSelection ?? true
+            expandSelection: config.expandSelection ?? true,
         };
 
         this.context.subscriptions.push(
             vscode.commands.registerTextEditorCommand(config.id, (editor) => {
                 return applyLineAction(editor, config.processor, options);
-            })
+            }),
         );
     }
 
     /**
      * Register multiple line-based commands at once
      * All commands use the same expandSelection setting
-     * 
+     *
      * @param commands Array of command configurations
      * @param expandSelection Default expand selection for all commands (default: true)
-     * 
+     *
      * Example:
      * ```typescript
      * factory.registerLineCommands([
@@ -73,12 +73,12 @@ export class CommandFactory {
      */
     public registerLineCommands(
         commands: Array<Omit<CommandConfig, 'expandSelection'>>,
-        expandSelection: boolean = true
+        expandSelection: boolean = true,
     ): void {
         for (const cmd of commands) {
             this.registerLineCommand({
                 ...cmd,
-                expandSelection
+                expandSelection,
             });
         }
     }
@@ -86,9 +86,9 @@ export class CommandFactory {
     /**
      * Register a custom async command handler
      * Use this for commands that don't follow the standard line-processing pattern
-     * 
+     *
      * @param config Async command configuration
-     * 
+     *
      * Example:
      * ```typescript
      * factory.registerAsyncCommand({
@@ -102,13 +102,13 @@ export class CommandFactory {
             vscode.commands.registerTextEditorCommand(config.id, async (editor) => {
                 if (!editor || !editor.document) return;
                 return config.handler(editor);
-            })
+            }),
         );
     }
 
     /**
      * Register multiple async commands at once
-     * 
+     *
      * @param commands Array of async command configurations
      */
     public registerAsyncCommands(commands: AsyncCommandConfig[]): void {
@@ -120,7 +120,7 @@ export class CommandFactory {
 
 /**
  * Create a command factory instance
- * 
+ *
  * @param context Extension context
  * @returns CommandFactory instance
  */

@@ -181,33 +181,8 @@ export function registerTransformationCommands(context: vscode.ExtensionContext)
     factory.registerAsyncCommand({
         id: COMMANDS.ALIGN_LINES,
         handler: async (editor) => {
-            const separator = await vscode.window.showInputBox({
-                prompt: 'Enter separator to align on',
-                value: '=',
-                placeHolder: '=',
-            });
-
-            if (separator === undefined) return;
-
-            const { applyLineAction } = await import('../utils/editor.js');
-            await applyLineAction(editor, (lines: string[]) => {
-                const parts = lines.map((line) => {
-                    const idx = line.indexOf(separator);
-                    return idx >= 0
-                        ? {
-                              left: line.substring(0, idx),
-                              sep: separator,
-                              right: line.substring(idx + separator.length),
-                          }
-                        : { left: line, sep: '', right: '' };
-                });
-
-                const maxLeft = Math.max(...parts.map((p) => p.left.length));
-
-                return parts.map((p) =>
-                    p.sep ? p.left.padEnd(maxLeft, ' ') + p.sep + p.right : p.left,
-                );
-            });
+            const { alignToSeparatorInteractive } = await import('../lib/transformer.js');
+            await alignToSeparatorInteractive(editor);
         },
     });
 
