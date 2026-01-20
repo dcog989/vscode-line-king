@@ -64,17 +64,26 @@ function logMetrics(): void {
         return;
     }
 
+    console.log('--- Performance Metrics ---');
+
     if (metrics.activationDuration !== undefined) {
-        const _score = getPerformanceScore(metrics.activationDuration, 'activation');
+        const score = getPerformanceScore(metrics.activationDuration, 'activation');
+        console.log(`Extension Activation: ${metrics.activationDuration.toFixed(2)}ms ${score}`);
     }
 
     if (metrics.configLoadDuration !== undefined) {
-        // Config load metrics are collected but not currently used
+        const score = getPerformanceScore(metrics.configLoadDuration, 'config');
+        console.log(`Config Load: ${metrics.configLoadDuration.toFixed(2)}ms ${score}`);
     }
 
     if (metrics.commandRegistrationDuration !== undefined) {
-        // Command registration metrics are collected but not currently used
+        const score = getPerformanceScore(metrics.commandRegistrationDuration, 'command');
+        console.log(
+            `Command Registration: ${metrics.commandRegistrationDuration.toFixed(2)}ms ${score}`,
+        );
     }
+
+    console.log('-------------------------');
 }
 
 /**
