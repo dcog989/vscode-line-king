@@ -21,7 +21,7 @@ const LARGE_FILE_THRESHOLD = 50000;
  * Threshold for using streaming processing (in bytes)
  * Files larger than 1MB will use streaming to minimize memory allocations
  */
-const STREAMING_THRESHOLD = 1024 * 1024;
+const _STREAMING_THRESHOLD = 1024 * 1024;
 
 /**
  * Applies a transformation function to selected lines or the entire document
@@ -40,7 +40,7 @@ const STREAMING_THRESHOLD = 1024 * 1024;
 export async function applyLineAction(
     editor: vscode.TextEditor,
     processor: LineProcessor,
-    options: LineActionOptions = { expandSelection: true }
+    options: LineActionOptions = { expandSelection: true },
 ): Promise<void> {
     const document = editor.document;
     const selections = editor.selections;
@@ -52,6 +52,11 @@ export async function applyLineAction(
 
     // Collect changes before applying to avoid marking document as changed if nothing changes
     const changes: Array<{ range: vscode.Range; newText: string }> = [];
+    // Map original selections to their corresponding changes for updating selections later
+    const selectionChangeMap = new Map<
+        vscode.Selection,
+        { range: vscode.Range; newText: string }
+    >();
     let hasSelection = false;
 
     for (const selection of sortedSelections) {
@@ -77,6 +82,7 @@ export async function applyLineAction(
                 const newText = await processTextStreaming(text, processor, eol);
                 if (text !== newText) {
                     changes.push({ range, newText });
+                    selectionChangeMap.set(selection, { range, newText });
                 }
             } else {
                 const lines = text.split(eol === '\r\n' ? '\r\n' : '\n');
@@ -85,6 +91,7 @@ export async function applyLineAction(
 
                 if (text !== newText) {
                     changes.push({ range, newText });
+                    selectionChangeMap.set(selection, { range, newText });
                 }
             }
         }
@@ -110,7 +117,7 @@ export async function applyLineAction(
         if (text !== newText) {
             const fullRange = new vscode.Range(
                 document.positionAt(0),
-                document.positionAt(text.length)
+                document.positionAt(text.length),
             );
             changes.push({ range: fullRange, newText });
         }
@@ -118,11 +125,44 @@ export async function applyLineAction(
 
     // Only perform edit if there are actual changes
     if (changes.length > 0) {
-        await editor.edit(editBuilder => {
+        await editor.edit((editBuilder) => {
             for (const change of changes) {
                 editBuilder.replace(change.range, change.newText);
             }
         });
+
+        // Update selections to maintain focus on modified content
+        const newSelections: vscode.Selection[] = [];
+        for (const selection of selections) {
+            const change = selectionChangeMap.get(selection);
+            if (change) {
+                // Calculate new selection range based on the transformed text
+                const newTextLines = change.newText.split(eol === '\r\n' ? '\r\n' : '\n');
+                const startLine = document.lineAt(change.range.start.line);
+
+                // The new selection starts at the same position as the original range start
+                const newStart = startLine.range.start;
+
+                // Calculate the end position based on the number of lines in the new text
+                if (newTextLines.length === 1) {
+                    // Single line result - select the entire line content
+                    const lineText = document.lineAt(change.range.start.line).text;
+                    const newEnd = new vscode.Position(change.range.start.line, lineText.length);
+                    newSelections.push(new vscode.Selection(newStart, newEnd));
+                } else {
+                    // Multiple lines - select from start to end of last line
+                    const lastLineNum = change.range.start.line + newTextLines.length - 1;
+                    const lastLine = document.lineAt(lastLineNum);
+                    const newEnd = lastLine.range.end;
+                    newSelections.push(new vscode.Selection(newStart, newEnd));
+                }
+            } else {
+                // No change for this selection, keep it as is
+                newSelections.push(selection);
+            }
+        }
+
+        editor.selections = newSelections;
     }
 }
 
@@ -133,9 +173,8 @@ export async function applyLineAction(
 async function processTextStreaming(
     text: string,
     processor: LineProcessor,
-    eol: string
+    eol: string,
 ): Promise<string> {
-
     // Check if the processor has a streaming variant
     const processorName = processor.name;
     let streamProcessor: StreamLineProcessor | null = null;
@@ -146,9 +185,11 @@ async function processTextStreaming(
         const streamFunctionName = `${processorName}Stream`;
 
         if (streamFunctionName in cleanerModule) {
-            streamProcessor = (cleanerModule as any)[streamFunctionName];
+            streamProcessor = (cleanerModule as { [key: string]: unknown })[
+                streamFunctionName
+            ] as StreamLineProcessor;
         }
-    } catch (error) {
+    } catch {
         // Streaming version not available, fall back to array processing
     }
 
@@ -172,7 +213,7 @@ async function processTextStreaming(
 async function processLargeDocument(
     editor: vscode.TextEditor,
     processor: LineProcessor,
-    eol: string
+    eol: string,
 ): Promise<void> {
     const document = editor.document;
     const lineCount = document.lineCount;
@@ -184,10 +225,10 @@ async function processLargeDocument(
 
         // Check if anything changed
         if (text !== newText) {
-            await editor.edit(editBuilder => {
+            await editor.edit((editBuilder) => {
                 const fullRange = new vscode.Range(
                     document.positionAt(0),
-                    document.positionAt(text.length)
+                    document.positionAt(text.length),
                 );
                 editBuilder.replace(fullRange, newText);
             });
@@ -220,10 +261,10 @@ async function processLargeDocument(
     }
 
     // Apply changes - replace entire document
-    await editor.edit(editBuilder => {
+    await editor.edit((editBuilder) => {
         const fullRange = new vscode.Range(
             document.positionAt(0),
-            document.positionAt(text.length)
+            document.positionAt(text.length),
         );
         editBuilder.replace(fullRange, processedLines.join(eol));
     });
