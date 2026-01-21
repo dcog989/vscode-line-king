@@ -8,7 +8,7 @@ describe('CSS Property Sorting', () => {
                 'display: flex;',
                 'margin: 0;',
                 'padding: 1rem;',
-                'color: red;'
+                'color: red;',
             ];
 
             const sorted = [...properties].sort((a, b) => {
@@ -22,7 +22,7 @@ describe('CSS Property Sorting', () => {
                 'display: flex;',
                 'margin: 0;',
                 'padding: 1rem;',
-                'z-index: 10;'
+                'z-index: 10;',
             ]);
         });
     });
@@ -33,7 +33,7 @@ describe('CSS Property Sorting', () => {
                 'background-color: rgba(0, 0, 0, 0.5);',
                 'color: red;',
                 'display: flex;',
-                'z-index: 10;'
+                'z-index: 10;',
             ];
 
             const sorted = [...properties].sort((a, b) => {
@@ -46,7 +46,6 @@ describe('CSS Property Sorting', () => {
     });
 
     describe('Property Detection', () => {
-        // Updated regex to be more strict
         const PROPERTY_REGEX = /^\s{2,}[-a-z]+(?:-[a-z0-9]+)*\s*:\s*[^:;{}]+;?\s*$/i;
 
         it('should identify valid CSS properties with indentation', () => {
@@ -57,7 +56,7 @@ describe('CSS Property Sorting', () => {
 
         it('should reject properties without proper indentation', () => {
             assert.strictEqual(PROPERTY_REGEX.test('color: red;'), false);
-            assert.strictEqual(PROPERTY_REGEX.test(' color: red;'), false); // Only 1 space
+            assert.strictEqual(PROPERTY_REGEX.test(' color: red;'), false);
         });
 
         it('should reject non-property lines', () => {
@@ -72,7 +71,8 @@ describe('CSS Property Sorting', () => {
     });
 
     describe('CSS Value Pattern Validation', () => {
-        const CSS_VALUE_PATTERN = /(?:[\d.]+(?:px|em|rem|%|vh|vw|ex|ch|cm|mm|in|pt|pc|deg|rad|turn|s|ms)?|#[0-9a-f]{3,8}|rgba?|hsla?|var\(|calc\(|url\(|['"]|\b(?:auto|none|inherit|initial|unset|normal|bold|italic|flex|block|inline|absolute|relative|fixed|hidden|visible|transparent|currentColor)\b)/i;
+        const CSS_VALUE_PATTERN =
+            /(?:[\d.]+(?:px|em|rem|%|vh|vw|ex|ch|cm|mm|in|pt|pc|deg|rad|turn|s|ms)?|#[0-9a-f]{3,8}|rgba?|hsla?|var\(|calc\(|url\(|['"]|\b(?:auto|none|inherit|initial|unset|normal|bold|italic|flex|block|inline|absolute|relative|fixed|hidden|visible|transparent|currentColor|red|blue|white|black)\b)/i;
 
         it('should recognize valid CSS values with units', () => {
             assert.ok(CSS_VALUE_PATTERN.test('10px'));
@@ -86,6 +86,7 @@ describe('CSS Property Sorting', () => {
             assert.ok(CSS_VALUE_PATTERN.test('#ffffff'));
             assert.ok(CSS_VALUE_PATTERN.test('rgba(0, 0, 0, 0.5)'));
             assert.ok(CSS_VALUE_PATTERN.test('rgb(255, 0, 0)'));
+            assert.ok(CSS_VALUE_PATTERN.test('red'));
         });
 
         it('should recognize CSS functions', () => {
@@ -109,10 +110,10 @@ describe('CSS Property Sorting', () => {
     });
 
     describe('False Positive Prevention', () => {
-        // Simulate the validation function
         const validateCSSProperty = (line: string): boolean => {
             const PROPERTY_REGEX = /^\s{2,}[-a-z]+(?:-[a-z0-9]+)*\s*:\s*[^:;{}]+;?\s*$/i;
-            const CSS_VALUE_PATTERN = /(?:[\d.]+(?:px|em|rem|%|vh|vw|ex|ch|cm|mm|in|pt|pc|deg|rad|turn|s|ms)?|#[0-9a-f]{3,8}|rgba?|hsla?|var\(|calc\(|url\(|['"]|\b(?:auto|none|inherit|initial|unset|normal|bold|italic|flex|block|inline|absolute|relative|fixed|hidden|visible|transparent|currentColor)\b)/i;
+            const CSS_VALUE_PATTERN =
+                /(?:[\d.]+(?:px|em|rem|%|vh|vw|ex|ch|cm|mm|in|pt|pc|deg|rad|turn|s|ms)?|#[0-9a-f]{3,8}|rgba?|hsla?|var\(|calc\(|url\(|['"]|\b(?:auto|none|inherit|initial|unset|normal|bold|italic|flex|block|inline|absolute|relative|fixed|hidden|visible|transparent|currentColor|red|blue|white|black)\b)/i;
 
             if (!PROPERTY_REGEX.test(line)) {
                 return false;
@@ -170,21 +171,22 @@ describe('CSS Property Sorting', () => {
         });
 
         it('should reject values with too much whitespace (prose)', () => {
-            assert.strictEqual(validateCSSProperty('  description: this is   a long description'), false);
+            assert.strictEqual(
+                validateCSSProperty('  description: this is   a long description'),
+                false,
+            );
         });
     });
 
     describe('Comment Preservation', () => {
         it('should preserve comments when sorting', () => {
-            // Simulate the sorting logic that should preserve comments
             const lines = [
                 'z-index: 10;',
                 '/* Important comment */',
                 'display: flex;',
-                'color: red;'
+                'color: red;',
             ];
 
-            // Mock implementation: separate declarations from comments
             const declarations: string[] = [];
             const comments: Array<{ content: string; afterIndex: number }> = [];
 
@@ -196,18 +198,15 @@ describe('CSS Property Sorting', () => {
                 }
             });
 
-            // Sort declarations
             const sortedDecls = [...declarations].sort((a, b) => {
                 const propA = a.split(':')[0].trim();
                 const propB = b.split(':')[0].trim();
                 return propA.localeCompare(propB);
             });
 
-            // Comments should still exist
             assert.strictEqual(comments.length, 1);
             assert.ok(comments[0].content.includes('Important comment'));
-            
-            // Sorted declarations should be in alphabetical order
+
             assert.strictEqual(sortedDecls[0], 'color: red;');
             assert.strictEqual(sortedDecls[1], 'display: flex;');
             assert.strictEqual(sortedDecls[2], 'z-index: 10;');
@@ -215,12 +214,8 @@ describe('CSS Property Sorting', () => {
 
         it('should handle inline comments', () => {
             const line = 'color: red; /* inline comment */';
-            
-            // Verify the line is still recognized as a property
             const hasProperty = line.includes(':') && line.includes(';');
             assert.ok(hasProperty);
-            
-            // Verify comment is preserved in the line
             assert.ok(line.includes('/* inline comment */'));
         });
     });
@@ -232,20 +227,19 @@ describe('CSS Property Sorting', () => {
                 '/* This is a comment */',
                 'display: flex;',
                 '// Another comment',
-                'color: red;'
+                'color: red;',
             ];
 
-            // Count declarations vs non-declarations
-            const declarationCount = input.filter(line => 
-                line.includes(':') && 
-                line.includes(';') && 
-                !line.trim().startsWith('/*') &&
-                !line.trim().startsWith('//')
+            const declarationCount = input.filter(
+                (line) =>
+                    line.includes(':') &&
+                    line.includes(';') &&
+                    !line.trim().startsWith('/*') &&
+                    !line.trim().startsWith('//'),
             ).length;
 
-            const commentCount = input.filter(line => 
-                line.trim().startsWith('/*') || 
-                line.trim().startsWith('//')
+            const commentCount = input.filter(
+                (line) => line.trim().startsWith('/*') || line.trim().startsWith('//'),
             ).length;
 
             assert.strictEqual(declarationCount, 3, 'Should have 3 declarations');

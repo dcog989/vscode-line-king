@@ -1,65 +1,6 @@
 import * as vscode from 'vscode';
 import { createCommandFactory } from './factory.js';
-
-/**
- * Create a lazy proxy for cleaner functions
- * Ensures the cleaner module is only loaded when actually used
- */
-function createLazyCleanerProxy() {
-    let cleanerModule: typeof import('../lib/cleaner.js') | null = null;
-
-    const loadCleaner = async () => {
-        if (!cleanerModule) {
-            cleanerModule = await import('../lib/cleaner.js');
-        }
-        return cleanerModule;
-    };
-
-    return {
-        removeBlankLines: async (
-            ...args: Parameters<typeof import('../lib/cleaner.js').removeBlankLines>
-        ) => {
-            const cleaner = await loadCleaner();
-            return cleaner.removeBlankLines(...args);
-        },
-        condenseBlankLines: async (
-            ...args: Parameters<typeof import('../lib/cleaner.js').condenseBlankLines>
-        ) => {
-            const cleaner = await loadCleaner();
-            return cleaner.condenseBlankLines(...args);
-        },
-        removeDuplicateLines: async (
-            ...args: Parameters<typeof import('../lib/cleaner.js').removeDuplicateLines>
-        ) => {
-            const cleaner = await loadCleaner();
-            return cleaner.removeDuplicateLines(...args);
-        },
-        keepOnlyDuplicates: async (
-            ...args: Parameters<typeof import('../lib/cleaner.js').keepOnlyDuplicates>
-        ) => {
-            const cleaner = await loadCleaner();
-            return cleaner.keepOnlyDuplicates(...args);
-        },
-        trimTrailingWhitespace: async (
-            ...args: Parameters<typeof import('../lib/cleaner.js').trimTrailingWhitespace>
-        ) => {
-            const cleaner = await loadCleaner();
-            return cleaner.trimTrailingWhitespace(...args);
-        },
-        trimLeadingWhitespace: async (
-            ...args: Parameters<typeof import('../lib/cleaner.js').trimLeadingWhitespace>
-        ) => {
-            const cleaner = await loadCleaner();
-            return cleaner.trimLeadingWhitespace(...args);
-        },
-        trimBothEnds: async (
-            ...args: Parameters<typeof import('../lib/cleaner.js').trimBothEnds>
-        ) => {
-            const cleaner = await loadCleaner();
-            return cleaner.trimBothEnds(...args);
-        },
-    };
-}
+import { createLazyProxy } from '../utils/lazy-proxy.js';
 
 /**
  * Registers all cleaning/tidying commands
@@ -69,7 +10,7 @@ function createLazyCleanerProxy() {
  */
 export function registerCleaningCommands(context: vscode.ExtensionContext): void {
     const factory = createCommandFactory(context);
-    const lazyCleaner = createLazyCleanerProxy();
+    const lazyCleaner = createLazyProxy<typeof import('../lib/cleaner.js')>('../lib/cleaner.js');
 
     // All cleaning commands expand selection to full lines by default
     factory.registerLineCommands(

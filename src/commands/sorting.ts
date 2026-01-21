@@ -1,82 +1,7 @@
 import * as vscode from 'vscode';
 import { COMMANDS } from '../constants.js';
 import { createCommandFactory } from './factory.js';
-
-/**
- * Create a lazy proxy for sorter functions
- * This ensures the sorter module is only loaded when actually used
- */
-function createLazySorterProxy() {
-    let sorterModule: typeof import('../lib/sorter.js') | null = null;
-
-    const loadSorter = async () => {
-        if (!sorterModule) {
-            sorterModule = await import('../lib/sorter.js');
-        }
-        return sorterModule;
-    };
-
-    return {
-        sortAsc: async (...args: Parameters<typeof import('../lib/sorter.js').sortAsc>) => {
-            const sorter = await loadSorter();
-            return sorter.sortAsc(...args);
-        },
-        sortAscInsensitive: async (
-            ...args: Parameters<typeof import('../lib/sorter.js').sortAscInsensitive>
-        ) => {
-            const sorter = await loadSorter();
-            return sorter.sortAscInsensitive(...args);
-        },
-        sortDesc: async (...args: Parameters<typeof import('../lib/sorter.js').sortDesc>) => {
-            const sorter = await loadSorter();
-            return sorter.sortDesc(...args);
-        },
-        sortDescInsensitive: async (
-            ...args: Parameters<typeof import('../lib/sorter.js').sortDescInsensitive>
-        ) => {
-            const sorter = await loadSorter();
-            return sorter.sortDescInsensitive(...args);
-        },
-        sortUnique: async (...args: Parameters<typeof import('../lib/sorter.js').sortUnique>) => {
-            const sorter = await loadSorter();
-            return sorter.sortUnique(...args);
-        },
-        sortUniqueInsensitive: async (
-            ...args: Parameters<typeof import('../lib/sorter.js').sortUniqueInsensitive>
-        ) => {
-            const sorter = await loadSorter();
-            return sorter.sortUniqueInsensitive(...args);
-        },
-        sortNatural: async (...args: Parameters<typeof import('../lib/sorter.js').sortNatural>) => {
-            const sorter = await loadSorter();
-            return sorter.sortNatural(...args);
-        },
-        sortLengthAsc: async (
-            ...args: Parameters<typeof import('../lib/sorter.js').sortLengthAsc>
-        ) => {
-            const sorter = await loadSorter();
-            return sorter.sortLengthAsc(...args);
-        },
-        sortLengthDesc: async (
-            ...args: Parameters<typeof import('../lib/sorter.js').sortLengthDesc>
-        ) => {
-            const sorter = await loadSorter();
-            return sorter.sortLengthDesc(...args);
-        },
-        sortReverse: async (...args: Parameters<typeof import('../lib/sorter.js').sortReverse>) => {
-            const sorter = await loadSorter();
-            return sorter.sortReverse(...args);
-        },
-        sortIP: async (...args: Parameters<typeof import('../lib/sorter.js').sortIP>) => {
-            const sorter = await loadSorter();
-            return sorter.sortIP(...args);
-        },
-        sortShuffle: async (...args: Parameters<typeof import('../lib/sorter.js').sortShuffle>) => {
-            const sorter = await loadSorter();
-            return sorter.sortShuffle(...args);
-        },
-    };
-}
+import { createLazyProxy } from '../utils/lazy-proxy.js';
 
 /**
  * Registers all sorting-related commands
@@ -88,7 +13,7 @@ function createLazySorterProxy() {
  */
 export function registerSortingCommands(context: vscode.ExtensionContext): void {
     const factory = createCommandFactory(context);
-    const lazySorter = createLazySorterProxy();
+    const lazySorter = createLazyProxy<typeof import('../lib/sorter.js')>('../lib/sorter.js');
 
     // All sorting commands expand selection to full lines by default
     factory.registerLineCommands(

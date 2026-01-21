@@ -64,6 +64,7 @@ function logMetrics(): void {
         return;
     }
 
+    /* eslint-disable no-console */
     console.log('--- Performance Metrics ---');
 
     if (metrics.activationDuration !== undefined) {
@@ -84,6 +85,7 @@ function logMetrics(): void {
     }
 
     console.log('-------------------------');
+    /* eslint-enable no-console */
 }
 
 /**
