@@ -1,39 +1,48 @@
-# ---------------------------------------------------------
-# Exclude
-# ---------------------------------------------------------
+# --- Directories ---
 .ai/
 .assets/
+.claude/
 .docs/
-.eslintrc.json
 .git/
 .github/
-.gitignore
-.repomixignore
+.husky/
 .scripts/
 .test/
 .vscode-test/
 .vscode/
-.yarnrc
-**/*.map
-**/*.ts
-**/*.tsbuildinfo
 assets/
 coverage/
-esbuild.config.js
 node_modules/
 out/
-repomix.config.json
 src/
 tests/
+
+# --- Config Files ---
+.editorconfig
+.eslintrc.json
+.lintstagedrc.json
+.prettierignore
+.prettierrc
+.repomixignore
+bun.config.mjs
+bun.lock
+esbuild.config.mjs
+eslint.config.mjs
+package-lock.json
+repomix.config.json
 tsconfig.json
 vitest.config.ts
 vsc-extension-quickstart.md
+yarn.lock
 
-# ---------------------------------------------------------
-# Include
-# ---------------------------------------------------------
+# --- Build Artifacts ---
+**/*.map
+**/*.ts
+**/*.tsbuildinfo
+
+# --- Includes ---
 !dist/
-!dist/extension.js
+!dist/*.js
 !package.json
 !README.md
 !assets/icon.png

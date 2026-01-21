@@ -110,21 +110,17 @@ const bundleSizeLimitPlugin = (maxSizeKB) => ({
     name: 'bundle-size-limit',
     setup(build) {
         build.onEnd((result) => {
-            if (!result.outputFiles || result.outputFiles.length === 0) {
-                return;
-            }
+            const outputs = result.metafile?.outputs;
+            if (!outputs) return;
 
-            for (const file of result.outputFiles) {
-                const sizeKB = file.contents.byteLength / 1024;
-
+            for (const [outputPath, meta] of Object.entries(outputs)) {
+                const sizeKB = meta.bytes / 1024;
                 if (sizeKB > maxSizeKB) {
                     console.error(`\n✘ [ERROR] Bundle size limit exceeded!`);
-                    console.error(`   File: ${file.path}`);
+                    console.error(`   File: ${outputPath}`);
                     console.error(`   Size: ${sizeKB.toFixed(1)} KB`);
                     console.error(`   Limit: ${maxSizeKB} KB`);
                     console.error(`   Exceeded by: ${(sizeKB - maxSizeKB).toFixed(1)} KB\n`);
-
-                    // Fail the build
                     process.exit(1);
                 }
             }
@@ -138,7 +134,7 @@ async function main() {
         bundle: true,
         format: 'esm',
         platform: 'node',
-        outfile: 'dist/extension.js',
+        outdir: 'dist',
 
         /**
          * External modules that should NEVER be bundled
