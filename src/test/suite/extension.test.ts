@@ -40,7 +40,7 @@ describe('Line King Comprehensive Test Suite', () => {
         it('should trim whitespace from both ends', () => {
             const input = ['  abc  ', '  '];
             const expected = ['abc', ''];
-            assert.deepStrictEqual(cleaner.trimBothWhitespace(input), expected);
+            assert.deepStrictEqual(cleaner.trimBothEnds(input), expected);
         });
 
         it('should condense multiple blank lines', () => {
