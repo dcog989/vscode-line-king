@@ -55,24 +55,20 @@
     "lint:fix": "bunx eslint src --ext ts --fix",
     "migrate": "bun scripts/migrate.js",
     "package": "bun run check-types && bun esbuild.config.mjs --production",
+    "pack": "vsce package --no-dependencies",
     "prepare": "husky",
-    "size": "bunx bundlesize --files dist/extension.js --max-size 400kb",
     "test": "bun test",
     "vscode:prepublish": "bun run package",
     "watch": "bun esbuild.config.mjs --watch"
   },
-  "dependencies": {
-    "change-case": "^5.4.4",
-    "postcss": "^8.5.6",
-    "postcss-values-parser": "^7.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/glob": "^9.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "^25.0.9",
     "@types/vscode": "^1.108.1",
     "@vscode/test-electron": "^2.5.2",
-    "bundlesize": "^0.18.2",
+    "change-case": "^5.4.4",
     "esbuild": "^0.27.2",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
@@ -81,8 +77,12 @@
     "husky": "^9.1.7",
     "lint-staged": "^15.5.2",
     "mocha": "^11.7.5",
+    "postcss": "^8.5.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.53.1"
+  },
+  "resolutions": {
+    "diff": "^5.2.0"
   },
   "contributes": {
     "configuration": {

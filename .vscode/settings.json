@@ -1,0 +1,30 @@
+{
+    "files.trimTrailingWhitespace": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false,
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features",
+        "editor.formatOnSave": true
+    },
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features",
+        "editor.formatOnSave": true
+    },
+    "[markdown]": {
+        "editor.wordWrap": "on"
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/out": true,
+        "**/.vscode-test": true
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/node_modules": true,
+        "**/out": false
+    }
+}

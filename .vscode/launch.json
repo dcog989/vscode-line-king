@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Extension",
+            "type": "extensionHost",
+            "request": "launch",
+            "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "preLaunchTask": "bun: watch",
+            "env": {
+                "VSCODE_TEST_MODE": "0",
+                "NODE_ENV": "development"
+            },
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Extension Tests",
+            "type": "extensionHost",
+            "request": "launch",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "--extensionTestsPath=${workspaceFolder}/src/test/suite/index"
+            ],
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "preLaunchTask": "bun: compile",
+            "env": {
+                "VSCODE_TEST_MODE": "1"
+            }
+        }
+    ]
+}
