@@ -1,6 +1,6 @@
 import esbuild from 'esbuild';
-import process from 'node:process';
 import fs from 'node:fs';
+import process from 'node:process';
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
@@ -18,7 +18,7 @@ const esbuildProblemMatcherPlugin = {
         build.onStart(() => {
             console.log('[watch] build started');
         });
-        build.onEnd(result => {
+        build.onEnd((result) => {
             result.errors.forEach(({ text, location }) => {
                 console.error(`✘ [ERROR] ${text}`);
                 console.error(`    ${location.file}:${location.line}:${location.column}:`);
@@ -39,16 +39,45 @@ const externalizeNodeBuiltins = {
     setup(build) {
         // List of Node.js built-in module names
         const nodeBuiltins = new Set([
-            'assert', 'buffer', 'child_process', 'cluster', 'crypto',
-            'dgram', 'dns', 'events', 'fs', 'http', 'http2', 'https',
-            'inspector', 'module', 'net', 'os', 'path', 'perf_hooks',
-            'process', 'querystring', 'readline', 'repl', 'stream',
-            'string_decoder', 'sys', 'timers', 'tls', 'trace_events',
-            'tty', 'url', 'util', 'v8', 'vm', 'worker_threads', 'zlib'
+            'assert',
+            'buffer',
+            'child_process',
+            'cluster',
+            'crypto',
+            'dgram',
+            'dns',
+            'events',
+            'fs',
+            'http',
+            'http2',
+            'https',
+            'inspector',
+            'module',
+            'net',
+            'os',
+            'path',
+            'perf_hooks',
+            'process',
+            'querystring',
+            'readline',
+            'repl',
+            'stream',
+            'string_decoder',
+            'sys',
+            'timers',
+            'tls',
+            'trace_events',
+            'tty',
+            'url',
+            'util',
+            'v8',
+            'vm',
+            'worker_threads',
+            'zlib',
         ]);
 
         // Externalize both 'node:*' prefixed and non-prefixed imports
-        build.onResolve({ filter: /.*/ }, args => {
+        build.onResolve({ filter: /.*/ }, (args) => {
             // Handle 'node:' prefixed imports (modern style)
             if (args.path.startsWith('node:')) {
                 return { path: args.path, external: true };
@@ -68,7 +97,7 @@ const externalizeNodeBuiltins = {
             // Let esbuild handle other modules normally
             return null;
         });
-    }
+    },
 };
 
 /**
@@ -80,7 +109,7 @@ const externalizeNodeBuiltins = {
 const bundleSizeLimitPlugin = (maxSizeKB) => ({
     name: 'bundle-size-limit',
     setup(build) {
-        build.onEnd(result => {
+        build.onEnd((result) => {
             if (!result.outputFiles || result.outputFiles.length === 0) {
                 return;
             }
@@ -100,7 +129,7 @@ const bundleSizeLimitPlugin = (maxSizeKB) => ({
                 }
             }
         });
-    }
+    },
 });
 
 async function main() {
@@ -128,7 +157,7 @@ async function main() {
          * CRITICAL: Only minify and remove sourcemaps in production
          */
         minify: production,
-        sourcemap: production ? false : 'inline',  // No sourcemap in production!
+        sourcemap: production ? false : 'inline', // No sourcemap in production!
 
         /**
          * Aggressive minification settings for production
@@ -137,13 +166,13 @@ async function main() {
             minifyWhitespace: true,
             minifyIdentifiers: true,
             minifySyntax: true,
-            drop: ['console', 'debugger'],  // Remove console.logs and debuggers
-            pure: ['console.log', 'console.debug'],  // Mark as side-effect free
-            mangleProps: /^_/,  // Mangle private properties (starting with _)
-            mangleQuoted: true,  // Mangle quoted properties
-            reserveProps: /^vscode/,  // Don't mangle VSCode API properties
-            keepNames: false,  // Remove function/variable names in production
-            dropLabels: ['DEV', 'TEST'],  // Remove labeled statements with DEV or TEST labels
+            drop: ['console', 'debugger'], // Remove console.logs and debuggers
+            pure: ['console.log', 'console.debug'], // Mark as side-effect free
+            mangleProps: /^_/, // Mangle private properties (starting with _)
+            mangleQuoted: true, // Mangle quoted properties
+            reserveProps: /^vscode/, // Don't mangle VSCode API properties
+            keepNames: false, // Remove function/variable names in production
+            dropLabels: ['DEV', 'TEST'], // Remove labeled statements with DEV or TEST labels
         }),
 
         /**
@@ -154,7 +183,7 @@ async function main() {
         /**
          * Target modern Node.js for smaller output
          */
-        target: 'node20',
+        target: 'node25',
 
         /**
          * Remove legal comments in production (they add size)
@@ -189,7 +218,7 @@ async function main() {
          * Shim 'require' for CJS dependencies bundled into ESM
          */
         banner: {
-            js: `import { createRequire } from 'module';const require = createRequire(import.meta.url);`
+            js: `import { createRequire } from 'module';const require = createRequire(import.meta.url);`,
         },
 
         /**
@@ -237,7 +266,7 @@ async function main() {
     }
 }
 
-main().catch(e => {
+main().catch((e) => {
     console.error(e);
     process.exit(1);
 });

@@ -9,7 +9,7 @@
         "noImplicitReturns": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
-        "types": ["node"]
+        "types": ["node", "mocha"]
     },
     "exclude": ["node_modules", "dist", ".vscode-test", "esbuild.config.mjs"]
 }
