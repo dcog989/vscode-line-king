@@ -157,24 +157,8 @@ export function registerTransformationCommands(context: vscode.ExtensionContext)
     factory.registerAsyncCommand({
         id: COMMANDS.SPLIT_LINES,
         handler: async (editor) => {
-            const separator = await vscode.window.showInputBox({
-                prompt: 'Enter separator character(s) to split on',
-                value: ',',
-                placeHolder: ',',
-            });
-
-            if (separator === undefined) return;
-
-            const { getEOL } = await import('../utils/text-utils.js');
-            const eol = getEOL(editor.document);
-
-            await editor.edit((editBuilder) => {
-                editor.selections.forEach((selection) => {
-                    const text = editor.document.getText(selection);
-                    const lines = text.split(separator).join(eol);
-                    editBuilder.replace(selection, lines);
-                });
-            });
+            const { splitLinesInteractive } = await import('../lib/transformer.js');
+            await splitLinesInteractive(editor);
         },
     });
 
@@ -189,10 +173,8 @@ export function registerTransformationCommands(context: vscode.ExtensionContext)
     factory.registerAsyncCommand({
         id: COMMANDS.INSERT_SEQUENCE,
         handler: async (editor) => {
-            const { applyLineAction } = await import('../utils/editor.js');
-            await applyLineAction(editor, (lines: string[]) => {
-                return lines.map((line, idx) => `${idx + 1}${line}`);
-            });
+            const { insertNumericSequence } = await import('../lib/transformer.js');
+            await insertNumericSequence(editor);
         },
     });
 }

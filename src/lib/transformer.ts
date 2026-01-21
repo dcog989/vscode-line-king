@@ -216,11 +216,12 @@ export function transformJoin(lines: string[]): string[] {
  */
 export async function splitLinesInteractive(editor: vscode.TextEditor): Promise<void> {
     const separator = await vscode.window.showInputBox({
-        prompt: 'Enter the separator to split by',
-        placeHolder: 'e.g. "," or "|" or " "',
+        prompt: 'Enter separator character(s) to split on',
+        value: ',',
+        placeHolder: ',',
     });
 
-    if (separator === undefined || separator === '') {
+    if (separator === undefined) {
         return;
     }
 
