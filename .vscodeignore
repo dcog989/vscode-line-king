@@ -20,6 +20,7 @@ tests/
 # --- Config Files ---
 .editorconfig
 .eslintrc.json
+.gitignore
 .lintstagedrc.json
 .prettierignore
 .prettierrc
@@ -28,7 +29,7 @@ bun.lock
 esbuild.config.mjs
 eslint.config.mjs
 package-lock.json
-repomix.config.json
+repomix.*.json
 tsconfig.json
 vitest.config.ts
 vsc-extension-quickstart.md

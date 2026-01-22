@@ -56,7 +56,7 @@
     "package": "vsce package --no-dependencies",
     "prepare": "husky",
     "test": "bun test",
-    "vscode:prepublish": "bun run package",
+    "vscode:prepublish": "bun run packprod",
     "watch": "bun esbuild.config.mjs --watch"
   },
   "dependencies": {},
