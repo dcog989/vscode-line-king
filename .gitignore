@@ -5,7 +5,7 @@
 .repomixignore
 .scripts/
 .test/
-repomix.config.json
+repomix.*
 
 # ----------------------------------------------
 # OS
