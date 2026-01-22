@@ -1,4 +1,5 @@
 # --- Directories ---
+.agents/
 .ai/
 .assets/
 .claude/
@@ -25,6 +26,8 @@ tests/
 .prettierignore
 .prettierrc
 .repomixignore
+AGENTS.md
+CLAUDE.md
 bun.lock
 esbuild.config.mjs
 eslint.config.mjs
