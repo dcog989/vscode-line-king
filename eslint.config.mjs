@@ -1,7 +1,7 @@
 import js from '@eslint/js';
-import typescriptEslint from 'typescript-eslint';
 import prettierConfig from 'eslint-config-prettier';
 import globals from 'globals';
+import typescriptEslint from 'typescript-eslint';
 
 export default [
     // Ignore patterns
@@ -43,7 +43,7 @@ export default [
             ],
 
             // Performance rules
-            'no-console': 'warn',
+            'no-console': 'error',
             'no-debugger': 'error',
 
             // Code quality rules

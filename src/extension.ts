@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { registerCommands } from './commands.js';
 import { ContextManager } from './context-manager.js';
 import { configCache, disposeConfigCache } from './utils/config-cache.js';
+import { Logger } from './utils/Logger.js';
 
 /**
  * Line King Extension Activation Entry Point
@@ -22,6 +23,7 @@ const isTestEnvironment = () => {
 };
 
 export async function activate(context: vscode.ExtensionContext) {
+    Logger.initialize(context);
     try {
         // 1. Initialize configuration cache (fast path - no Zod)
         // This completes in <5ms, ensuring config is ready before commands run
@@ -70,8 +72,8 @@ export async function activate(context: vscode.ExtensionContext) {
                         } else if (action === 'sortCssProperties' && cssSorterModule) {
                             await cssSorterModule.sortCssProperties(editor);
                         }
-                    } catch {
-                        // Error during save cleanup
+                    } catch (e) {
+                        Logger.error('Error during save cleanup', e);
                     }
                 })();
 
@@ -91,14 +93,15 @@ export async function activate(context: vscode.ExtensionContext) {
                         contextManager.register();
                     }
                     initContextOnce.dispose();
-                } catch {
-                    // Error initializing context manager
+                } catch (e) {
+                    Logger.error('Error initializing context manager', e);
                     initContextOnce.dispose();
                 }
             });
             context.subscriptions.push(initContextOnce);
         }
     } catch (error) {
+        Logger.error('Activation failed', error);
         vscode.window.showErrorMessage(`Line King failed to activate: ${error}`);
     }
 }
@@ -116,7 +119,7 @@ export function deactivate() {
 
         // Dispose config cache
         disposeConfigCache();
-    } catch {
-        // Error during deactivation
+    } catch (e) {
+        Logger.error('Error during deactivation', e);
     }
 }
