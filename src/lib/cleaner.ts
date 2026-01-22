@@ -3,8 +3,7 @@
  * Optimized for memory efficiency with large files
  */
 
-const TRAILING_WHITESPACE_REGEX = /\s+$/;
-const LEADING_WHITESPACE_REGEX = /^\s+/;
+import { REGEX } from '../constants.js';
 
 function toArray<T>(iterator: Iterable<T>): T[] {
     return Array.from(iterator);
@@ -96,7 +95,7 @@ export function* trimTrailingWhitespaceStream(
     lines: Iterable<string>,
 ): Generator<string, void, undefined> {
     for (const line of lines) {
-        yield line.replace(TRAILING_WHITESPACE_REGEX, '');
+        yield line.replace(REGEX.TRAILING_WHITESPACE, '');
     }
 }
 
@@ -108,7 +107,7 @@ export function* trimLeadingWhitespaceStream(
     lines: Iterable<string>,
 ): Generator<string, void, undefined> {
     for (const line of lines) {
-        yield line.replace(LEADING_WHITESPACE_REGEX, '');
+        yield line.replace(REGEX.LEADING_WHITESPACE, '');
     }
 }
 

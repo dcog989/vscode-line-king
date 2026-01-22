@@ -4,6 +4,8 @@
  * Pure logic only - no VS Code dependencies for unit testing compatibility.
  */
 
+import { REGEX } from '../constants.js';
+
 let naturalCollator: Intl.Collator | undefined;
 let caseInsensitiveCollator: Intl.Collator | undefined;
 
@@ -20,8 +22,6 @@ function getCaseInsensitiveCollator(): Intl.Collator {
     }
     return caseInsensitiveCollator;
 }
-
-const IP_REGEX = /\b(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\b/;
 
 export const sortAsc = (lines: string[]): string[] => [...lines].sort((a, b) => a.localeCompare(b));
 
@@ -56,7 +56,7 @@ export function sortIP(lines: string[]): string[] {
     const withoutIPs: string[] = [];
 
     for (const line of lines) {
-        const match = line.match(IP_REGEX);
+        const match = line.match(REGEX.IP_ADDRESS);
         if (match) {
             const ipValue =
                 ((parseInt(match[1], 10) << 24) |

@@ -1,12 +1,10 @@
 import * as vscode from 'vscode';
+import { REGEX } from '../constants.js';
 
 /**
  * Shared text processing utilities
  * Optimized for memory efficiency with large files
  */
-
-// Line ending detection regex (compiled once)
-export const LINE_SPLIT_REGEX = /\r?\n/;
 
 /**
  * Threshold for switching to streaming line processing
@@ -27,7 +25,7 @@ export function getEOL(document: vscode.TextDocument): string {
  * For large files, consider using streamLines() instead
  */
 export function splitLines(text: string): string[] {
-    return text.split(LINE_SPLIT_REGEX);
+    return text.split(REGEX.LINE_SPLIT);
 }
 
 /**
@@ -77,7 +75,7 @@ export function* streamLines(text: string): Generator<string, void, undefined> {
  */
 export function splitLinesAuto(text: string): string[] | Generator<string, void, undefined> {
     if (text.length < STREAMING_THRESHOLD) {
-        return text.split(LINE_SPLIT_REGEX);
+        return text.split(REGEX.LINE_SPLIT);
     } else {
         return streamLines(text);
     }

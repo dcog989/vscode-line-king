@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import { REGEX } from '../constants.js';
 
 describe('CSS Property Sorting', () => {
     describe('Alphabetical Strategy', () => {
@@ -46,80 +47,71 @@ describe('CSS Property Sorting', () => {
     });
 
     describe('Property Detection', () => {
-        const PROPERTY_REGEX = /^\s{2,}[-a-z]+(?:-[a-z0-9]+)*\s*:\s*[^:;{}]+;?\s*$/i;
-
         it('should identify valid CSS properties with indentation', () => {
-            assert.strictEqual(PROPERTY_REGEX.test('  color: red;'), true);
-            assert.strictEqual(PROPERTY_REGEX.test('    display: flex;'), true);
-            assert.strictEqual(PROPERTY_REGEX.test('  margin-top: 10px;'), true);
+            assert.strictEqual(REGEX.CSS_PROPERTY.test('  color: red;'), true);
+            assert.strictEqual(REGEX.CSS_PROPERTY.test('    display: flex;'), true);
+            assert.strictEqual(REGEX.CSS_PROPERTY.test('  margin-top: 10px;'), true);
         });
 
         it('should reject properties without proper indentation', () => {
-            assert.strictEqual(PROPERTY_REGEX.test('color: red;'), false);
-            assert.strictEqual(PROPERTY_REGEX.test(' color: red;'), false);
+            assert.strictEqual(REGEX.CSS_PROPERTY.test('color: red;'), false);
+            assert.strictEqual(REGEX.CSS_PROPERTY.test(' color: red;'), false);
         });
 
         it('should reject non-property lines', () => {
-            assert.strictEqual(PROPERTY_REGEX.test('.selector {'), false);
-            assert.strictEqual(PROPERTY_REGEX.test('}'), false);
+            assert.strictEqual(REGEX.CSS_PROPERTY.test('.selector {'), false);
+            assert.strictEqual(REGEX.CSS_PROPERTY.test('}'), false);
         });
 
         it('should reject markdown-like content', () => {
-            assert.strictEqual(PROPERTY_REGEX.test('- Item: description'), false);
-            assert.strictEqual(PROPERTY_REGEX.test('Note: this is important'), false);
+            assert.strictEqual(REGEX.CSS_PROPERTY.test('- Item: description'), false);
+            assert.strictEqual(REGEX.CSS_PROPERTY.test('Note: this is important'), false);
         });
     });
 
     describe('CSS Value Pattern Validation', () => {
-        const CSS_VALUE_PATTERN =
-            /(?:[\d.]+(?:px|em|rem|%|vh|vw|ex|ch|cm|mm|in|pt|pc|deg|rad|turn|s|ms)?|#[0-9a-f]{3,8}|rgba?|hsla?|var\(|calc\(|url\(|['"]|\b(?:auto|none|inherit|initial|unset|normal|bold|italic|flex|block|inline|absolute|relative|fixed|hidden|visible|transparent|currentColor|red|blue|white|black)\b)/i;
-
         it('should recognize valid CSS values with units', () => {
-            assert.ok(CSS_VALUE_PATTERN.test('10px'));
-            assert.ok(CSS_VALUE_PATTERN.test('1.5rem'));
-            assert.ok(CSS_VALUE_PATTERN.test('100%'));
-            assert.ok(CSS_VALUE_PATTERN.test('50vh'));
+            assert.ok(REGEX.CSS_VALUE.test('10px'));
+            assert.ok(REGEX.CSS_VALUE.test('1.5rem'));
+            assert.ok(REGEX.CSS_VALUE.test('100%'));
+            assert.ok(REGEX.CSS_VALUE.test('50vh'));
         });
 
         it('should recognize CSS color values', () => {
-            assert.ok(CSS_VALUE_PATTERN.test('#fff'));
-            assert.ok(CSS_VALUE_PATTERN.test('#ffffff'));
-            assert.ok(CSS_VALUE_PATTERN.test('rgba(0, 0, 0, 0.5)'));
-            assert.ok(CSS_VALUE_PATTERN.test('rgb(255, 0, 0)'));
-            assert.ok(CSS_VALUE_PATTERN.test('red'));
+            assert.ok(REGEX.CSS_VALUE.test('#fff'));
+            assert.ok(REGEX.CSS_VALUE.test('#ffffff'));
+            assert.ok(REGEX.CSS_VALUE.test('rgba(0, 0, 0, 0.5)'));
+            assert.ok(REGEX.CSS_VALUE.test('rgb(255, 0, 0)'));
+            assert.ok(REGEX.CSS_VALUE.test('red'));
         });
 
         it('should recognize CSS functions', () => {
-            assert.ok(CSS_VALUE_PATTERN.test('var(--main-color)'));
-            assert.ok(CSS_VALUE_PATTERN.test('calc(100% - 20px)'));
-            assert.ok(CSS_VALUE_PATTERN.test('url("image.png")'));
+            assert.ok(REGEX.CSS_VALUE.test('var(--main-color)'));
+            assert.ok(REGEX.CSS_VALUE.test('calc(100% - 20px)'));
+            assert.ok(REGEX.CSS_VALUE.test('url("image.png")'));
         });
 
         it('should recognize CSS keywords', () => {
-            assert.ok(CSS_VALUE_PATTERN.test('auto'));
-            assert.ok(CSS_VALUE_PATTERN.test('flex'));
-            assert.ok(CSS_VALUE_PATTERN.test('none'));
-            assert.ok(CSS_VALUE_PATTERN.test('inherit'));
-            assert.ok(CSS_VALUE_PATTERN.test('transparent'));
+            assert.ok(REGEX.CSS_VALUE.test('auto'));
+            assert.ok(REGEX.CSS_VALUE.test('flex'));
+            assert.ok(REGEX.CSS_VALUE.test('none'));
+            assert.ok(REGEX.CSS_VALUE.test('inherit'));
+            assert.ok(REGEX.CSS_VALUE.test('transparent'));
         });
 
         it('should not match prose or markdown', () => {
-            assert.strictEqual(CSS_VALUE_PATTERN.test('this is a description'), false);
-            assert.strictEqual(CSS_VALUE_PATTERN.test('some random text here'), false);
+            assert.strictEqual(REGEX.CSS_VALUE.test('this is a description'), false);
+            assert.strictEqual(REGEX.CSS_VALUE.test('some random text here'), false);
         });
     });
 
     describe('False Positive Prevention', () => {
         const validateCSSProperty = (line: string): boolean => {
-            const PROPERTY_REGEX = /^\s{2,}[-a-z]+(?:-[a-z0-9]+)*\s*:\s*[^:;{}]+;?\s*$/i;
-            const CSS_VALUE_PATTERN =
-                /(?:[\d.]+(?:px|em|rem|%|vh|vw|ex|ch|cm|mm|in|pt|pc|deg|rad|turn|s|ms)?|#[0-9a-f]{3,8}|rgba?|hsla?|var\(|calc\(|url\(|['"]|\b(?:auto|none|inherit|initial|unset|normal|bold|italic|flex|block|inline|absolute|relative|fixed|hidden|visible|transparent|currentColor|red|blue|white|black)\b)/i;
-
-            if (!PROPERTY_REGEX.test(line)) {
+            if (!REGEX.CSS_PROPERTY.test(line)) {
                 return false;
             }
 
-            if (!/^\s{2,}/.test(line)) {
+            if (!REGEX.INDENTATION.test(line)) {
                 return false;
             }
 
@@ -133,15 +125,15 @@ describe('CSS Property Sorting', () => {
                 return false;
             }
 
-            if (/^[-*]\s/.test(value)) {
+            if (REGEX.LIST_ITEM.test(value)) {
                 return false;
             }
 
-            if (/\s{3,}/.test(value)) {
+            if (REGEX.EXCESS_WHITESPACE.test(value)) {
                 return false;
             }
 
-            return CSS_VALUE_PATTERN.test(value);
+            return REGEX.CSS_VALUE.test(value);
         };
 
         it('should accept valid CSS properties', () => {

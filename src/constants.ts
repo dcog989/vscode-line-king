@@ -2,24 +2,24 @@ export const CONFIG = {
     NAMESPACE: 'lineKing',
     JOIN_SEPARATOR: 'joinSeparator',
     CLEANUP_ON_SAVE: 'cleanupOnSave',
-    CSS_SORT_STRATEGY: 'cssSortStrategy'
+    CSS_SORT_STRATEGY: 'cssSortStrategy',
 } as const;
 
 export const CONTEXT_KEYS = {
     IS_MULTI_LINE: 'lineKing.isMultiLine',
-    ALL_CHARS_VISIBLE: 'lineKing.whitespaceCharsVisible'
+    ALL_CHARS_VISIBLE: 'lineKing.whitespaceCharsVisible',
 };
 
 // Timing constants
 export const TIMING = {
     SELECTION_DEBOUNCE_MS: 50,
-    DECORATION_DEBOUNCE_MS: 150
+    DECORATION_DEBOUNCE_MS: 150,
 };
 
 // Line ending detection constants
 export const LINE_ENDINGS = {
     LF_BYTE_LENGTH: 1,
-    CRLF_BYTE_LENGTH: 2
+    CRLF_BYTE_LENGTH: 2,
 };
 
 // Command identifiers
@@ -33,5 +33,19 @@ export const COMMANDS = {
     INSERT_SEQUENCE: 'lineKing.manipulate.sequence',
     DUPLICATE_SELECTION: 'lineKing.manipulate.duplicate',
     CONVERT_LF: 'lineKing.util.eol.lf',
-    CONVERT_CRLF: 'lineKing.util.eol.crlf'
+    CONVERT_CRLF: 'lineKing.util.eol.crlf',
+};
+
+export const REGEX = {
+    LINE_SPLIT: /\r?\n/,
+    TRAILING_WHITESPACE: /\s+$/,
+    LEADING_WHITESPACE: /^\s+/,
+    IP_ADDRESS: /\b(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\b/,
+    CSS_PROPERTY: /^\s{2,}[-a-z]+(?:-[a-z0-9]+)*\s*:\s*[^:;{}]+;?\s*$/i,
+    CSS_VALUE:
+        /(?:[\d.]+(?:px|em|rem|%|vh|vw|ex|ch|cm|mm|in|pt|pc|deg|rad|turn|s|ms)?|#[0-9a-f]{3,8}|rgba?|hsla?|var\(|calc\(|url\(|['"]|\b(?:auto|none|inherit|initial|unset|normal|bold|italic|flex|block|inline|absolute|relative|fixed|hidden|visible|transparent|currentColor|red|blue|white|black)\b)/i,
+    WHITESPACE: /\s/,
+    INDENTATION: /^\s{2,}/,
+    LIST_ITEM: /^[-*]\s/,
+    EXCESS_WHITESPACE: /\s{3,}/,
 };

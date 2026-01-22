@@ -1,6 +1,7 @@
 import type { Plugin } from 'postcss';
 import * as vscode from 'vscode';
 import { configCache } from '../utils/config-cache.js';
+import { REGEX } from '../constants.js';
 
 /**
  * Modern CSS property sorter using PostCSS
@@ -183,7 +184,7 @@ function findCssRuleBlock(
     }
 
     // Skip leading whitespace in the selector
-    while (ruleStartPos < openBracePos && /\s/.test(text[ruleStartPos])) {
+    while (ruleStartPos < openBracePos && REGEX.WHITESPACE.test(text[ruleStartPos])) {
         ruleStartPos++;
     }
 
