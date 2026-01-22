@@ -1,6 +1,6 @@
+import type { Plugin } from 'postcss';
 import * as vscode from 'vscode';
 import { configCache } from '../utils/config-cache.js';
-import type { Plugin } from 'postcss';
 
 /**
  * Modern CSS property sorter using PostCSS
@@ -41,6 +41,7 @@ function sortDeclarationsPlugin(opts: SortOptions = { strategy: 'alphabetical' }
 
             rule.each((node: any, index: number) => {
                 // eslint-disable-line @typescript-eslint/no-explicit-any
+
                 nodes.push({
                     node,
                     index,
