@@ -1,11 +1,12 @@
-import postcss from 'postcss';
 import * as vscode from 'vscode';
 import { configCache } from '../utils/config-cache.js';
+import type { Plugin } from 'postcss';
 
 /**
  * Modern CSS property sorter using PostCSS
  * Supports nested rules (Sass/Less) and modern CSS syntax
  * Optimized for selection-based sorting to avoid parsing large files
+ * NOTE: PostCSS is imported lazily to avoid ~500ms startup time penalty
  */
 
 interface SortOptions {
@@ -29,15 +30,17 @@ const MAX_SAFE_CSS_LINES = 100000;
  * PostCSS plugin to sort CSS declarations within rules
  * Preserves comments and other non-declaration nodes
  */
-function sortDeclarationsPlugin(opts: SortOptions = { strategy: 'alphabetical' }): postcss.Plugin {
+function sortDeclarationsPlugin(opts: SortOptions = { strategy: 'alphabetical' }): Plugin {
     return {
         postcssPlugin: 'sort-declarations',
-        Rule(rule) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        Rule(rule: any) {
             // Collect all nodes with their positions
-            const nodes: Array<{ node: postcss.ChildNode; index: number; type: string }> = [];
+            const nodes: Array<{ node: any; index: number; type: string }> = []; // eslint-disable-line @typescript-eslint/no-explicit-any
             let declarationCount = 0;
 
-            rule.each((node, index) => {
+            rule.each((node: any, index: number) => {
+                // eslint-disable-line @typescript-eslint/no-explicit-any
                 nodes.push({
                     node,
                     index,
@@ -54,12 +57,12 @@ function sortDeclarationsPlugin(opts: SortOptions = { strategy: 'alphabetical' }
             }
 
             // Separate declarations from other nodes (comments, at-rules, etc.)
-            const declarations: postcss.Declaration[] = [];
-            const nonDeclarations: Array<{ node: postcss.ChildNode; originalIndex: number }> = [];
+            const declarations: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
+            const nonDeclarations: Array<{ node: any; originalIndex: number }> = []; // eslint-disable-line @typescript-eslint/no-explicit-any
 
             nodes.forEach(({ node, index, type }) => {
                 if (type === 'decl') {
-                    declarations.push(node as postcss.Declaration);
+                    declarations.push(node);
                 } else {
                     nonDeclarations.push({ node, originalIndex: index });
                 }
@@ -249,6 +252,9 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
             );
         }
 
+        // Lazy-load PostCSS only when needed (avoids ~500ms startup time penalty)
+        const postcss = (await import('postcss')).default;
+
         // Process with PostCSS
         const result = await postcss([sortDeclarationsPlugin({ strategy })]).process(
             textToProcess,
@@ -265,7 +271,7 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
         }
 
         // Apply the transformation
-        await editor.edit((editBuilder) => {
+        await editor.edit((editBuilder: vscode.TextEditorEdit) => {
             editBuilder.replace(rangeToReplace, result.css);
         });
     } catch (error) {
