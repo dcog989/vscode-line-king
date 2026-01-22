@@ -26,7 +26,7 @@ jobs:
       - name: Lint
         run: bun run lint
 
-      # This runs esbuild --production, which includes your 400KB size limit check
+      # This runs esbuild --production, which includes size limit check
       - name: Build & Check Size
         run: bun run packprod
 

@@ -47,7 +47,7 @@ jobs:
             ✅ Dependency audit completed.
 
             ### Bundle Size
-            ✅ Bundle size check passed (Under 400KB).
+            ✅ Bundle size check passed.
             `;
             github.rest.issues.createComment({
                 owner: context.repo.owner,
