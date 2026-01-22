@@ -17,7 +17,7 @@ async function main() {
         await runTests({
             extensionDevelopmentPath,
             extensionTestsPath,
-            version: '1.108.1',
+            version: '1.106.1',
             launchArgs: [
                 `--user-data-dir=${userDataDir}`,
                 '--disable-gpu',
