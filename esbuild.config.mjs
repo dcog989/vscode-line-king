@@ -141,7 +141,6 @@ async function main() {
          */
         external: [
             'vscode', // VS Code API - always provided by host
-            'postcss', // PostCSS - lazy-loaded at runtime to avoid 500ms startup penalty
         ],
 
         /**
