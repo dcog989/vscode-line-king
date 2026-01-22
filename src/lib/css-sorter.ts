@@ -39,8 +39,8 @@ function sortDeclarationsPlugin(opts: SortOptions = { strategy: 'alphabetical' }
             const nodes: Array<{ node: any; index: number; type: string }> = []; // eslint-disable-line @typescript-eslint/no-explicit-any
             let declarationCount = 0;
 
-            rule.each((node: any, index: number) => {
-                // eslint-disable-line @typescript-eslint/no-explicit-any
+            // prettier-ignore
+            rule.each((node: any, index: number) => { // eslint-disable-line @typescript-eslint/no-explicit-any
 
                 nodes.push({
                     node,
