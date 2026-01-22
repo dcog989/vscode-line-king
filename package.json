@@ -46,8 +46,6 @@
   },
   "scripts": {
     "audit": "bun pm audit",
-    "bun:build": "bun run check-types && bun --bun bun.config.mjs",
-    "bun:build:dev": "bun --bun bun.config.mjs",
     "check-types": "bunx tsc --noEmit",
     "clean": "bun -e \"const fs = require('fs'); ['dist', 'coverage'].forEach(dir => { try { fs.rmSync(dir, {recursive:true, force:true}); } catch(e) { console.log('Skipped:', dir); } });\"",
     "compile": "bun esbuild.config.mjs",

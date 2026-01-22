@@ -24,7 +24,6 @@ tests/
 .prettierignore
 .prettierrc
 .repomixignore
-bun.config.mjs
 bun.lock
 esbuild.config.mjs
 eslint.config.mjs
