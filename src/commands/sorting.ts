@@ -14,6 +14,8 @@ import { createLazyProxy } from '../utils/lazy-proxy.js';
 export function registerSortingCommands(context: vscode.ExtensionContext): void {
     const factory = createCommandFactory(context);
     const lazySorter = createLazyProxy<typeof import('../lib/sorter.js')>('../lib/sorter.js');
+    const lazyCssSorter =
+        createLazyProxy<typeof import('../lib/css-sorter.js')>('../lib/css-sorter.js');
 
     // All sorting commands expand selection to full lines by default
     factory.registerLineCommands(
@@ -42,8 +44,7 @@ export function registerSortingCommands(context: vscode.ExtensionContext): void 
         id: COMMANDS.SORT_CSS,
         handler: async (editor) => {
             // Lazy load CSS sorter (which will then lazy load PostCSS)
-            const { sortCssProperties } = await import('../lib/css-sorter.js');
-            return sortCssProperties(editor);
+            return await lazyCssSorter.sortCssProperties(editor);
         },
     });
 }

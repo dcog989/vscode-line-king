@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { COMMANDS } from '../constants.js';
 import { createCommandFactory } from './factory.js';
+import { createLazyProxy } from '../utils/lazy-proxy.js';
 
 /**
  * Registers utility commands (EOL conversion, whitespace visualization, debug)
@@ -13,6 +14,8 @@ export function registerUtilityCommands(
     updateContextCallback: () => void,
 ): void {
     const factory = createCommandFactory(context);
+    const lazyVisualizer =
+        createLazyProxy<typeof import('../lib/visualizer.js')>('../lib/visualizer.js');
 
     // EOL conversion commands (no heavy dependencies)
     factory.registerAsyncCommands([
@@ -31,25 +34,27 @@ export function registerUtilityCommands(
     ]);
 
     // Whitespace visualization (non-editor commands) - lazy load visualizer
-    context.subscriptions.push(
-        vscode.commands.registerCommand(COMMANDS.SHOW_ALL_CHARS, async () => {
-            const { toggleWhitespaceChars } = await import('../lib/visualizer.js');
-            toggleWhitespaceChars(true);
-            updateContextCallback();
-        }),
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand(COMMANDS.HIDE_ALL_CHARS, async () => {
-            const { toggleWhitespaceChars } = await import('../lib/visualizer.js');
-            toggleWhitespaceChars(false);
-            updateContextCallback();
-        }),
-    );
+    factory.registerAsyncCommands([
+        {
+            id: COMMANDS.SHOW_ALL_CHARS,
+            handler: async () => {
+                await lazyVisualizer.toggleWhitespaceChars(true);
+                updateContextCallback();
+            },
+        },
+        {
+            id: COMMANDS.HIDE_ALL_CHARS,
+            handler: async () => {
+                await lazyVisualizer.toggleWhitespaceChars(false);
+                updateContextCallback();
+            },
+        },
+    ]);
 
     // Debug command (no dependencies)
-    context.subscriptions.push(
-        vscode.commands.registerCommand(COMMANDS.DEBUG_CONTEXT, () => {
+    factory.registerAsyncCommand({
+        id: COMMANDS.DEBUG_CONTEXT,
+        handler: () => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
                 vscode.window.showInformationMessage('No active editor');
@@ -58,6 +63,6 @@ export function registerUtilityCommands(
             vscode.window.showInformationMessage(
                 'Context Debug: See Debug Console for details (Functionality moved to simplified view)',
             );
-        }),
-    );
+        },
+    });
 }
