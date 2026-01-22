@@ -179,7 +179,7 @@ async function main() {
         /**
          * Target modern Node.js for smaller output
          */
-        target: 'node25',
+        target: 'node22',
 
         /**
          * Remove legal comments in production (they add size)
