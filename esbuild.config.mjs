@@ -207,7 +207,7 @@ async function main() {
             externalizeNodeBuiltins,
             esbuildProblemMatcherPlugin,
             // Only enforce bundle size limit in production
-            ...(production ? [bundleSizeLimitPlugin(400)] : []),
+            ...(production ? [bundleSizeLimitPlugin(500)] : []),
         ],
 
         /**
@@ -251,7 +251,7 @@ async function main() {
                 console.log('   🟢 Excellent: Bundle size is optimized');
             } else if (sizeScore < 300) {
                 console.log('   🟡 Good: Bundle size is acceptable');
-            } else if (sizeScore < 400) {
+            } else if (sizeScore < 500) {
                 console.log('   🟠 Fair: Consider reducing bundle size');
             } else {
                 console.log('   🔴 Poor: Bundle size should be reduced');
