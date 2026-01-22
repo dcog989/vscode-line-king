@@ -7,7 +7,14 @@ import { applyLineAction, type LineActionOptions } from '../utils/editor.js';
 interface CommandConfig {
     /** Command identifier */
     id: string;
-    /** Line processing function (can be sync or async) */
+    /**
+     * Line processing function
+     * Accepts both synchronous and asynchronous processors
+     * - Sync: (lines: string[]) => string[]
+     * - Async: (lines: string[]) => Promise<string[]>
+     *
+     * Use async processors for lazy-loaded modules to avoid blocking the UI thread
+     */
     processor: (lines: string[]) => string[] | Promise<string[]>;
     /** Whether to expand selection to full lines (default: true) */
     expandSelection?: boolean;

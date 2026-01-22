@@ -1,6 +1,12 @@
+type Asyncify<T> = T extends (...args: infer A) => infer R ? (...args: A) => Promise<R> : T;
+type AsyncifyModule<T extends Record<string, unknown>> = {
+    [K in keyof T]: Asyncify<T[K]>;
+};
+
 /**
  * Creates a lazy proxy for a module, ensuring it's only loaded when accessed.
  * Automatically wraps all exported functions with async wrappers.
+ * Returns a type where all functions are async to match runtime behavior.
  *
  * @example
  * ```typescript
@@ -8,7 +14,9 @@
  * await lazyCleaner.removeBlankLines(lines);
  * ```
  */
-export function createLazyProxy<T extends Record<string, unknown>>(modulePath: string): T {
+export function createLazyProxy<T extends Record<string, unknown>>(
+    modulePath: string,
+): AsyncifyModule<T> {
     let module: T | null = null;
 
     const loadModule = async (): Promise<T> => {
@@ -35,5 +43,5 @@ export function createLazyProxy<T extends Record<string, unknown>>(modulePath: s
                 return func(...args);
             };
         },
-    }) as T;
+    }) as AsyncifyModule<T>;
 }
