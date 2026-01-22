@@ -4,30 +4,32 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: unbuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      # Use Bun, not Node
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: "25"
-          cache: "npm"
+          bun-version: "latest"
 
+      # Install using Bun's lockfile
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
-      - name: Compile TypeScript
-        run: npm run compile
+      # Enforce code quality
+      - name: Type Check
+        run: bun run check-types
 
-      - name: Install Xvfb (Virtual Display Server)
-        run: |
-          # Update package list and install Xvfb on the temporary runner VM
-          sudo apt-get update
-          sudo apt-get install -y xvfb
+      - name: Lint
+        run: bun run lint
 
-      - name: Run tests Headlessly
-        # xvfb-run executes the tests within a virtual screen environment,
-        # satisfying the VS Code/Electron application's need for a display.
-        run: xvfb-run -a npm test
+      # This runs esbuild --production, which includes your 400KB size limit check
+      - name: Build & Check Size
+        run: bun run packprod
+
+      # Run Unit Tests
+      - name: Run Tests
+        run: bun run test
