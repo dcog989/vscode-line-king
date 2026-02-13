@@ -105,3 +105,27 @@ export const sortUniqueInsensitive = (lines: string[]): string[] => {
     unique.sort((a, b) => collator.compare(a.lower, b.lower));
     return unique.map((x) => x.original);
 };
+
+/**
+ * Strip leading special characters to get the sortable text
+ */
+function stripLeadingSpecialChars(str: string): string {
+    // Match leading non-alphanumeric characters (except whitespace which we want to preserve)
+    return str.replace(/^[^\w\s]+/, '');
+}
+
+export const sortAscIgnoreSpecial = (lines: string[]): string[] =>
+    lines.slice().sort((a, b) => {
+        const cleanA = stripLeadingSpecialChars(a);
+        const cleanB = stripLeadingSpecialChars(b);
+        return cleanA.localeCompare(cleanB);
+    });
+
+export const sortAscIgnoreSpecialInsensitive = (lines: string[]): string[] => {
+    const collator = getCaseInsensitiveCollator();
+    return lines.slice().sort((a, b) => {
+        const cleanA = stripLeadingSpecialChars(a);
+        const cleanB = stripLeadingSpecialChars(b);
+        return collator.compare(cleanA, cleanB);
+    });
+};

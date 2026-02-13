@@ -18,6 +18,11 @@ export function registerSortingCommands(context: vscode.ExtensionContext): void 
             { id: 'lineKing.sort.asc.insensitive', processor: sorter.sortAscInsensitive },
             { id: 'lineKing.sort.desc', processor: sorter.sortDesc },
             { id: 'lineKing.sort.desc.insensitive', processor: sorter.sortDescInsensitive },
+            { id: 'lineKing.sort.asc.ignoreSpecial', processor: sorter.sortAscIgnoreSpecial },
+            {
+                id: 'lineKing.sort.asc.ignoreSpecial.insensitive',
+                processor: sorter.sortAscIgnoreSpecialInsensitive,
+            },
 
             // Advanced sorting
             { id: 'lineKing.sort.unique', processor: sorter.sortUnique },
