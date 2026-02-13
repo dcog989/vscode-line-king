@@ -1,37 +1,37 @@
 import * as vscode from 'vscode';
 import { COMMANDS } from '../constants.js';
 import { applyLineAction, getJoinSeparator } from '../utils/editor.js';
-import { createLazyProxy } from '../utils/lazy-proxy.js';
+import * as transformer from '../lib/transformer.js';
 import { createCommandFactory } from './factory.js';
 
 export function registerTransformationCommands(context: vscode.ExtensionContext): void {
     const factory = createCommandFactory(context);
-    const lazyTransformer =
-        createLazyProxy<typeof import('../lib/transformer.js')>('../lib/transformer.js');
 
     factory.registerLineCommands(
         [
-            { id: 'lineKing.manipulate.upper', processor: lazyTransformer.transformUpper },
-            { id: 'lineKing.manipulate.lower', processor: lazyTransformer.transformLower },
-            { id: 'lineKing.manipulate.camel', processor: lazyTransformer.transformCamel },
-            { id: 'lineKing.manipulate.kebab', processor: lazyTransformer.transformKebab },
-            { id: 'lineKing.manipulate.snake', processor: lazyTransformer.transformSnake },
-            { id: 'lineKing.manipulate.pascal', processor: lazyTransformer.transformPascal },
-            { id: 'lineKing.manipulate.sentence', processor: lazyTransformer.transformSentence },
-            { id: 'lineKing.manipulate.title', processor: lazyTransformer.transformTitle },
-            { id: 'lineKing.dev.urlEncode', processor: lazyTransformer.transformUrlEncode },
-            { id: 'lineKing.dev.urlDecode', processor: lazyTransformer.transformUrlDecode },
-            { id: 'lineKing.dev.base64Encode', processor: lazyTransformer.transformBase64Encode },
-            { id: 'lineKing.dev.base64Decode', processor: lazyTransformer.transformBase64Decode },
-            { id: 'lineKing.dev.jsonEscape', processor: lazyTransformer.transformJsonEscape },
-            { id: 'lineKing.dev.jsonUnescape', processor: lazyTransformer.transformJsonUnescape },
+            { id: 'lineKing.manipulate.upper', processor: transformer.transformUpper },
+            { id: 'lineKing.manipulate.lower', processor: transformer.transformLower },
+            { id: 'lineKing.manipulate.camel', processor: transformer.transformCamel },
+            { id: 'lineKing.manipulate.kebab', processor: transformer.transformKebab },
+            { id: 'lineKing.manipulate.snake', processor: transformer.transformSnake },
+            { id: 'lineKing.manipulate.pascal', processor: transformer.transformPascal },
+            { id: 'lineKing.manipulate.sentence', processor: transformer.transformSentence },
+            { id: 'lineKing.manipulate.title', processor: transformer.transformTitle },
+            { id: 'lineKing.dev.urlEncode', processor: transformer.transformUrlEncode },
+            { id: 'lineKing.dev.urlDecode', processor: transformer.transformUrlDecode },
+            { id: 'lineKing.dev.base64Encode', processor: transformer.transformBase64Encode },
+            { id: 'lineKing.dev.base64Decode', processor: transformer.transformBase64Decode },
+            { id: 'lineKing.dev.jsonEscape', processor: transformer.transformJsonEscape },
+            { id: 'lineKing.dev.jsonUnescape', processor: transformer.transformJsonUnescape },
+            { id: 'lineKing.dev.jsonSort', processor: transformer.transformJsonSort },
+            { id: 'lineKing.dev.jsonMinify', processor: transformer.transformJsonMinify },
         ],
         false,
     );
 
     factory.registerLineCommand({
         id: 'lineKing.manipulate.join',
-        processor: (lines) => lazyTransformer.transformJoin(lines, getJoinSeparator()),
+        processor: (lines) => transformer.transformJoin(lines, getJoinSeparator()),
         expandSelection: true,
     });
 

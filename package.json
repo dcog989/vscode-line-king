@@ -2,7 +2,7 @@
   "name": "line-king",
   "displayName": "Line King",
   "description": "Sort, remove dups, change case, clean, encode / decode. Do all the things to line and text.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "publisher": "dcog989",
   "icon": "assets/icon.png",
   "repository": {
@@ -347,6 +347,16 @@
         "command": "lineKing.debug.checkContext",
         "title": "Debug: Check Context State",
         "category": "Line King"
+      },
+      {
+        "title": "Sort JSON Keys",
+        "command": "lineKing.dev.jsonSort",
+        "category": "Line King: Dev"
+      },
+      {
+        "title": "Minify JSON",
+        "command": "lineKing.dev.jsonMinify",
+        "category": "Line King: Dev"
       }
     ],
     "submenus": [
@@ -583,6 +593,14 @@
         },
         {
           "command": "lineKing.dev.jsonUnescape",
+          "group": "3_json"
+        },
+        {
+          "command": "lineKing.dev.jsonSort",
+          "group": "3_json"
+        },
+        {
+          "command": "lineKing.dev.jsonMinify",
           "group": "3_json"
         }
       ]

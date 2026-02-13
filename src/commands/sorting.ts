@@ -1,50 +1,43 @@
 import * as vscode from 'vscode';
 import { COMMANDS } from '../constants.js';
 import { createCommandFactory } from './factory.js';
-import { createLazyProxy } from '../utils/lazy-proxy.js';
+import * as sorter from '../lib/sorter.js';
 
 /**
  * Registers all sorting-related commands
  * Uses CommandFactory for consistent registration
- *
- * PERFORMANCE CRITICAL: All dependencies are lazy-loaded
- * - sorter.js is only loaded when a sort command is used
- * - css-sorter.js (and PostCSS) only loaded when CSS sorting is used
  */
 export function registerSortingCommands(context: vscode.ExtensionContext): void {
     const factory = createCommandFactory(context);
-    const lazySorter = createLazyProxy<typeof import('../lib/sorter.js')>('../lib/sorter.js');
-    const lazyCssSorter =
-        createLazyProxy<typeof import('../lib/css-sorter.js')>('../lib/css-sorter.js');
 
     // All sorting commands expand selection to full lines by default
     factory.registerLineCommands(
         [
             // Basic sorting
-            { id: 'lineKing.sort.asc', processor: lazySorter.sortAsc },
-            { id: 'lineKing.sort.asc.insensitive', processor: lazySorter.sortAscInsensitive },
-            { id: 'lineKing.sort.desc', processor: lazySorter.sortDesc },
-            { id: 'lineKing.sort.desc.insensitive', processor: lazySorter.sortDescInsensitive },
+            { id: 'lineKing.sort.asc', processor: sorter.sortAsc },
+            { id: 'lineKing.sort.asc.insensitive', processor: sorter.sortAscInsensitive },
+            { id: 'lineKing.sort.desc', processor: sorter.sortDesc },
+            { id: 'lineKing.sort.desc.insensitive', processor: sorter.sortDescInsensitive },
 
             // Advanced sorting
-            { id: 'lineKing.sort.unique', processor: lazySorter.sortUnique },
-            { id: 'lineKing.sort.unique.insensitive', processor: lazySorter.sortUniqueInsensitive },
-            { id: 'lineKing.sort.natural', processor: lazySorter.sortNatural },
-            { id: 'lineKing.sort.length.asc', processor: lazySorter.sortLengthAsc },
-            { id: 'lineKing.sort.length.desc', processor: lazySorter.sortLengthDesc },
-            { id: 'lineKing.sort.reverse', processor: lazySorter.sortReverse },
-            { id: 'lineKing.sort.ip', processor: lazySorter.sortIP },
-            { id: 'lineKing.sort.shuffle', processor: lazySorter.sortShuffle },
+            { id: 'lineKing.sort.unique', processor: sorter.sortUnique },
+            { id: 'lineKing.sort.unique.insensitive', processor: sorter.sortUniqueInsensitive },
+            { id: 'lineKing.sort.natural', processor: sorter.sortNatural },
+            { id: 'lineKing.sort.length.asc', processor: sorter.sortLengthAsc },
+            { id: 'lineKing.sort.length.desc', processor: sorter.sortLengthDesc },
+            { id: 'lineKing.sort.reverse', processor: sorter.sortReverse },
+            { id: 'lineKing.sort.ip', processor: sorter.sortIP },
+            { id: 'lineKing.sort.shuffle', processor: sorter.sortShuffle },
         ],
         true,
     ); // expandSelection: true (process full lines)
 
-    // CSS property sorting (special case - uses custom handler with lazy loading)
+    // CSS property sorting (lazy load only CSS sorter and PostCSS)
     factory.registerAsyncCommand({
         id: COMMANDS.SORT_CSS,
         handler: async (editor) => {
-            // Lazy load CSS sorter (which will then lazy load PostCSS)
-            return await lazyCssSorter.sortCssProperties(editor);
+            const { sortCssProperties } = await import('../lib/css-sorter.js');
+            return await sortCssProperties(editor);
         },
     });
 }

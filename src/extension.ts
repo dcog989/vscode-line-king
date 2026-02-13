@@ -10,8 +10,6 @@ import { Logger } from './utils/logger.js';
 
 // Lazy-loaded modules
 let contextManager: ContextManager | undefined;
-let cleanerModule: typeof import('./lib/cleaner.js') | undefined;
-let cssSorterModule: typeof import('./lib/css-sorter.js') | undefined;
 
 // Detect if we're running in a test environment
 const isTestEnvironment = (): boolean => {
@@ -72,20 +70,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                 const promise = (async () => {
                     try {
                         // Lazy-load modules only when actually needed
-                        if (!cleanerModule) {
-                            cleanerModule = await import('./lib/cleaner.js');
-                        }
-                        if (!cssSorterModule) {
-                            cssSorterModule = await import('./lib/css-sorter.js');
-                        }
+                        const cleanerModule = await import('./lib/cleaner.js');
+                        const cssSorterModule = await import('./lib/css-sorter.js');
 
                         const { applyLineAction } = await import('./utils/editor.js');
 
-                        if (action === 'removeBlankLines' && cleanerModule) {
+                        if (action === 'removeBlankLines') {
                             await applyLineAction(editor, cleanerModule.removeBlankLines);
-                        } else if (action === 'trimTrailingWhitespace' && cleanerModule) {
+                        } else if (action === 'trimTrailingWhitespace') {
                             await applyLineAction(editor, cleanerModule.trimTrailingWhitespace);
-                        } else if (action === 'sortCssProperties' && cssSorterModule) {
+                        } else if (action === 'sortCssProperties') {
                             await cssSorterModule.sortCssProperties(editor);
                         }
                     } catch (e) {

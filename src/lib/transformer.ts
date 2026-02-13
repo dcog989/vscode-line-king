@@ -184,3 +184,43 @@ function unescapeJsonString(str: string): string {
 export function transformJoin(lines: string[], separator: string): string[] {
     return [lines.join(separator)];
 }
+
+function sortObjectKeys(obj: unknown): unknown {
+    if (obj === null || typeof obj !== 'object') return obj;
+
+    if (Array.isArray(obj)) {
+        return obj.map(sortObjectKeys);
+    }
+
+    const objRecord = obj as Record<string, unknown>;
+    return Object.keys(objRecord)
+        .sort()
+        .reduce(
+            (result, key) => {
+                result[key] = sortObjectKeys(objRecord[key]);
+                return result;
+            },
+            {} as Record<string, unknown>,
+        );
+}
+
+export function transformJsonSort(lines: string[]): string[] {
+    const text = lines.join('\n');
+    try {
+        const parsed = JSON.parse(text);
+        const sorted = sortObjectKeys(parsed);
+        return [JSON.stringify(sorted, null, 2)];
+    } catch (error) {
+        throw new Error(`Invalid JSON: ${(error as Error).message}`);
+    }
+}
+
+export function transformJsonMinify(lines: string[]): string[] {
+    const text = lines.join('\n');
+    try {
+        const parsed = JSON.parse(text);
+        return [JSON.stringify(parsed)];
+    } catch (error) {
+        throw new Error(`Invalid JSON: ${(error as Error).message}`);
+    }
+}
