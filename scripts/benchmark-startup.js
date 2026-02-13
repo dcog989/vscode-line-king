@@ -1,6 +1,9 @@
-const path = require('node:path');
-const { execSync } = require('node:child_process');
-const { existsSync, readFileSync, writeFileSync, mkdirSync } = require('node:fs');
+import path from 'node:path';
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const ROOT_DIR = path.join(__dirname, '..');
 const RESULTS_DIR = path.join(ROOT_DIR, '.benchmark-results');
@@ -10,43 +13,6 @@ function ensureResultsDir() {
     if (!existsSync(RESULTS_DIR)) {
         mkdirSync(RESULTS_DIR, { recursive: true });
     }
-}
-
-function parseMetrics(output) {
-    const match = output.match(/STARTUP_METRICS:\s*({.*})/);
-    if (match) {
-        try {
-            return JSON.parse(match[1]);
-        } catch (e) {
-            console.warn('Failed to parse metrics:', e);
-        }
-    }
-    return null;
-}
-
-function aggregateResults(allMetrics) {
-    const metricsKeys = Object.keys(allMetrics[0]);
-    const aggregated = {};
-
-    for (const key of metricsKeys) {
-        const values = allMetrics.map((m) => m[key]);
-        const sum = values.reduce((a, b) => a + b, 0);
-        const avg = sum / values.length;
-        const min = Math.min(...values);
-        const max = Math.max(...values);
-        const variance =
-            values.reduce((acc, val) => acc + Math.pow(val - avg, 2), 0) / values.length;
-        const stdDev = Math.sqrt(variance);
-
-        aggregated[key] = {
-            avg: Number(avg.toFixed(3)),
-            min: Number(min.toFixed(3)),
-            max: Number(max.toFixed(3)),
-            stdDev: Number(stdDev.toFixed(3)),
-        };
-    }
-
-    return aggregated;
 }
 
 function saveResults(results) {
@@ -64,38 +30,51 @@ function saveResults(results) {
     };
 
     writeFileSync(RESULTS_FILE, JSON.stringify(fullResults, null, 2));
+    // eslint-disable-next-line no-console
     console.log(`\n✅ Results saved to: ${RESULTS_FILE}`);
 
     return fullResults;
 }
 
 function formatOutput(results) {
-    console.log('\n' + '='.repeat(60));
+    // eslint-disable-next-line no-console
+    console.log(`\n${'='.repeat(60)}`);
+    // eslint-disable-next-line no-console
     console.log('📊 LINE KING STARTUP BENCHMARK RESULTS');
+    // eslint-disable-next-line no-console
     console.log('='.repeat(60));
 
     for (const [key, value] of Object.entries(results)) {
         if (typeof value === 'object' && value.avg !== undefined) {
+            // eslint-disable-next-line no-console
             console.log(`\n${key}:`);
+            // eslint-disable-next-line no-console
             console.log(`  Average: ${value.avg}ms`);
+            // eslint-disable-next-line no-console
             console.log(`  Min:     ${value.min}ms`);
+            // eslint-disable-next-line no-console
             console.log(`  Max:     ${value.max}ms`);
+            // eslint-disable-next-line no-console
             console.log(`  Std Dev: ${value.stdDev}ms`);
         }
     }
 
-    console.log('\n' + '='.repeat(60));
+    // eslint-disable-next-line no-console
+    console.log(`\n${'='.repeat(60)}`);
 }
 
 function compareWithBaseline(newResults) {
     if (!existsSync(RESULTS_FILE)) {
+        // eslint-disable-next-line no-console
         console.log('\nℹ️  No baseline found for comparison');
         return null;
     }
 
     try {
         const baseline = JSON.parse(readFileSync(RESULTS_FILE, 'utf8'));
+        // eslint-disable-next-line no-console
         console.log('\n📈 Comparison with baseline:');
+        // eslint-disable-next-line no-console
         console.log(`Baseline: ${baseline.timestamp}`);
 
         for (const [key, newValue] of Object.entries(newResults)) {
@@ -106,6 +85,7 @@ function compareWithBaseline(newResults) {
                     const percentChange = ((diff / baselineValue) * 100).toFixed(2);
                     const sign = diff > 0 ? '+' : '';
                     const status = Math.abs(diff) < 0.5 ? '✓' : diff > 0 ? '⚠️' : '⚡';
+                    // eslint-disable-next-line no-console
                     console.log(
                         `  ${status} ${key}: ${sign}${diff.toFixed(3)}ms (${sign}${percentChange}%)`,
                     );
@@ -113,6 +93,7 @@ function compareWithBaseline(newResults) {
             }
         }
     } catch (e) {
+        // eslint-disable-next-line no-console
         console.warn('\n⚠️  Could not compare with baseline:', e.message);
     }
 }
@@ -122,7 +103,9 @@ function compareWithBaseline(newResults) {
 async function runBenchmark() {
     ensureResultsDir();
 
+    // eslint-disable-next-line no-console
     console.log('🚀 Starting Line King startup benchmark...');
+    // eslint-disable-next-line no-console
     console.log('Looking for metrics from VS Code extension activation...\n');
 
     // Look for metrics in various possible locations
@@ -137,21 +120,27 @@ async function runBenchmark() {
         if (existsSync(loc)) {
             try {
                 metrics = JSON.parse(readFileSync(loc, 'utf8'));
+                // eslint-disable-next-line no-console
                 console.log(`✅ Found metrics in: ${loc}`);
                 break;
-            } catch (e) {
+            } catch {
                 // Continue to next location
             }
         }
     }
 
     if (!metrics) {
+        // eslint-disable-next-line no-console
         console.error('❌ No benchmark metrics found.');
+        // eslint-disable-next-line no-console
         console.log('   Run tests in VS Code with VSCODE_BENCHMARK_MODE=1 to capture metrics.');
+        // eslint-disable-next-line no-console
         console.log('   Or use the unit tests to verify functionality.');
 
         // Show a sample of what metrics would look like
+        // eslint-disable-next-line no-console
         console.log('\n📋 Sample metrics format:');
+        // eslint-disable-next-line no-console
         console.log(
             JSON.stringify(
                 {
@@ -169,7 +158,9 @@ async function runBenchmark() {
         process.exit(1);
     }
 
+    // eslint-disable-next-line no-console
     console.log(`\n📊 Current metrics:`);
+    // eslint-disable-next-line no-console
     console.log(JSON.stringify(metrics, null, 2));
 
     // Create fake aggregated for single run
@@ -195,6 +186,7 @@ async function runBenchmark() {
 }
 
 runBenchmark().catch((error) => {
+    // eslint-disable-next-line no-console
     console.error('Benchmark failed:', error);
     process.exit(1);
 });

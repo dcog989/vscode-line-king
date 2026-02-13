@@ -12,6 +12,7 @@ export default [
             'out/**',
             'coverage/**',
             '.vscode-test/**',
+            'scripts/**',
             'esbuild.config.mjs',
         ],
     },
