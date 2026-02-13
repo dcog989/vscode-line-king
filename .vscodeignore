@@ -1,8 +1,9 @@
 # --- Directories ---
+.benchmark-results/
+.repomix/
+scripts/
 .agents/
-.ai/
 .assets/
-.claude/
 .docs/
 .git/
 .github/
@@ -31,7 +32,6 @@ CLAUDE.md
 bun.lock
 esbuild.config.mjs
 eslint.config.mjs
-package-lock.json
 repomix.*.json
 tsconfig.json
 vitest.config.ts

@@ -11,6 +11,8 @@ export default [
             'node_modules/**',
             'out/**',
             'coverage/**',
+            '.benchmark-results/',
+            '.repomix/',
             '.vscode-test/**',
             'scripts/**',
             'esbuild.config.mjs',

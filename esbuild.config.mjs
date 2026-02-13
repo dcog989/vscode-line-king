@@ -151,7 +151,7 @@ async function main() {
          * Code splitting for better tree-shaking and caching
          * Enables separate chunks for dependencies
          */
-        splitting: production,
+        splitting: false,
 
         /**
          * CRITICAL: Only minify and remove sourcemaps in production
