@@ -49,3 +49,17 @@ export const REGEX = {
     LIST_ITEM: /^[-*]\s/,
     EXCESS_WHITESPACE: /\s{3,}/,
 };
+
+// Performance thresholds and limits
+export const PERFORMANCE = {
+    /** Threshold for large file processing (lines) - 50,000 lines */
+    LARGE_FILE_LINE_THRESHOLD: 50000,
+    /** Threshold for streaming processing (bytes) - 1MB */
+    STREAMING_THRESHOLD_BYTES: 1024 * 1024,
+    /** Chunk size for efficient line joining - 10,000 lines */
+    JOIN_CHUNK_SIZE: 10000,
+    /** Maximum CSS lines to safely process - 100,000 lines */
+    MAX_SAFE_CSS_LINES: 100000,
+    /** Maximum lines to scan when finding CSS rule blocks - 500 lines */
+    MAX_CSS_SCAN_LINES: 500,
+} as const;

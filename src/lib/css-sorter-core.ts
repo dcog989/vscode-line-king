@@ -105,7 +105,6 @@ export function sortRuleBlock(
     const parsed = blockLines.map((line, index) => ({ ...parseLine(line), originalIndex: index }));
 
     const declarations = parsed.filter((p) => p.type === 'declaration');
-    const nonDeclarations = parsed.filter((p) => p.type !== 'declaration');
 
     const sortedDeclarations = sortDeclarations(
         declarations as Array<ParsedLine & { property: string; value: string }>,
@@ -113,24 +112,14 @@ export function sortRuleBlock(
     );
 
     const result = [...lines];
-    const newBlockLines = [];
-
     let declIndex = 0;
-    let nonDeclIndex = 0;
 
-    for (const parsedLine of parsed) {
+    const newBlockLines = parsed.map((parsedLine) => {
         if (parsedLine.type === 'declaration') {
-            if (declIndex < sortedDeclarations.length) {
-                newBlockLines.push(sortedDeclarations[declIndex].original);
-                declIndex++;
-            }
-        } else {
-            if (nonDeclIndex < nonDeclarations.length) {
-                newBlockLines.push(nonDeclarations[nonDeclIndex].original);
-                nonDeclIndex++;
-            }
+            return sortedDeclarations[declIndex++].original;
         }
-    }
+        return parsedLine.original;
+    });
 
     result.splice(startIndex + 1, endIndex - startIndex - 1, ...newBlockLines);
 

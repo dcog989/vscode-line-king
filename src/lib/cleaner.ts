@@ -62,16 +62,25 @@ export function removeDuplicateLines(lines: string[]): string[] {
 }
 
 export function keepOnlyDuplicates(lines: string[]): string[] {
+    // Two-pass approach is actually optimal here:
+    // Pass 1: Count occurrences using a Map
+    // Pass 2: Filter lines that appear more than once
+    // This maintains original order and correctly handles duplicates
     const counts = new Map<string, number>();
+
+    // First pass: count occurrences
     for (const line of lines) {
-        counts.set(line, (counts.get(line) || 0) + 1);
+        counts.set(line, (counts.get(line) ?? 0) + 1);
     }
+
+    // Second pass: keep only duplicates
     const result: string[] = [];
     for (const line of lines) {
-        if ((counts.get(line) || 0) > 1) {
+        if (counts.get(line)! > 1) {
             result.push(line);
         }
     }
+
     return result;
 }
 

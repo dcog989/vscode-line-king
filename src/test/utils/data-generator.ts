@@ -13,7 +13,9 @@ export function generateRandomLines(count: number, prefix: string = 'Line Entry'
 export function generateIPs(count: number): string[] {
     const ips: string[] = [];
     for (let i = 0; i < count; i++) {
-        ips.push(`${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`);
+        ips.push(
+            `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+        );
     }
     return ips;
 }

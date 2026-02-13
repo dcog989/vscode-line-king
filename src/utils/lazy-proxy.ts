@@ -34,6 +34,16 @@ export function createLazyProxy<T extends Record<string, unknown>>(
 
             return async (...args: unknown[]) => {
                 const loadedModule = await loadModule();
+
+                // Check if property exists on the module
+                if (!(prop in loadedModule)) {
+                    const availableExports = Object.keys(loadedModule).join(', ');
+                    throw new Error(
+                        `Property "${prop}" does not exist in module "${modulePath}". ` +
+                            `Available exports: ${availableExports || '(none)'}`,
+                    );
+                }
+
                 const func = loadedModule[prop];
                 if (typeof func !== 'function') {
                     throw new Error(

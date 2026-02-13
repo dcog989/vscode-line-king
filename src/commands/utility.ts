@@ -21,13 +21,13 @@ export function registerUtilityCommands(
     factory.registerAsyncCommands([
         {
             id: COMMANDS.CONVERT_LF,
-            handler: async (editor) => {
+            handler: async (editor): Promise<void> => {
                 await editor.edit((eb) => eb.setEndOfLine(vscode.EndOfLine.LF));
             },
         },
         {
             id: COMMANDS.CONVERT_CRLF,
-            handler: async (editor) => {
+            handler: async (editor): Promise<void> => {
                 await editor.edit((eb) => eb.setEndOfLine(vscode.EndOfLine.CRLF));
             },
         },
@@ -37,14 +37,14 @@ export function registerUtilityCommands(
     factory.registerAsyncCommands([
         {
             id: COMMANDS.SHOW_ALL_CHARS,
-            handler: async () => {
+            handler: async (): Promise<void> => {
                 await lazyVisualizer.toggleWhitespaceChars(true);
                 updateContextCallback();
             },
         },
         {
             id: COMMANDS.HIDE_ALL_CHARS,
-            handler: async () => {
+            handler: async (): Promise<void> => {
                 await lazyVisualizer.toggleWhitespaceChars(false);
                 updateContextCallback();
             },
@@ -54,7 +54,7 @@ export function registerUtilityCommands(
     // Debug command (no dependencies)
     factory.registerAsyncCommand({
         id: COMMANDS.DEBUG_CONTEXT,
-        handler: () => {
+        handler: (): void => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
                 vscode.window.showInformationMessage('No active editor');

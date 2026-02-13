@@ -107,11 +107,7 @@ export function transformJsonUnescape(lines: string[]): string[] {
         try {
             return JSON.parse(`"${l}"`);
         } catch {
-            try {
-                return JSON.parse(l);
-            } catch {
-                return unescapeJsonString(l);
-            }
+            return unescapeJsonString(l);
         }
     });
 }

@@ -1,7 +1,13 @@
 import * as vscode from 'vscode';
-import { CONFIG } from '../constants.js';
+import { CONFIG, PERFORMANCE } from '../constants.js';
 import { configCache } from './config-cache.js';
-import { getEOL, joinLinesEfficient, shouldUseStreaming, streamLines } from './text-utils.js';
+import {
+    getEOL,
+    joinLinesEfficient,
+    shouldUseStreaming,
+    splitLinesByEOL,
+    streamLines,
+} from './text-utils.js';
 
 type LineProcessor = (lines: string[]) => string[] | Promise<string[]>;
 type StreamLineProcessor = (lines: Iterable<string>) => Generator<string, void, undefined>;
@@ -9,19 +15,6 @@ type StreamLineProcessor = (lines: Iterable<string>) => Generator<string, void, 
 export interface LineActionOptions {
     expandSelection?: boolean;
 }
-
-/**
- * Threshold for switching to chunk-based processing (in lines)
- * Reduced from 100k to 50k for better memory management
- * Files with more lines than this will be processed with optimization
- */
-const LARGE_FILE_THRESHOLD = 50000;
-
-/**
- * Threshold for using streaming processing (in bytes)
- * Files larger than 1MB will use streaming to minimize memory allocations
- */
-const _STREAMING_THRESHOLD = 1024 * 1024;
 
 /**
  * Applies a transformation function to selected lines or the entire document
@@ -85,7 +78,7 @@ export async function applyLineAction(
                     selectionChangeMap.set(selection, { range, newText });
                 }
             } else {
-                const lines = text.split(eol === '\r\n' ? '\r\n' : '\n');
+                const lines = splitLinesByEOL(text, eol);
                 const processedLines = await Promise.resolve(processor(lines));
                 const newText = processedLines.join(eol);
 
@@ -103,13 +96,13 @@ export async function applyLineAction(
         const text = document.getText();
 
         // For very large files, use optimized processing
-        if (lineCount > LARGE_FILE_THRESHOLD || shouldUseStreaming(text)) {
+        if (lineCount > PERFORMANCE.LARGE_FILE_LINE_THRESHOLD || shouldUseStreaming(text)) {
             await processLargeDocument(editor, processor, eol);
             return;
         }
 
         // For smaller files, use the standard in-memory approach
-        const lines = text.split(eol === '\r\n' ? '\r\n' : '\n');
+        const lines = splitLinesByEOL(text, eol);
         const processedLines = await Promise.resolve(processor(lines));
         const newText = processedLines.join(eol);
 
@@ -125,36 +118,57 @@ export async function applyLineAction(
 
     // Only perform edit if there are actual changes
     if (changes.length > 0) {
+        // Calculate line count changes for each change (before applying)
+        const lineChanges = changes.map((change) => {
+            const originalLines = change.range.end.line - change.range.start.line + 1;
+            const newLines = splitLinesByEOL(change.newText, eol).length;
+            return newLines - originalLines;
+        });
+
         await editor.edit((editBuilder) => {
             for (const change of changes) {
                 editBuilder.replace(change.range, change.newText);
             }
         });
 
-        // Update selections to maintain focus on modified content
+        // After edit, document has been modified - recalculate selection positions
+        // We need to track cumulative line shifts from all previous changes
         const newSelections: vscode.Selection[] = [];
-        for (const selection of selections) {
+        const sortedOriginalSelections = [...selections].sort((a, b) => b.start.compareTo(a.start));
+
+        for (let i = 0; i < sortedOriginalSelections.length; i++) {
+            const selection = sortedOriginalSelections[i];
             const change = selectionChangeMap.get(selection);
+
             if (change) {
-                // Calculate new selection range based on the transformed text
-                const newTextLines = change.newText.split(eol === '\r\n' ? '\r\n' : '\n');
-                const startLine = document.lineAt(change.range.start.line);
+                // Calculate cumulative line shift from changes that were below this one
+                // (since we process from bottom to top, changes with lower indices are below)
+                let lineShift = 0;
+                for (let j = 0; j < i; j++) {
+                    lineShift += lineChanges[j];
+                }
 
-                // The new selection starts at the same position as the original range start
-                const newStart = startLine.range.start;
+                const newTextLines = splitLinesByEOL(change.newText, eol);
+                const adjustedStartLine = change.range.start.line + lineShift;
 
-                // Calculate the end position based on the number of lines in the new text
+                // Ensure the adjusted line is within document bounds
+                const safeStartLine = Math.max(
+                    0,
+                    Math.min(adjustedStartLine, document.lineCount - 1),
+                );
+                const newStart = document.lineAt(safeStartLine).range.start;
+
                 if (newTextLines.length === 1) {
                     // Single line result - select the entire line content
-                    const lineText = document.lineAt(change.range.start.line).text;
-                    const newEnd = new vscode.Position(change.range.start.line, lineText.length);
+                    const lineText = document.lineAt(safeStartLine).text;
+                    const newEnd = new vscode.Position(safeStartLine, lineText.length);
                     newSelections.push(new vscode.Selection(newStart, newEnd));
                 } else {
                     // Multiple lines - select from start to end of last line
-                    const lastLineNum = change.range.start.line + newTextLines.length - 1;
-                    const lastLine = document.lineAt(lastLineNum);
-                    const newEnd = lastLine.range.end;
-                    newSelections.push(new vscode.Selection(newStart, newEnd));
+                    const lastLineNum = safeStartLine + newTextLines.length - 1;
+                    const safeLastLine = Math.min(lastLineNum, document.lineCount - 1);
+                    const lastLine = document.lineAt(safeLastLine);
+                    newSelections.push(new vscode.Selection(newStart, lastLine.range.end));
                 }
             } else {
                 // No change for this selection, keep it as is
@@ -200,7 +214,7 @@ async function processTextStreaming(
         return joinLinesEfficient(processedStream, eol);
     } else {
         // Fall back to standard array processing
-        const lines = text.split(eol === '\r\n' ? '\r\n' : '\n');
+        const lines = splitLinesByEOL(text, eol);
         const processedLines = await Promise.resolve(processor(lines));
         return processedLines.join(eol);
     }

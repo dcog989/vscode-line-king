@@ -23,33 +23,34 @@ function getCaseInsensitiveCollator(): Intl.Collator {
     return caseInsensitiveCollator;
 }
 
-export const sortAsc = (lines: string[]): string[] => [...lines].sort((a, b) => a.localeCompare(b));
+export const sortAsc = (lines: string[]): string[] =>
+    lines.slice().sort((a, b) => a.localeCompare(b));
 
 export const sortAscInsensitive = (lines: string[]): string[] => {
     const collator = getCaseInsensitiveCollator();
-    return [...lines].sort(collator.compare);
+    return lines.slice().sort(collator.compare);
 };
 
 export const sortDesc = (lines: string[]): string[] =>
-    [...lines].sort((a, b) => b.localeCompare(a));
+    lines.slice().sort((a, b) => b.localeCompare(a));
 
 export const sortDescInsensitive = (lines: string[]): string[] => {
     const collator = getCaseInsensitiveCollator();
-    return [...lines].sort((a, b) => collator.compare(b, a));
+    return lines.slice().sort((a, b) => collator.compare(b, a));
 };
 
 export const sortNatural = (lines: string[]): string[] => {
     const collator = getNaturalCollator();
-    return [...lines].sort(collator.compare);
+    return lines.slice().sort(collator.compare);
 };
 
 export const sortLengthAsc = (lines: string[]): string[] =>
-    [...lines].sort((a, b) => a.length - b.length);
+    lines.slice().sort((a, b) => a.length - b.length);
 
 export const sortLengthDesc = (lines: string[]): string[] =>
-    [...lines].sort((a, b) => b.length - a.length);
+    lines.slice().sort((a, b) => b.length - a.length);
 
-export const sortReverse = (lines: string[]): string[] => [...lines].reverse();
+export const sortReverse = (lines: string[]): string[] => lines.slice().reverse();
 
 export function sortIP(lines: string[]): string[] {
     const withIPs: Array<{ line: string; ipValue: number }> = [];
@@ -77,7 +78,7 @@ export function sortIP(lines: string[]): string[] {
 }
 
 export const sortShuffle = (lines: string[]): string[] => {
-    const array = [...lines];
+    const array = lines.slice();
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];

@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
 import { CONTEXT_KEYS, TIMING } from './constants.js';
+import { Logger } from './utils/logger.js';
 
 /**
  * PERFORMANCE: visualizer is lazy-loaded to avoid loading it during extension activation
  */
 let visualizerModule: typeof import('./lib/visualizer.js') | null = null;
-async function getVisualizer() {
+async function getVisualizer(): Promise<typeof import('./lib/visualizer.js')> {
     if (!visualizerModule) {
         visualizerModule = await import('./lib/visualizer.js');
     }
@@ -142,8 +143,8 @@ export class ContextManager {
         for (const disposable of this.disposables) {
             try {
                 disposable.dispose();
-            } catch {
-                // Silently ignore disposal errors
+            } catch (error) {
+                Logger.error('Error disposing listener', error);
             }
         }
         this.disposables = [];
@@ -174,8 +175,8 @@ export class ContextManager {
             const visualizer = await getVisualizer();
             const areCharsVisible = visualizer.isWhitespaceCharsVisible();
             this.setContext(CONTEXT_KEYS.ALL_CHARS_VISIBLE, areCharsVisible);
-        } catch {
-            // Error updating context - silently ignore
+        } catch (error) {
+            Logger.error('Failed to update context', error);
         }
     }
 

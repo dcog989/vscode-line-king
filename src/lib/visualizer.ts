@@ -48,6 +48,7 @@ class WhitespaceCharsVisualizer {
     /**
      * Performs the actual decoration update
      * Processes only visible ranges for better performance
+     * Batches consecutive whitespace to reduce decoration count
      */
     private performUpdate(editor: vscode.TextEditor): void {
         if (!editor || !this._isEnabled) {
@@ -71,24 +72,40 @@ class WhitespaceCharsVisualizer {
                 const lineText = line.text;
                 const endPos = line.range.end;
 
-                // Detect spaces and tabs in the line
-                for (let charIndex = 0; charIndex < lineText.length; charIndex++) {
+                // Detect spaces and tabs in the line - batch consecutive whitespace
+                let charIndex = 0;
+                while (charIndex < lineText.length) {
                     const char = lineText[charIndex];
                     if (char === ' ') {
-                        const pos = new vscode.Position(i, charIndex);
+                        // Batch consecutive spaces into a single range
+                        const start = charIndex;
+                        while (charIndex < lineText.length && lineText[charIndex] === ' ') {
+                            charIndex++;
+                        }
+                        // Use the first character position for the decoration
+                        const pos = new vscode.Position(i, start);
                         spaceRanges.push(new vscode.Range(pos, pos));
                     } else if (char === '\t') {
-                        const pos = new vscode.Position(i, charIndex);
+                        // Batch consecutive tabs into a single range
+                        const start = charIndex;
+                        while (charIndex < lineText.length && lineText[charIndex] === '\t') {
+                            charIndex++;
+                        }
+                        // Use the first character position for the decoration
+                        const pos = new vscode.Position(i, start);
                         tabRanges.push(new vscode.Range(pos, pos));
+                    } else {
+                        charIndex++;
                     }
                 }
 
                 // Detect line ending type
                 const lineEndDecorationRange = new vscode.Range(endPos, endPos);
-                
+
                 if (i < lastLineIndex) {
                     const nextLineStart = new vscode.Position(i + 1, 0);
-                    const lineEndOffset = document.offsetAt(nextLineStart) - document.offsetAt(endPos);
+                    const lineEndOffset =
+                        document.offsetAt(nextLineStart) - document.offsetAt(endPos);
 
                     if (lineEndOffset === LINE_ENDINGS.CRLF_BYTE_LENGTH) {
                         crlfRanges.push(lineEndDecorationRange);
@@ -147,7 +164,12 @@ class WhitespaceCharsVisualizer {
     }
 
     private initDecorations(): void {
-        if (this.lfDecoration && this.crlfDecoration && this.spaceDecoration && this.tabDecoration) {
+        if (
+            this.lfDecoration &&
+            this.crlfDecoration &&
+            this.spaceDecoration &&
+            this.tabDecoration
+        ) {
             return;
         }
 
@@ -155,22 +177,22 @@ class WhitespaceCharsVisualizer {
         this.disposeDecorations();
 
         const color = new vscode.ThemeColor('editorCodeLens.foreground');
-        
+
         const lineEndOptions = (text: string): vscode.DecorationRenderOptions => ({
             after: {
                 contentText: text,
                 color: color,
                 margin: '0 0 0 3px',
-                fontWeight: 'bold'
-            }
+                fontWeight: 'bold',
+            },
         });
 
         const charOptions = (text: string): vscode.DecorationRenderOptions => ({
             before: {
                 contentText: text,
                 color: color,
-                fontWeight: 'bold'
-            }
+                fontWeight: 'bold',
+            },
         });
 
         this.lfDecoration = vscode.window.createTextEditorDecorationType(lineEndOptions('↓'));

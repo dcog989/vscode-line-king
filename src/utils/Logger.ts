@@ -35,4 +35,38 @@ export class Logger {
         const timestamp = new Date().toLocaleTimeString();
         this.outputChannel.appendLine(`[${timestamp}] [${level}] ${message}`);
     }
+
+    /**
+     * Safely executes an async function and handles errors consistently
+     * Logs errors but doesn't throw - use for non-critical operations
+     */
+    public static async safeExecute<T>(
+        operation: () => Promise<T>,
+        errorMessage: string,
+        defaultValue?: T,
+    ): Promise<T | undefined> {
+        try {
+            return await operation();
+        } catch (error) {
+            this.error(errorMessage, error);
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Safely executes a sync function and handles errors consistently
+     * Logs errors but doesn't throw - use for non-critical operations
+     */
+    public static safeExecuteSync<T>(
+        operation: () => T,
+        errorMessage: string,
+        defaultValue?: T,
+    ): T | undefined {
+        try {
+            return operation();
+        } catch (error) {
+            this.error(errorMessage, error);
+            return defaultValue;
+        }
+    }
 }

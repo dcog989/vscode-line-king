@@ -1,16 +1,10 @@
 import * as vscode from 'vscode';
-import { REGEX } from '../constants.js';
+import { PERFORMANCE, REGEX } from '../constants.js';
 
 /**
  * Shared text processing utilities
  * Optimized for memory efficiency with large files
  */
-
-/**
- * Threshold for switching to streaming line processing
- * Files larger than this will use memory-efficient streaming approach
- */
-const STREAMING_THRESHOLD = 1024 * 1024; // 1MB
 
 /**
  * Gets the appropriate line ending string for a document
@@ -74,7 +68,7 @@ export function* streamLines(text: string): Generator<string, void, undefined> {
  * - Large files (>= 1MB): Uses memory-efficient streaming
  */
 export function splitLinesAuto(text: string): string[] | Generator<string, void, undefined> {
-    if (text.length < STREAMING_THRESHOLD) {
+    if (text.length < PERFORMANCE.STREAMING_THRESHOLD_BYTES) {
         return text.split(REGEX.LINE_SPLIT);
     } else {
         return streamLines(text);
@@ -100,7 +94,7 @@ export function collectLines(lineIterator: Generator<string, void, undefined>): 
 export function joinLinesEfficient(
     lines: Iterable<string>,
     eol: string,
-    chunkSize: number = 10000,
+    chunkSize: number = PERFORMANCE.JOIN_CHUNK_SIZE,
 ): string {
     const chunks: string[] = [];
     let currentChunk: string[] = [];
@@ -129,7 +123,19 @@ export function joinLinesEfficient(
  * Determines if a text is large enough to benefit from streaming
  */
 export function shouldUseStreaming(text: string): boolean {
-    return text.length >= STREAMING_THRESHOLD;
+    return text.length >= PERFORMANCE.STREAMING_THRESHOLD_BYTES;
+}
+
+/**
+ * Splits text into lines using the specified EOL string
+ * Centralized to avoid duplicate ternary logic across the codebase
+ *
+ * @param text - The text to split
+ * @param eol - The end of line string ('\n' or '\r\n')
+ * @returns Array of lines without line endings
+ */
+export function splitLinesByEOL(text: string, eol: string): string[] {
+    return text.split(eol === '\r\n' ? '\r\n' : '\n');
 }
 
 /**

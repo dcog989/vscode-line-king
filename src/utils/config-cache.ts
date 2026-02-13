@@ -26,10 +26,28 @@ class ConfigCache {
     private disposables: vscode.Disposable[] = [];
     private isInitialized = false;
     private initializationPromise: Promise<void> | null = null;
+    private isActivated = false;
 
     constructor() {
-        // Eagerly load configuration (using fast validation)
+        // Defer all initialization until activate() is called
+        // This prevents module load time from impacting extension activation
+    }
+
+    /**
+     * Initialize the config cache - call this from activate()
+     * This ensures we only register listeners after the extension is activated
+     * Returns a promise that resolves when config is loaded
+     */
+    public async initialize(): Promise<void> {
+        if (this.isActivated) {
+            return;
+        }
+
+        this.isActivated = true;
+
+        // Load configuration (using fast validation)
         this.initializationPromise = this.loadConfigFast();
+        await this.initializationPromise;
 
         // Listen for configuration changes and reload asynchronously
         this.disposables.push(
