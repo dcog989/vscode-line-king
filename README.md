@@ -246,6 +246,46 @@ Line King is designed to work in:
 - ✅ Virtual Workspaces
 - ✅ Untrusted Workspaces
 
+## Performance Benchmarks
+
+Line King is optimized for fast startup with lazy initialization. Benchmark metrics track extension activation time to ensure performance remains optimal.
+
+### Running Benchmarks Locally
+
+```bash
+# Run startup benchmark
+bun run benchmark
+```
+
+This will:
+
+- Compile the extension
+- Run VS Code extension host
+- Measure activation timing across multiple runs
+- Display aggregated results with statistics
+- Compare against baseline if available
+
+### Benchmark Metrics
+
+The following metrics are tracked during extension activation:
+
+| Metric                      | Description                                  |
+| --------------------------- | -------------------------------------------- |
+| **Logger Init**             | Time to initialize logging system            |
+| **Commands Registered**     | Time to register all commands                |
+| **Save Handler Registered** | Time to register document save handler       |
+| **Context Deferred**        | Time to defer context manager initialization |
+| **Total**                   | Complete extension activation time           |
+
+### CI Benchmarking
+
+Benchmarks run automatically on:
+
+- Push to `main` or `develop` branches
+- Pull requests to `main` or `develop`
+
+Results are posted as comments on PRs to track performance changes.
+
 ## Support
 
 Please report issues and feature requests to [Line King issues](https://github.com/dcog989/vscode-line-king/issues).

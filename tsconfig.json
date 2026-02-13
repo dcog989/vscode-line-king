@@ -1,15 +1,15 @@
 {
-    "compilerOptions": {
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
-        "target": "ES2024",
-        "lib": ["ES2024"],
-        "rootDir": "src",
-        "strict": true,
-        "noImplicitReturns": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "types": ["node", "mocha"]
-    },
-    "exclude": ["node_modules", "dist", ".vscode-test", "esbuild.config.mjs"]
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2024",
+    "lib": ["ES2024"],
+    "rootDir": "src",
+    "strict": true,
+    "noImplicitReturns": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "types": ["node", "mocha"]
+  },
+  "exclude": ["node_modules", "dist", ".vscode-test", "esbuild.config.mjs"]
 }

@@ -4,9 +4,11 @@ import process from 'node:process';
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
+const testBuild = process.argv.includes('--test');
 
 console.log(`[esbuild] Mode: ${production ? 'PRODUCTION' : 'DEVELOPMENT'}`);
 console.log(`[esbuild] Watch: ${watch ? 'YES' : 'NO'}`);
+console.log(`[esbuild] Test Build: ${testBuild ? 'YES' : 'NO'}`);
 
 /**
  * @type {import('esbuild').Plugin}
@@ -129,6 +131,8 @@ const bundleSizeLimitPlugin = (maxSizeKB) => ({
 });
 
 async function main() {
+    const isTestBuild = process.argv.includes('--test');
+
     const ctx = await esbuild.context({
         entryPoints: ['src/extension.ts'],
         bundle: true,
@@ -259,6 +263,48 @@ async function main() {
         }
 
         await ctx.dispose();
+    }
+
+    // Build test files if requested
+    if (testBuild) {
+        console.log('[esbuild] Building test files...');
+
+        // Build test runner files
+        const testCtx = await esbuild.context({
+            entryPoints: [
+                'src/test/suite/index.ts',
+                'src/test/runTest.ts',
+                'src/test/benchmark.ts',
+            ],
+            bundle: true,
+            format: 'esm',
+            platform: 'node',
+            outdir: 'dist/test',
+            sourcemap: 'inline',
+            logLevel: 'silent',
+            external: ['vscode', '@vscode/test-electron', 'mocha', 'glob'],
+            banner: {
+                js: `import { createRequire } from 'module';const require = createRequire(import.meta.url);`,
+            },
+        });
+
+        await testCtx.rebuild();
+        await testCtx.dispose();
+
+        // Build test suite files (without bundling to preserve Mocha globals)
+        const testSuiteCtx = await esbuild.context({
+            entryPoints: ['src/test/suite/benchmark.test.ts'],
+            bundle: false,
+            format: 'esm',
+            platform: 'node',
+            outdir: 'dist/test/suite',
+            sourcemap: 'inline',
+            logLevel: 'silent',
+        });
+
+        await testSuiteCtx.rebuild();
+        await testSuiteCtx.dispose();
+        console.log('[esbuild] Test files built successfully');
     }
 }
 
