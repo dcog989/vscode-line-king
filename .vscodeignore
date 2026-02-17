@@ -42,10 +42,10 @@ yarn.lock
 **/*.map
 **/*.ts
 **/*.tsbuildinfo
+dist/test/
 
 # --- Includes ---
-!dist/
-!dist/*.js
+!dist/extension.js
 !package.json
 !README.md
 !assets/icon.png
