@@ -139,15 +139,41 @@ export function sortCssText(cssText: string, strategy: SortStrategy = 'alphabeti
         return cssText;
     }
 
-    let result = [...lines];
+    const result: string[] = [];
+    let lastProcessedEnd = 0;
 
     for (const block of ruleBlocks) {
         if (block.end - block.start <= 1) {
             continue;
         }
 
-        result = sortRuleBlock(result, block.start, block.end, strategy);
+        result.push(...lines.slice(lastProcessedEnd, block.start + 1));
+
+        const blockLines = lines.slice(block.start + 1, block.end);
+        const parsed = blockLines.map((line, index) => ({
+            ...parseLine(line),
+            originalIndex: index,
+        }));
+        const declarations = parsed.filter((p) => p.type === 'declaration');
+
+        const sortedDeclarations = sortDeclarations(
+            declarations as Array<ParsedLine & { property: string; value: string }>,
+            strategy,
+        );
+
+        let declIndex = 0;
+        const newBlockLines = parsed.map((parsedLine) => {
+            if (parsedLine.type === 'declaration') {
+                return sortedDeclarations[declIndex++].original;
+            }
+            return parsedLine.original;
+        });
+
+        result.push(...newBlockLines);
+        lastProcessedEnd = block.end;
     }
+
+    result.push(...lines.slice(lastProcessedEnd));
 
     return result.join('\n');
 }
