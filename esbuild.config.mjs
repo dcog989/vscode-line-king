@@ -139,7 +139,6 @@ async function main() {
         format: 'cjs',
         platform: 'node',
         outdir: 'dist',
-        absWorkingDir: process.cwd(),
 
         /**
          * External modules that should NEVER be bundled
@@ -272,7 +271,6 @@ async function main() {
             outdir: 'dist/test',
             sourcemap: 'inline',
             logLevel: 'silent',
-            absWorkingDir: process.cwd(),
             external: ['vscode', '@vscode/test-electron', 'mocha', 'glob', 'bun:test'],
             banner: {
                 js: `import { createRequire } from 'module';const require = createRequire(import.meta.url);`,
