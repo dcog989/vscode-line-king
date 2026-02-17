@@ -134,3 +134,19 @@ export const sortAscIgnoreSpecialInsensitive = (lines: string[]): string[] => {
         return collator.compare(cleanA, cleanB);
     });
 };
+
+export const sortDescIgnoreSpecial = (lines: string[]): string[] =>
+    lines.slice().sort((a, b) => {
+        const cleanA = stripLeadingSpecialChars(a);
+        const cleanB = stripLeadingSpecialChars(b);
+        return cleanB.localeCompare(cleanA);
+    });
+
+export const sortDescIgnoreSpecialInsensitive = (lines: string[]): string[] => {
+    const collator = getCaseInsensitiveCollator();
+    return lines.slice().sort((a, b) => {
+        const cleanA = stripLeadingSpecialChars(a);
+        const cleanB = stripLeadingSpecialChars(b);
+        return collator.compare(cleanB, cleanA);
+    });
+};

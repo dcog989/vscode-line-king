@@ -19,6 +19,11 @@ export function registerSortingCommands(context: vscode.ExtensionContext): void 
             { id: 'lineKing.sort.desc', processor: sorter.sortDesc },
             { id: 'lineKing.sort.desc.insensitive', processor: sorter.sortDescInsensitive },
             { id: 'lineKing.sort.desc.natural', processor: sorter.sortNaturalDesc },
+            { id: 'lineKing.sort.desc.ignoreSpecial', processor: sorter.sortDescIgnoreSpecial },
+            {
+                id: 'lineKing.sort.desc.ignoreSpecial.insensitive',
+                processor: sorter.sortDescIgnoreSpecialInsensitive,
+            },
             { id: 'lineKing.sort.length.asc', processor: sorter.sortLengthAsc },
             { id: 'lineKing.sort.length.desc', processor: sorter.sortLengthDesc },
             { id: 'lineKing.sort.reverse', processor: sorter.sortReverse },
