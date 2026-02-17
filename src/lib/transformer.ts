@@ -112,8 +112,16 @@ export function transformJsonUnescape(lines: string[]): string[] {
     return lines.map((l) => {
         try {
             return JSON.parse(`"${l}"`);
-        } catch {
-            return unescapeJsonString(l);
+        } catch (primaryError) {
+            try {
+                return unescapeJsonString(l);
+            } catch {
+                const message =
+                    primaryError instanceof Error
+                        ? primaryError.message
+                        : 'Invalid escape sequence';
+                throw new Error(`JSON unescape failed: ${message}`);
+            }
         }
     });
 }
@@ -171,7 +179,7 @@ function unescapeJsonString(str: string): string {
                             break;
                         }
                     }
-                    result += char;
+                    result += '\\u';
                     i++;
                     break;
                 default:
