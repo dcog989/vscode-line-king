@@ -15,7 +15,6 @@ const isTestEnvironment = (): boolean => {
 };
 
 const startupMetrics = {
-    startTime: 0,
     loggerInit: 0,
     commandsRegistered: 0,
     saveHandlerRegistered: 0,
@@ -24,10 +23,10 @@ const startupMetrics = {
 };
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
-    startupMetrics.startTime = performance.now();
+    const startTime = performance.now();
 
     Logger.initialize(context);
-    startupMetrics.loggerInit = performance.now();
+    startupMetrics.loggerInit = performance.now() - startTime;
 
     try {
         await configCache.initialize();
@@ -41,7 +40,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                 void contextManager.update();
             }
         });
-        startupMetrics.commandsRegistered = performance.now();
+        startupMetrics.commandsRegistered = performance.now() - startTime;
 
         context.subscriptions.push(
             vscode.workspace.onWillSaveTextDocument((event) => {
@@ -73,7 +72,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                 event.waitUntil(promise);
             }),
         );
-        startupMetrics.saveHandlerRegistered = performance.now();
+        startupMetrics.saveHandlerRegistered = performance.now() - startTime;
 
         if (!isTestEnvironment()) {
             const initContextOnce = vscode.window.onDidChangeTextEditorSelection(() => {
@@ -90,9 +89,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             });
             context.subscriptions.push(initContextOnce);
         }
-        startupMetrics.contextDeferred = performance.now();
+        startupMetrics.contextDeferred = performance.now() - startTime;
 
-        startupMetrics.total = performance.now() - startupMetrics.startTime;
+        startupMetrics.total = performance.now() - startTime;
 
         if (process.env.VSCODE_BENCHMARK_MODE === '1') {
             // eslint-disable-next-line no-console

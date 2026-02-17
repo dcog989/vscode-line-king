@@ -2,7 +2,7 @@
   "name": "line-king",
   "displayName": "Line King",
   "description": "Sort, remove dups, change case, clean, encode / decode. Do all the things to line and text.",
-  "version": "1.1.21",
+  "version": "1.1.22",
   "publisher": "dcog989",
   "icon": "assets/icon.png",
   "repository": {
@@ -46,7 +46,7 @@
   },
   "scripts": {
     "audit": "bun pm audit",
-    "benchmark": "bun run compile && node scripts/benchmark-startup.js",
+    "benchmark": "bun run compile && bun scripts/benchmark-startup.js",
     "check": "bun run check-types && bun run lint && bun run format:check",
     "check-types": "bunx tsc --noEmit",
     "clean": "rm -rf .context node_modules bun.lock .vscode-test",

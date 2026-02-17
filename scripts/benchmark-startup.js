@@ -7,7 +7,7 @@ const __dirname = path.dirname(__filename);
 
 const ROOT_DIR = path.join(__dirname, '..');
 const RESULTS_DIR = path.join(ROOT_DIR, '.benchmark-results');
-const RESULTS_FILE = path.join(RESULTS_DIR, 'startup-results.json');
+const RESULTS_FILE = path.join(RESULTS_DIR, 'benchmark-results.json');
 
 function ensureResultsDir() {
     if (!existsSync(RESULTS_DIR)) {
@@ -40,7 +40,7 @@ function formatOutput(results) {
     // eslint-disable-next-line no-console
     console.log(`\n${'='.repeat(60)}`);
     // eslint-disable-next-line no-console
-    console.log('📊 LINE KING STARTUP BENCHMARK RESULTS');
+    console.log('📊 LINE KING BENCHMARK RESULTS');
     // eslint-disable-next-line no-console
     console.log('='.repeat(60));
 
@@ -49,13 +49,13 @@ function formatOutput(results) {
             // eslint-disable-next-line no-console
             console.log(`\n${key}:`);
             // eslint-disable-next-line no-console
-            console.log(`  Average: ${value.avg}ms`);
+            console.log(`  Average: ${value.avg.toFixed(3)}ms`);
             // eslint-disable-next-line no-console
-            console.log(`  Min:     ${value.min}ms`);
+            console.log(`  Min:     ${value.min.toFixed(3)}ms`);
             // eslint-disable-next-line no-console
-            console.log(`  Max:     ${value.max}ms`);
+            console.log(`  Max:     ${value.max.toFixed(3)}ms`);
             // eslint-disable-next-line no-console
-            console.log(`  Std Dev: ${value.stdDev}ms`);
+            console.log(`  Std Dev: ${value.stdDev.toFixed(3)}ms`);
         }
     }
 
@@ -80,9 +80,10 @@ function compareWithBaseline(newResults) {
         for (const [key, newValue] of Object.entries(newResults)) {
             if (typeof newValue === 'object' && newValue.avg !== undefined) {
                 const baselineValue = baseline[key]?.avg;
-                if (baselineValue) {
+                if (baselineValue !== undefined) {
                     const diff = newValue.avg - baselineValue;
-                    const percentChange = ((diff / baselineValue) * 100).toFixed(2);
+                    const percentChange =
+                        baselineValue > 0 ? ((diff / baselineValue) * 100).toFixed(2) : '0';
                     const sign = diff > 0 ? '+' : '';
                     const status = Math.abs(diff) < 0.5 ? '✓' : diff > 0 ? '⚠️' : '⚡';
                     // eslint-disable-next-line no-console
@@ -98,97 +99,95 @@ function compareWithBaseline(newResults) {
     }
 }
 
-// Simple benchmark that doesn't require importing extension
-// It assumes metrics will be written to a file by extension activation
+function generateTestData(lineCount) {
+    const lines = [];
+    for (let i = 0; i < lineCount; i++) {
+        lines.push(`Line ${Math.random().toString(36).substring(7)} ${i}`);
+    }
+    return lines;
+}
+
+function measure(fn, iterations = 100) {
+    const times = [];
+
+    for (let i = 0; i < iterations; i++) {
+        const start = performance.now();
+        fn();
+        times.push(performance.now() - start);
+    }
+
+    times.sort((a, b) => a - b);
+    const avg = times.reduce((a, b) => a + b, 0) / times.length;
+    const min = times[0];
+    const max = times[times.length - 1];
+    const stdDev = Math.sqrt(
+        times.reduce((sum, t) => sum + Math.pow(t - avg, 2), 0) / times.length,
+    );
+
+    return { avg, min, max, stdDev };
+}
+
 async function runBenchmark() {
     ensureResultsDir();
 
     // eslint-disable-next-line no-console
-    console.log('🚀 Starting Line King startup benchmark...');
-    // eslint-disable-next-line no-console
-    console.log('Looking for metrics from VS Code extension activation...\n');
+    console.log('🚀 Starting Line King benchmarks...\n');
 
-    // Look for metrics in various possible locations
-    const possibleLocations = [
-        path.join(RESULTS_DIR, 'metrics.json'),
-        path.join(ROOT_DIR, 'dist/extension.js.benchmark-results/metrics.json'),
-        path.join(ROOT_DIR, 'dist/extension.js.benchmark-metrics.json'),
-    ];
+    // Import lib modules
+    const sorter = await import('../src/lib/sorter.ts');
+    const cleaner = await import('../src/lib/cleaner.ts');
+    const transformer = await import('../src/lib/transformer.ts');
 
-    let metrics = null;
-    for (const loc of possibleLocations) {
-        if (existsSync(loc)) {
-            try {
-                metrics = JSON.parse(readFileSync(loc, 'utf8'));
-                // eslint-disable-next-line no-console
-                console.log(`✅ Found metrics in: ${loc}`);
-                break;
-            } catch {
-                // Continue to next location
-            }
-        }
-    }
-
-    if (!metrics) {
-        // eslint-disable-next-line no-console
-        console.log('ℹ️  No benchmark metrics found.');
-        // eslint-disable-next-line no-console
-        console.log('   Run tests in VS Code with VSCODE_BENCHMARK_MODE=1 to capture metrics.');
-        // eslint-disable-next-line no-console
-        console.log('   Or use the unit tests to verify functionality.');
-
-        // Show a sample of what metrics would look like
-        // eslint-disable-next-line no-console
-        console.log('\n📋 Sample metrics format:');
-        // eslint-disable-next-line no-console
-        console.log(
-            JSON.stringify(
-                {
-                    startTime: 0,
-                    loggerInit: 0.1,
-                    commandsRegistered: 1.5,
-                    saveHandlerRegistered: 1.6,
-                    contextDeferred: 1.7,
-                    total: 1.7,
-                },
-                null,
-                2,
-            ),
-        );
-
-        // In CI, exit successfully since benchmarks require VS Code runtime
-        if (process.env.CI || process.env.GITHUB_ACTIONS) {
-            // eslint-disable-next-line no-console
-            console.log('\n⏭️  Skipping benchmark in CI (requires VS Code runtime)');
-            process.exit(0);
-        }
-        process.exit(1);
-    }
+    // Generate test data
+    const smallData = generateTestData(100);
+    const mediumData = generateTestData(1000);
+    const largeData = generateTestData(10000);
 
     // eslint-disable-next-line no-console
-    console.log(`\n📊 Current metrics:`);
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(metrics, null, 2));
+    console.log('Test data sizes: 100, 1000, 10000 lines\n');
 
-    // Create fake aggregated for single run
-    const aggregated = {};
-    for (const [key, value] of Object.entries(metrics)) {
-        if (typeof value === 'number') {
-            aggregated[key] = {
-                avg: Number(value.toFixed(3)),
-                min: Number(value.toFixed(3)),
-                max: Number(value.toFixed(3)),
-                stdDev: 0,
-            };
-        }
-    }
+    const results = {};
 
-    formatOutput(aggregated);
-    compareWithBaseline(aggregated);
+    // Sorting benchmarks
+    results.sortAsc_100 = measure(() => sorter.sortAsc([...smallData]), 1000);
+    results.sortAsc_1000 = measure(() => sorter.sortAsc([...mediumData]), 500);
+    results.sortAsc_10000 = measure(() => sorter.sortAsc([...largeData]), 100);
+
+    results.sortDesc_100 = measure(() => sorter.sortDesc([...smallData]), 1000);
+    results.sortDesc_1000 = measure(() => sorter.sortDesc([...mediumData]), 500);
+
+    results.sortNaturalAsc_100 = measure(() => sorter.sortNaturalAsc([...smallData]), 500);
+    results.sortNaturalAsc_1000 = measure(() => sorter.sortNaturalAsc([...mediumData]), 200);
+
+    results.sortIP_100 = measure(() => sorter.sortIP([...smallData]), 500);
+
+    results.sortShuffle_1000 = measure(() => sorter.sortShuffle([...mediumData]), 200);
+
+    // Cleaning benchmarks
+    results.removeBlankLines_1000 = measure(() => cleaner.removeBlankLines([...mediumData]), 1000);
+    results.removeDuplicateLines_1000 = measure(
+        () => cleaner.removeDuplicateLines([...mediumData]),
+        500,
+    );
+    results.trimTrailingWhitespace_1000 = measure(
+        () => cleaner.trimTrailingWhitespace([...mediumData]),
+        1000,
+    );
+
+    // Transformer benchmarks (case changes)
+    const caseData = mediumData.map((l) => l.toUpperCase());
+    results.toLowerCase_1000 = measure(() => caseData.map((l) => l.toLowerCase()), 500);
+    results.toUpperCase_1000 = measure(() => mediumData.map((l) => l.toUpperCase()), 500);
+
+    // Slice/copy benchmark (baseline)
+    results.sliceCopy_10000 = measure(() => [...largeData], 1000);
+
+    formatOutput(results);
+    compareWithBaseline(results);
 
     saveResults({
-        runs: 1,
-        aggregated,
+        runs: 100,
+        aggregated: results,
     });
 }
 
