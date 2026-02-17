@@ -63,8 +63,6 @@ class ConfigCache {
     /**
      * Load configuration using fast native validation
      * This is PRIMARY load path - no external dependencies
-     *
-     * Performance: <5ms
      */
     private async loadConfigFast(): Promise<void> {
         try {
