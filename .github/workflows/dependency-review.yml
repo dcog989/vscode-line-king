@@ -29,7 +29,7 @@ jobs:
 
       # Bun audit returns exit code 1 on vulnerabilities, failing the job automatically
       - name: "Audit dependencies"
-        run: bun pm audit
+        run: bun pm scan
 
       # Use packprod to trigger the bundleSizeLimitPlugin in esbuild
       - name: "Bundle size check"
