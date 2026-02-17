@@ -1,11 +1,11 @@
 # VS Code Line King Guidelines
 
-Line King is an extension for VS Code that provides a wide range of sorting, case change, and line manipulation functions via context menu and command palette. It aims for fast performance, minimal resource usage, fast startup time in VS Code.
+Line King is an extension for VS Code that provides comprehensive sorting, case change, line manipulation, etc. functions via context menu and command palette. It is highly performant, with minimal resource usage, fast initialization time.
 
 ## Tech Stack
 
 - **TypeScript 5.9** with strict mode enabled
-- **VS Code Extension API** (^1.106)
+- **VS Code Extension API** (^1.109)
 - **Node.js** runtime (ES2024 target)
 - **esbuild** for bundling (production builds)
 - **Bun** for package management and scripts
@@ -14,34 +14,14 @@ Line King is an extension for VS Code that provides a wide range of sorting, cas
 
 ## Entry Points
 
-### Extension Entry Point
-
 - ?
 
-### Core Components
-
-- ?
-
-### Build Output
+## Build Output
 
 - **Bundled**: `dist/extension.js` (for both Node and browser)
 - **Compiled**: `out/` directory (TypeScript compilation for testing)
 
 ## Key Architecture
-
-### Performance Optimizations
-
-- ?
-
-### Caching Strategy
-
-- ?
-
-### Event Handling
-
-- ?
-
-### Decorator System
 
 - ?
 
@@ -55,19 +35,17 @@ Line King is an extension for VS Code that provides a wide range of sorting, cas
 - No magic numbers - use constants like `CHUNK_SIZE_LINES`, `VISIBLE_LINE_BUFFER`
 - **Do NOT create docs files** (summary, reference, testing, etc.) unless explicitly instructed
 
+## Common Patterns
+
+- ?
+
 ## File System Access
 
 ### Allowed
 
-- `.agents/`, `.github/`, `.vscode/`
-- `scripts/`, `src/`
-- Root files: `README.md`, `.editorconfig`, `.gitignore`, `eslint.config.mjs`, `package.json`, `tsconfig.json`, etc.
+- all root folders and files unless excluded below
 
 ### Disallowed
 
-- `.ai/`, `.assets/`, `.docs/`, `.git/`, `node_modules/`
-- `repomix.config.json`, `bun.lock`, `.repomixignore`
-
-## Common Patterns
-
-- ?
+- `.assets/`, `.context/`, `.docs/`, `.git/`, `node_modules/`
+- `repomix.config.json`, `bun.lock`, `.repomixignore`, `LICENSE`
