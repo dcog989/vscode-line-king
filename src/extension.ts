@@ -4,14 +4,8 @@ import { ContextManager } from './context-manager.js';
 import { configCache, disposeConfigCache } from './utils/config-cache.js';
 import { Logger } from './utils/logger.js';
 
-/**
- * Line King Extension Activation Entry Point
- */
-
-// Lazy-loaded modules
 let contextManager: ContextManager | undefined;
 
-// Detect if we're running in a test environment
 const isTestEnvironment = (): boolean => {
     return (
         process.env.VSCODE_TEST_MODE === '1' ||
@@ -20,7 +14,6 @@ const isTestEnvironment = (): boolean => {
     );
 };
 
-// Performance tracking
 const startupMetrics = {
     startTime: 0,
     loggerInit: 0,
@@ -37,15 +30,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     startupMetrics.loggerInit = performance.now();
 
     try {
-        // 1. Initialize configuration cache (fast path - no Zod)
-        // This completes in <5ms, ensuring config is ready before commands run
-        // Note: Full validation is deferred and only runs if explicitly needed
         await configCache.initialize();
 
-        // 2. Register all Commands (eager - needed for command palette)
-        // Pass a callback that lazily initializes and updates context
         registerCommands(context, () => {
-            // Skip context manager in test environment
             if (isTestEnvironment()) {
                 return;
             }
@@ -54,11 +41,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                 contextManager = new ContextManager(context);
                 contextManager.register();
             }
-            void contextManager.update(); // Fire and forget
+            void contextManager.update();
         });
         startupMetrics.commandsRegistered = performance.now();
 
-        // 3. Register Save Handler (only if cleanup is enabled)
         context.subscriptions.push(
             vscode.workspace.onWillSaveTextDocument((event) => {
                 const action = configCache.getCleanupAction();
@@ -69,7 +55,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
                 const promise = (async () => {
                     try {
-                        // Lazy-load modules only when actually needed
                         const cleanerModule = await import('./lib/cleaner.js');
                         const cssSorterModule = await import('./lib/css-sorter.js');
 
@@ -92,11 +77,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         );
         startupMetrics.saveHandlerRegistered = performance.now();
 
-        // 4. Initialize Context Manager lazily - only when needed
-        // Skip entirely in test environment
         if (!isTestEnvironment()) {
-            // Defer ContextManager until first user interaction
-            // This ensures extension activation completes in <5ms
             const initContextOnce = vscode.window.onDidChangeTextEditorSelection(() => {
                 try {
                     if (!contextManager) {
@@ -113,14 +94,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         }
         startupMetrics.contextDeferred = performance.now();
 
-        // Calculate total activation time
         startupMetrics.total = performance.now() - startupMetrics.startTime;
 
-        // Log performance metrics in benchmark mode
         if (process.env.VSCODE_BENCHMARK_MODE === '1') {
             // eslint-disable-next-line no-console
             console.log('STARTUP_METRICS:', JSON.stringify(startupMetrics));
-            // Also write to file for reliability
             const fs = await import('node:fs');
             const path = await import('node:path');
             const resultsPath = path.join(
@@ -131,7 +109,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             try {
                 fs.writeFileSync(resultsPath, JSON.stringify(startupMetrics, null, 2));
             } catch {
-                // Ignore write errors - metrics already logged
+                // Ignore write errors
             }
         }
     } catch (error) {
@@ -140,18 +118,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }
 }
 
-/**
- * Line King Extension Deactivation Entry Point
- */
 export function deactivate(): void {
     try {
-        // Dispose context manager
         if (contextManager) {
             contextManager.dispose();
             contextManager = undefined;
         }
 
-        // Dispose config cache
         disposeConfigCache();
     } catch (e) {
         Logger.error('Error during deactivation', e);

@@ -136,7 +136,7 @@ async function main() {
     const ctx = await esbuild.context({
         entryPoints: ['src/extension.ts'],
         bundle: true,
-        format: 'esm',
+        format: 'cjs',
         platform: 'node',
         outdir: 'dist',
 
@@ -199,7 +199,7 @@ async function main() {
          * Aggressive dependency optimizations
          */
         mainFields: ['module', 'main'],
-        conditions: ['import', 'node'],
+        conditions: ['require', 'node'],
 
         /**
          * Inline all imports for smaller bundle size
@@ -213,13 +213,6 @@ async function main() {
             // Only enforce bundle size limit in production
             ...(production ? [bundleSizeLimitPlugin(500)] : []),
         ],
-
-        /**
-         * Shim 'require' for CJS dependencies bundled into ESM
-         */
-        banner: {
-            js: `import { createRequire } from 'module';const require = createRequire(import.meta.url);`,
-        },
 
         /**
          * Metafile for bundle analysis (production only)
