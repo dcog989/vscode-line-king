@@ -264,18 +264,14 @@ async function main() {
 
         // Build test runner files
         const testCtx = await esbuild.context({
-            entryPoints: [
-                'src/test/suite/index.ts',
-                'src/test/runTest.ts',
-                'src/test/benchmark.ts',
-            ],
+            entryPoints: ['src/test/suite/benchmark.test.ts'],
             bundle: true,
             format: 'esm',
             platform: 'node',
             outdir: 'dist/test',
             sourcemap: 'inline',
             logLevel: 'silent',
-            external: ['vscode', '@vscode/test-electron', 'mocha', 'glob'],
+            external: ['vscode', '@vscode/test-electron', 'mocha', 'glob', 'bun:test'],
             banner: {
                 js: `import { createRequire } from 'module';const require = createRequire(import.meta.url);`,
             },
@@ -283,20 +279,6 @@ async function main() {
 
         await testCtx.rebuild();
         await testCtx.dispose();
-
-        // Build test suite files (without bundling to preserve Mocha globals)
-        const testSuiteCtx = await esbuild.context({
-            entryPoints: ['src/test/suite/benchmark.test.ts'],
-            bundle: false,
-            format: 'esm',
-            platform: 'node',
-            outdir: 'dist/test/suite',
-            sourcemap: 'inline',
-            logLevel: 'silent',
-        });
-
-        await testSuiteCtx.rebuild();
-        await testSuiteCtx.dispose();
         console.log('[esbuild] Test files built successfully');
     }
 }
