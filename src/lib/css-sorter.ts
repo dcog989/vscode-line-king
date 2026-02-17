@@ -60,9 +60,8 @@ function findCssRuleBlock(
     for (let lineNum = cursorLine; lineNum <= endScanLine; lineNum++) {
         const line = document.lineAt(lineNum);
         const text = line.text;
-        const startIdx = lineNum === cursorLine ? 0 : 0;
 
-        for (let i = startIdx; i < text.length; i++) {
+        for (let i = 0; i < text.length; i++) {
             const char = text[i];
             if (char === '{') {
                 braceDepth++;
@@ -113,7 +112,7 @@ function findCssRuleBlock(
     // Skip leading whitespace
     const startLine = document.lineAt(ruleStartLine);
     const startText = startLine.text;
-    while (ruleStartChar < startText.length && /\s/.test(startText[ruleStartChar])) {
+    while (ruleStartChar < startText.length && startText[ruleStartChar] <= ' ') {
         ruleStartChar++;
     }
 
