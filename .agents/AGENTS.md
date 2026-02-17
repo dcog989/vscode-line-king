@@ -9,12 +9,13 @@ Line King is an extension for VS Code that provides comprehensive sorting, case 
 - **Node.js** runtime (ES2024 target)
 - **esbuild** for bundling (production builds)
 - **Bun** for package management and scripts
-- **Mocha** for testing
+- **Bun test** for testing
 - **ESLint** for linting
 
 ## Entry Points
 
-- ?
+- `src/extension.ts` - Extension activation/deactivation, command registration, save handler
+- `src/commands.ts` - Orchestrates command registration from sub-modules
 
 ## Build Output
 
@@ -23,7 +24,16 @@ Line King is an extension for VS Code that provides comprehensive sorting, case 
 
 ## Key Architecture
 
-- ?
+```
+extension.ts
+├── commands/           # Command modules (sorting, cleaning, transformation, utility)
+│   └── factory.ts      # CommandFactory for consistent command registration
+├── lib/                # Core logic (sorter, cleaner, transformer, css-sorter, visualizer)
+├── utils/              # Helpers (editor, config-cache, Logger, text-utils, performance)
+├── context-manager.ts  # VS Code context state management, event listeners
+├── constants.ts        # CONFIG, CONTEXT_KEYS, TIMING, REGEX, PERFORMANCE
+└── schemas/            # JSON schema for configuration
+```
 
 ## Coding Principles
 
@@ -37,7 +47,11 @@ Line King is an extension for VS Code that provides comprehensive sorting, case 
 
 ## Common Patterns
 
-- ?
+- **CommandFactory**: Use `registerLineCommand`/`registerAsyncCommand` to add commands
+- **Lazy loading**: Heavy modules loaded on-demand via dynamic `import()` to keep startup fast
+- **Debouncing**: Selection/decoration updates use `TIMING` constants for debounce delays
+- **Context caching**: `ContextManager` caches state to avoid redundant `setContext` calls
+- **Config access**: Use `configCache` from `utils/config-cache.js` for settings
 
 ## File System Access
 
@@ -49,3 +63,7 @@ Line King is an extension for VS Code that provides comprehensive sorting, case 
 
 - `.assets/`, `.context/`, `.docs/`, `.git/`, `node_modules/`
 - `repomix.config.json`, `bun.lock`, `.repomixignore`, `LICENSE`
+
+## Verification Commands
+
+After making changes, run: `bun run check` (typecheck + lint + format check)
