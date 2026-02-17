@@ -12,7 +12,7 @@ interface ParsedLine {
     value?: string;
 }
 
-const PROPERTY_REGEX = /^\s{2,}([-a-z]+(?:-[a-z0-9]+)*)\s*:\s*([^:;{}]+)\s*;?\s*$/i;
+const PROPERTY_REGEX = /^\s+([-a-z]+(?:-[a-z0-9]+)*)\s*:\s*([^:;{}]+)\s*;?\s*$/i;
 
 const COMMENT_REGEX = /^\s*(\/\*.*\*\/|\/\/.*)$/;
 
@@ -66,28 +66,31 @@ export function sortDeclarations(
 }
 
 export function findRuleBlocks(lines: string[]): Array<{ start: number; end: number }> {
-    const blocks: Array<{ start: number; end: number }> = [];
-    let depth = 0;
-    let blockStart = -1;
+    const allBlocks: Array<{ start: number; end: number }> = [];
+    const openBraces: Array<{ line: number; depth: number }> = [];
 
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
 
-        if (BRACE_OPEN_REGEX.test(line)) {
-            if (depth === 0) {
-                blockStart = i;
-            }
-            depth++;
-        } else if (BRACE_CLOSE_REGEX.test(line)) {
-            depth--;
-            if (depth === 0 && blockStart >= 0) {
-                blocks.push({ start: blockStart, end: i });
-                blockStart = -1;
+        for (const char of line) {
+            if (char === '{') {
+                openBraces.push({ line: i, depth: openBraces.length });
+            } else if (char === '}') {
+                if (openBraces.length > 0) {
+                    const open = openBraces.pop()!;
+                    allBlocks.push({ start: open.line, end: i });
+                }
             }
         }
     }
 
-    return blocks;
+    if (allBlocks.length <= 1) {
+        return allBlocks;
+    }
+
+    return allBlocks.filter((block) => {
+        return !allBlocks.some((other) => other.start > block.start && other.end < block.end);
+    });
 }
 
 export function sortRuleBlock(
