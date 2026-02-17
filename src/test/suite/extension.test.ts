@@ -27,7 +27,7 @@ describe('Line King Comprehensive Test Suite', () => {
         it('should sort naturally (alphanumeric)', () => {
             const input = ['img10.png', 'img2.png', 'img1.png'];
             const expected = ['img1.png', 'img2.png', 'img10.png'];
-            assert.deepStrictEqual(sorter.sortNatural(input), expected);
+            assert.deepStrictEqual(sorter.sortNaturalAsc(input), expected);
         });
     });
 

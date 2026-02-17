@@ -39,9 +39,14 @@ export const sortDescInsensitive = (lines: string[]): string[] => {
     return lines.slice().sort((a, b) => collator.compare(b, a));
 };
 
-export const sortNatural = (lines: string[]): string[] => {
+export const sortNaturalAsc = (lines: string[]): string[] => {
     const collator = getNaturalCollator();
     return lines.slice().sort(collator.compare);
+};
+
+export const sortNaturalDesc = (lines: string[]): string[] => {
+    const collator = getNaturalCollator();
+    return lines.slice().sort((a, b) => collator.compare(b, a));
 };
 
 export const sortLengthAsc = (lines: string[]): string[] =>

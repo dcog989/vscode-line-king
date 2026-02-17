@@ -2,7 +2,7 @@
   "name": "line-king",
   "displayName": "Line King",
   "description": "Sort, remove dups, change case, clean, encode / decode. Do all the things to line and text.",
-  "version": "1.1.9",
+  "version": "1.1.11",
   "publisher": "dcog989",
   "icon": "assets/icon.png",
   "repository": {
@@ -130,7 +130,7 @@
     "commands": [
       {
         "command": "lineKing.sort.asc",
-        "title": "Ascending (A-Z)",
+        "title": "Ascending",
         "category": "Line King: Sort"
       },
       {
@@ -139,8 +139,23 @@
         "category": "Line King: Sort"
       },
       {
+        "command": "lineKing.sort.asc.natural",
+        "title": "Ascending (Natural)",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.sort.asc.ignoreSpecial",
+        "title": "Ascending (Ignore Special)",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.sort.asc.ignoreSpecial.insensitive",
+        "title": "Ascending (Ignore Special, Case Insensitive)",
+        "category": "Line King: Sort"
+      },
+      {
         "command": "lineKing.sort.desc",
-        "title": "Descending (Z-A)",
+        "title": "Descending",
         "category": "Line King: Sort"
       },
       {
@@ -149,18 +164,8 @@
         "category": "Line King: Sort"
       },
       {
-        "command": "lineKing.sort.unique",
-        "title": "Unique (Remove Duplicates)",
-        "category": "Line King: Sort"
-      },
-      {
-        "command": "lineKing.sort.unique.insensitive",
-        "title": "Unique (Case Insensitive)",
-        "category": "Line King: Sort"
-      },
-      {
-        "command": "lineKing.sort.natural",
-        "title": "Natural (Alphanumeric)",
+        "command": "lineKing.sort.desc.natural",
+        "title": "Descending (Natural)",
         "category": "Line King: Sort"
       },
       {
@@ -175,7 +180,7 @@
       },
       {
         "command": "lineKing.sort.reverse",
-        "title": "Reverse Order",
+        "title": "Reverse",
         "category": "Line King: Sort"
       },
       {
@@ -190,17 +195,17 @@
       },
       {
         "command": "lineKing.sort.css",
-        "title": "Sort CSS Properties",
+        "title": "CSS Properties",
         "category": "Line King: Sort"
       },
       {
         "command": "lineKing.sort.json.key",
-        "title": "JSON by Key Name",
+        "title": "JSON by Key",
         "category": "Line King: Sort"
       },
       {
         "command": "lineKing.sort.json.value",
-        "title": "JSON by Key Value",
+        "title": "JSON by Value",
         "category": "Line King: Sort"
       },
       {
@@ -362,16 +367,6 @@
         "title": "Minify JSON",
         "command": "lineKing.dev.jsonMinify",
         "category": "Line King: Dev"
-      },
-      {
-        "title": "Ascending (Ignore Leading Special Chars)",
-        "command": "lineKing.sort.asc.ignoreSpecial",
-        "category": "Line King: Sort"
-      },
-      {
-        "title": "Ascending (Ignore Leading Special Chars, Case Insensitive)",
-        "command": "lineKing.sort.asc.ignoreSpecial.insensitive",
-        "category": "Line King: Sort"
       }
     ],
     "submenus": [
@@ -500,71 +495,67 @@
       "lineKing.sortMenu": [
         {
           "command": "lineKing.sort.asc",
-          "group": "1_basic@1"
+          "group": "1_asc@1"
         },
         {
           "command": "lineKing.sort.asc.insensitive",
-          "group": "1_basic@2"
+          "group": "1_asc@2"
         },
         {
-          "command": "lineKing.sort.desc",
-          "group": "1_basic@3"
-        },
-        {
-          "command": "lineKing.sort.desc.insensitive",
-          "group": "1_basic@4"
-        },
-        {
-          "command": "lineKing.sort.natural",
-          "group": "1_basic@5"
-        },
-        {
-          "command": "lineKing.sort.reverse",
-          "group": "1_basic@6"
-        },
-        {
-          "command": "lineKing.sort.length.asc",
-          "group": "2_len@1"
-        },
-        {
-          "command": "lineKing.sort.length.desc",
-          "group": "2_len@2"
-        },
-        {
-          "command": "lineKing.sort.unique",
-          "group": "3_unique@1"
-        },
-        {
-          "command": "lineKing.sort.unique.insensitive",
-          "group": "3_unique@2"
-        },
-        {
-          "command": "lineKing.sort.ip",
-          "group": "3_unique@3"
-        },
-        {
-          "command": "lineKing.sort.shuffle",
-          "group": "3_unique@4"
-        },
-        {
-          "command": "lineKing.sort.css",
-          "group": "4_css"
-        },
-        {
-          "command": "lineKing.sort.json.key",
-          "group": "5_json@1"
-        },
-        {
-          "command": "lineKing.sort.json.value",
-          "group": "5_json@2"
+          "command": "lineKing.sort.asc.natural",
+          "group": "1_asc@3"
         },
         {
           "command": "lineKing.sort.asc.ignoreSpecial",
-          "group": "1_basic@5"
+          "group": "1_asc@4"
         },
         {
           "command": "lineKing.sort.asc.ignoreSpecial.insensitive",
-          "group": "1_basic@6"
+          "group": "1_asc@5"
+        },
+        {
+          "command": "lineKing.sort.desc",
+          "group": "2_desc@1"
+        },
+        {
+          "command": "lineKing.sort.desc.insensitive",
+          "group": "2_desc@2"
+        },
+        {
+          "command": "lineKing.sort.desc.natural",
+          "group": "2_desc@3"
+        },
+        {
+          "command": "lineKing.sort.length.asc",
+          "group": "3_len@1"
+        },
+        {
+          "command": "lineKing.sort.length.desc",
+          "group": "3_len@2"
+        },
+        {
+          "command": "lineKing.sort.reverse",
+          "group": "4_other@1"
+        },
+        {
+          "command": "lineKing.sort.ip",
+          "group": "4_other@2"
+        },
+        {
+          "command": "lineKing.sort.shuffle",
+          "group": "4_other@3"
+        },
+        {
+          "command": "lineKing.sort.css",
+          "group": "5_css"
+        },
+        {
+          "command": "lineKing.sort.json.key",
+          "group": "6_json@1"
+        },
+        {
+          "command": "lineKing.sort.json.value",
+          "group": "6_json@2"
         }
       ],
       "lineKing.caseMenu": [
