@@ -1,3 +1,4 @@
+import { describe, it } from 'bun:test';
 import * as assert from 'assert';
 import { validateConfigFast, validateConfigWithFeedback, DEFAULT_CONFIG } from './config.schema.js';
 

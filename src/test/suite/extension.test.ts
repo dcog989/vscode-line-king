@@ -1,3 +1,4 @@
+import { describe, it } from 'bun:test';
 import * as assert from 'assert';
 import * as cleaner from '../../lib/cleaner.js';
 import * as sorter from '../../lib/sorter.js';

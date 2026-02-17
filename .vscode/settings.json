@@ -26,5 +26,8 @@
     "**/.DS_Store": true,
     "**/node_modules": true,
     "**/out": false
+  },
+  "[json][jsonc][markdown][yaml]": {
+    "editor.tabSize": 2
   }
 }

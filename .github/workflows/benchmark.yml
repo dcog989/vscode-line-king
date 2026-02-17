@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
@@ -73,21 +73,21 @@ jobs:
           script: |
             const fs = require('fs');
             const path = '.benchmark-results/startup-results.json';
-            
+
             if (!fs.existsSync(path)) {
               console.log('No benchmark results found');
               return;
             }
-            
+
             const results = JSON.parse(fs.readFileSync(path, 'utf8'));
             const totalAvg = results.aggregated.total?.avg || 'N/A';
             const timestamp = results.timestamp;
-            
+
             const comment = `## 📊 Startup Benchmark Results
-            
+
             **Total Activation Time:** ${totalAvg}ms
             **Timestamp:** ${timestamp}
-            
+
             | Metric | Avg (ms) | Min (ms) | Max (ms) | Std Dev (ms) |
             |--------|----------|----------|----------|--------------|
             | Logger Init | ${results.aggregated.loggerInit?.avg || 'N/A'} | ${results.aggregated.loggerInit?.min || 'N/A'} | ${results.aggregated.loggerInit?.max || 'N/A'} | ${results.aggregated.loggerInit?.stdDev || 'N/A'} |
@@ -95,17 +95,17 @@ jobs:
             | Save Handler Registered | ${results.aggregated.saveHandlerRegistered?.avg || 'N/A'} | ${results.aggregated.saveHandlerRegistered?.min || 'N/A'} | ${results.aggregated.saveHandlerRegistered?.max || 'N/A'} | ${results.aggregated.saveHandlerRegistered?.stdDev || 'N/A'} |
             | Context Deferred | ${results.aggregated.contextDeferred?.avg || 'N/A'} | ${results.aggregated.contextDeferred?.min || 'N/A'} | ${results.aggregated.contextDeferred?.max || 'N/A'} | ${results.aggregated.contextDeferred?.stdDev || 'N/A'} |
             | **Total** | **${totalAvg}** | ${results.aggregated.total?.min || 'N/A'} | ${results.aggregated.total?.max || 'N/A'} | ${results.aggregated.total?.stdDev || 'N/A'} |
-            
+
             *Results based on ${results.runs} runs*
             `;
-            
+
             const { owner, repo, number } = context.issue;
             const comments = await github.rest.issues.listComments({ owner, repo, issue_number: number });
-            
+
             const botComment = comments.data.find(
               c => c.user.type === 'Bot' && c.body.includes('📊 Startup Benchmark Results')
             );
-            
+
             if (botComment) {
               await github.rest.issues.updateComment({
                 owner, repo, comment_id: botComment.id, body: comment

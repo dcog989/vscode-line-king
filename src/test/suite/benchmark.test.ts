@@ -1,3 +1,4 @@
+import { describe, it } from 'bun:test';
 import * as assert from 'assert';
 
 describe('Benchmark Test Suite', () => {
