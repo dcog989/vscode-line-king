@@ -131,7 +131,7 @@ async function runBenchmark() {
 
     if (!metrics) {
         // eslint-disable-next-line no-console
-        console.error('❌ No benchmark metrics found.');
+        console.log('ℹ️  No benchmark metrics found.');
         // eslint-disable-next-line no-console
         console.log('   Run tests in VS Code with VSCODE_BENCHMARK_MODE=1 to capture metrics.');
         // eslint-disable-next-line no-console
@@ -155,6 +155,13 @@ async function runBenchmark() {
                 2,
             ),
         );
+
+        // In CI, exit successfully since benchmarks require VS Code runtime
+        if (process.env.CI || process.env.GITHUB_ACTIONS) {
+            // eslint-disable-next-line no-console
+            console.log('\n⏭️  Skipping benchmark in CI (requires VS Code runtime)');
+            process.exit(0);
+        }
         process.exit(1);
     }
 
