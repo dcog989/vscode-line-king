@@ -85,9 +85,15 @@ export function transformBase64Encode(lines: string[]): string[] {
 export function transformBase64Decode(lines: string[]): string[] {
     return lines.map((l) => {
         try {
-            return base64Decode(l);
-        } catch {
-            return l;
+            const decoded = base64Decode(l);
+            const validUtf8 = /^[\x20-\x7E\s]*$/;
+            if (!validUtf8.test(decoded)) {
+                throw new Error('Result contains invalid UTF-8 characters');
+            }
+            return decoded;
+        } catch (e) {
+            const message = e instanceof Error ? e.message : 'Invalid Base64 input';
+            throw new Error(`Base64 decode failed for line: ${message}`);
         }
     });
 }
