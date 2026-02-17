@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { CONFIG, PERFORMANCE } from '../constants.js';
 import { configCache } from './config-cache.js';
+import { Logger } from './logger.js';
 import {
     getEOL,
     joinLinesEfficient,
@@ -31,6 +32,20 @@ export interface LineActionOptions {
  * @param options Configuration options for the action
  */
 export async function applyLineAction(
+    editor: vscode.TextEditor,
+    processor: LineProcessor,
+    options: LineActionOptions = { expandSelection: true },
+): Promise<void> {
+    try {
+        await applyLineActionInternal(editor, processor, options);
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        Logger.error(`Failed to apply line action: ${message}`, error);
+        vscode.window.showErrorMessage(`Line King: Operation failed - ${message}`);
+    }
+}
+
+async function applyLineActionInternal(
     editor: vscode.TextEditor,
     processor: LineProcessor,
     options: LineActionOptions = { expandSelection: true },
