@@ -45,7 +45,7 @@ jobs:
 
       - name: Store baseline results
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: .benchmark-results/startup-results.json
           key: benchmark-baseline-${{ github.sha }}
@@ -53,7 +53,7 @@ jobs:
       - name: Get baseline results
         if: github.event_name == 'pull_request'
         id: baseline
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: .benchmark-results/baseline.json
           key: benchmark-baseline
