@@ -23,7 +23,6 @@ export function registerTransformationCommands(context: vscode.ExtensionContext)
             { id: 'lineKing.dev.base64Decode', processor: transformer.transformBase64Decode },
             { id: 'lineKing.dev.jsonEscape', processor: transformer.transformJsonEscape },
             { id: 'lineKing.dev.jsonUnescape', processor: transformer.transformJsonUnescape },
-            { id: 'lineKing.dev.jsonSort', processor: transformer.transformJsonSort },
             { id: 'lineKing.dev.jsonMinify', processor: transformer.transformJsonMinify },
         ],
         false,

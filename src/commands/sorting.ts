@@ -3,17 +3,11 @@ import { COMMANDS } from '../constants.js';
 import { createCommandFactory } from './factory.js';
 import * as sorter from '../lib/sorter.js';
 
-/**
- * Registers all sorting-related commands
- * Uses CommandFactory for consistent registration
- */
 export function registerSortingCommands(context: vscode.ExtensionContext): void {
     const factory = createCommandFactory(context);
 
-    // All sorting commands expand selection to full lines by default
     factory.registerLineCommands(
         [
-            // Basic sorting
             { id: 'lineKing.sort.asc', processor: sorter.sortAsc },
             { id: 'lineKing.sort.asc.insensitive', processor: sorter.sortAscInsensitive },
             { id: 'lineKing.sort.desc', processor: sorter.sortDesc },
@@ -23,8 +17,6 @@ export function registerSortingCommands(context: vscode.ExtensionContext): void 
                 id: 'lineKing.sort.asc.ignoreSpecial.insensitive',
                 processor: sorter.sortAscIgnoreSpecialInsensitive,
             },
-
-            // Advanced sorting
             { id: 'lineKing.sort.unique', processor: sorter.sortUnique },
             { id: 'lineKing.sort.unique.insensitive', processor: sorter.sortUniqueInsensitive },
             { id: 'lineKing.sort.natural', processor: sorter.sortNatural },
@@ -35,9 +27,8 @@ export function registerSortingCommands(context: vscode.ExtensionContext): void 
             { id: 'lineKing.sort.shuffle', processor: sorter.sortShuffle },
         ],
         true,
-    ); // expandSelection: true (process full lines)
+    );
 
-    // CSS property sorting (lazy load only CSS sorter and PostCSS)
     factory.registerAsyncCommand({
         id: COMMANDS.SORT_CSS,
         handler: async (editor) => {
@@ -45,4 +36,23 @@ export function registerSortingCommands(context: vscode.ExtensionContext): void 
             return await sortCssProperties(editor);
         },
     });
+
+    factory.registerAsyncCommands([
+        {
+            id: 'lineKing.sort.json.key',
+            handler: async (editor) => {
+                const { applyLineAction } = await import('../utils/editor.js');
+                const { transformJsonSortByKey } = await import('../lib/transformer.js');
+                await applyLineAction(editor, transformJsonSortByKey, { expandSelection: true });
+            },
+        },
+        {
+            id: 'lineKing.sort.json.value',
+            handler: async (editor) => {
+                const { applyLineAction } = await import('../utils/editor.js');
+                const { transformJsonSortByValue } = await import('../lib/transformer.js');
+                await applyLineAction(editor, transformJsonSortByValue, { expandSelection: true });
+            },
+        },
+    ]);
 }

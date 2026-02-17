@@ -204,7 +204,30 @@ function sortObjectKeys(obj: unknown): unknown {
         );
 }
 
-export function transformJsonSort(lines: string[]): string[] {
+function sortObjectByValue(obj: unknown): unknown {
+    if (obj === null || typeof obj !== 'object') return obj;
+
+    if (Array.isArray(obj)) {
+        return obj.map(sortObjectByValue);
+    }
+
+    const objRecord = obj as Record<string, unknown>;
+    const sortedEntries = Object.entries(objRecord).sort(([, a], [, b]) => {
+        const aStr = typeof a === 'string' ? a : JSON.stringify(a);
+        const bStr = typeof b === 'string' ? b : JSON.stringify(b);
+        return aStr.localeCompare(bStr);
+    });
+
+    return sortedEntries.reduce(
+        (result, [key, value]) => {
+            result[key] = sortObjectByValue(value);
+            return result;
+        },
+        {} as Record<string, unknown>,
+    );
+}
+
+export function transformJsonSortByKey(lines: string[]): string[] {
     const text = lines.join('\n');
     try {
         const parsed = JSON.parse(text);
@@ -213,6 +236,21 @@ export function transformJsonSort(lines: string[]): string[] {
     } catch (error) {
         throw new Error(`Invalid JSON: ${(error as Error).message}`);
     }
+}
+
+export function transformJsonSortByValue(lines: string[]): string[] {
+    const text = lines.join('\n');
+    try {
+        const parsed = JSON.parse(text);
+        const sorted = sortObjectByValue(parsed);
+        return [JSON.stringify(sorted, null, 2)];
+    } catch (error) {
+        throw new Error(`Invalid JSON: ${(error as Error).message}`);
+    }
+}
+
+export function transformJsonSort(lines: string[]): string[] {
+    return transformJsonSortByKey(lines);
 }
 
 export function transformJsonMinify(lines: string[]): string[] {

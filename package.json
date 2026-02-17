@@ -2,7 +2,7 @@
   "name": "line-king",
   "displayName": "Line King",
   "description": "Sort, remove dups, change case, clean, encode / decode. Do all the things to line and text.",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "publisher": "dcog989",
   "icon": "assets/icon.png",
   "repository": {
@@ -194,6 +194,16 @@
         "category": "Line King: Sort"
       },
       {
+        "command": "lineKing.sort.json.key",
+        "title": "JSON by Key Name",
+        "category": "Line King: Sort"
+      },
+      {
+        "command": "lineKing.sort.json.value",
+        "title": "JSON by Key Value",
+        "category": "Line King: Sort"
+      },
+      {
         "command": "lineKing.tidy.removeBlank",
         "title": "Remove Blank Lines",
         "category": "Line King: Tidy"
@@ -349,11 +359,6 @@
         "category": "Line King"
       },
       {
-        "title": "Sort JSON Keys",
-        "command": "lineKing.dev.jsonSort",
-        "category": "Line King: Dev"
-      },
-      {
         "title": "Minify JSON",
         "command": "lineKing.dev.jsonMinify",
         "category": "Line King: Dev"
@@ -376,7 +381,7 @@
       },
       {
         "id": "lineKing.sortMenu",
-        "label": "Sort Lines",
+        "label": "Sort",
         "icon": "$(sort-precedence)"
       },
       {
@@ -546,6 +551,14 @@
           "group": "4_css"
         },
         {
+          "command": "lineKing.sort.json.key",
+          "group": "5_json@1"
+        },
+        {
+          "command": "lineKing.sort.json.value",
+          "group": "5_json@2"
+        },
+        {
           "command": "lineKing.sort.asc.ignoreSpecial",
           "group": "1_basic@5"
         },
@@ -611,10 +624,6 @@
         },
         {
           "command": "lineKing.dev.jsonUnescape",
-          "group": "3_json"
-        },
-        {
-          "command": "lineKing.dev.jsonSort",
           "group": "3_json"
         },
         {
