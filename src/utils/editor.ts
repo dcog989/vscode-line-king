@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { CONFIG, PERFORMANCE } from '../constants.js';
 import { configCache } from './config-cache.js';
-import { Logger } from './logger.js';
+import { Logger } from './Logger.js';
 import {
     getEOL,
     joinLinesEfficient,

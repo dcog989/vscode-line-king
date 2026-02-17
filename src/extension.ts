@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { registerCommands } from './commands.js';
 import { ContextManager } from './context-manager.js';
 import { configCache, disposeConfigCache } from './utils/config-cache.js';
-import { Logger } from './utils/logger.js';
+import { Logger } from './utils/Logger.js';
 
 let contextManager: ContextManager | undefined;
 

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { CONTEXT_KEYS, TIMING } from './constants.js';
-import { Logger } from './utils/logger.js';
+import { Logger } from './utils/Logger.js';
 
 /**
  * PERFORMANCE: visualizer is lazy-loaded to avoid loading it during extension activation
