@@ -37,11 +37,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                 return;
             }
 
-            if (!contextManager) {
-                contextManager = new ContextManager(context);
-                contextManager.register();
+            if (contextManager) {
+                void contextManager.update();
             }
-            void contextManager.update();
         });
         startupMetrics.commandsRegistered = performance.now();
 
