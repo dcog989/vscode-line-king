@@ -93,6 +93,28 @@ export function findRuleBlocks(lines: string[]): Array<{ start: number; end: num
     });
 }
 
+function processBlockLines(blockLines: string[], strategy: SortStrategy): string[] {
+    const parsed = blockLines.map((line) => parseLine(line));
+    const declarations = parsed.filter((p) => p.type === 'declaration');
+
+    if (declarations.length <= 1) {
+        return blockLines;
+    }
+
+    const sortedDeclarations = sortDeclarations(
+        declarations as Array<ParsedLine & { property: string; value: string }>,
+        strategy,
+    );
+
+    let declIndex = 0;
+    return parsed.map((parsedLine) => {
+        if (parsedLine.type === 'declaration') {
+            return sortedDeclarations[declIndex++].original;
+        }
+        return parsedLine.original;
+    });
+}
+
 export function sortRuleBlock(
     lines: string[],
     startIndex: number,
@@ -105,25 +127,9 @@ export function sortRuleBlock(
         return lines;
     }
 
-    const parsed = blockLines.map((line, index) => ({ ...parseLine(line), originalIndex: index }));
-
-    const declarations = parsed.filter((p) => p.type === 'declaration');
-
-    const sortedDeclarations = sortDeclarations(
-        declarations as Array<ParsedLine & { property: string; value: string }>,
-        strategy,
-    );
+    const newBlockLines = processBlockLines(blockLines, strategy);
 
     const result = [...lines];
-    let declIndex = 0;
-
-    const newBlockLines = parsed.map((parsedLine) => {
-        if (parsedLine.type === 'declaration') {
-            return sortedDeclarations[declIndex++].original;
-        }
-        return parsedLine.original;
-    });
-
     result.splice(startIndex + 1, endIndex - startIndex - 1, ...newBlockLines);
 
     return result;
@@ -153,25 +159,7 @@ export function sortCssText(cssText: string, strategy: SortStrategy = 'alphabeti
         result.push(...lines.slice(lastProcessedEnd, block.start + 1));
 
         const blockLines = lines.slice(block.start + 1, block.end);
-        const parsed = blockLines.map((line, index) => ({
-            ...parseLine(line),
-            originalIndex: index,
-        }));
-        const declarations = parsed.filter((p) => p.type === 'declaration');
-
-        const sortedDeclarations = sortDeclarations(
-            declarations as Array<ParsedLine & { property: string; value: string }>,
-            strategy,
-        );
-
-        let declIndex = 0;
-        const newBlockLines = parsed.map((parsedLine) => {
-            if (parsedLine.type === 'declaration') {
-                return sortedDeclarations[declIndex++].original;
-            }
-            return parsedLine.original;
-        });
-
+        const newBlockLines = processBlockLines(blockLines, strategy);
         result.push(...newBlockLines);
         lastProcessedEnd = block.end;
     }
