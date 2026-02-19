@@ -170,7 +170,7 @@ function unescapeJsonString(str: string): string {
                     i += 2;
                     break;
                 case 'u':
-                    if (i + 5 < len) {
+                    if (i + 6 <= len) {
                         const hex = str.slice(i + 2, i + 6);
                         const codePoint = parseInt(hex, 16);
                         if (!isNaN(codePoint)) {
