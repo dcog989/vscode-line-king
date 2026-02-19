@@ -180,12 +180,12 @@
       },
       {
         "command": "lineKing.sort.length.asc",
-        "title": "By Length (Shortest)",
+        "title": "Ascending (By Length)",
         "category": "Line King: Sort"
       },
       {
         "command": "lineKing.sort.length.desc",
-        "title": "By Length (Longest)",
+        "title": "Descending (By Length)",
         "category": "Line King: Sort"
       },
       {
