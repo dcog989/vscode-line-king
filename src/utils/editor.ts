@@ -94,7 +94,7 @@ async function applyLineActionInternal(
                 }
             } else {
                 const lines = splitLinesByEOL(text, eol);
-                const processedLines = await Promise.resolve(processor(lines));
+                const processedLines = await processor(lines);
                 const newText = processedLines.join(eol);
 
                 if (text !== newText) {
@@ -118,7 +118,7 @@ async function applyLineActionInternal(
 
         // For smaller files, use the standard in-memory approach
         const lines = splitLinesByEOL(text, eol);
-        const processedLines = await Promise.resolve(processor(lines));
+        const processedLines = await processor(lines);
         const newText = processedLines.join(eol);
 
         // Only add to changes if text actually changed
