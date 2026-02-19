@@ -6,7 +6,7 @@
       "name": "line-king",
       "devDependencies": {
         "@types/glob": "^9.0.0",
-        "@types/node": "^25.2.3",
+        "@types/node": "^25.3.0",
         "@types/vscode": "^1.109.0",
         "bun-types": "^1.3.9",
         "change-case": "^5.4.4",
