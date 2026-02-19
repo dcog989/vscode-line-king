@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 export class Logger {
-    private static outputChannel: vscode.OutputChannel;
+    private static outputChannel: vscode.OutputChannel | undefined;
 
     public static initialize(context: vscode.ExtensionContext): void {
         this.outputChannel = vscode.window.createOutputChannel('Line King');
@@ -18,7 +18,7 @@ export class Logger {
 
     public static error(message: string, error?: unknown): void {
         this.write('ERROR', message);
-        if (error) {
+        if (error && this.outputChannel) {
             this.outputChannel.appendLine(
                 error instanceof Error ? error.stack || error.message : String(error),
             );
