@@ -15,11 +15,12 @@ _Works on selection or entire document._
 - **Sort Ascending/Descending** - Standard alphabetical sort (case-sensitive or case-insensitive)
 - **Natural Sort** - Intelligently sorts numbers (e.g., `A2` comes before `A10`)
 - **Sort by Length** - Organize lines by their character count (shortest or longest first)
-- **Unique Sort** - Sorts and removes duplicates in one operation
+- **Ignore Special Characters** - Sorts ignoring leading special characters
 - **Reverse** - Reverses the order of lines
 - **IP Address Sort** - Sorts lines containing IPv4 addresses numerically
 - **Shuffle** - Randomize line order
 - **CSS Properties Sort** - Sorts CSS/SCSS/LESS properties alphabetically or by length within rule blocks
+- **JSON Sort** - Sorts JSON by keys or values
 
 ### Tidying & Cleaning
 
@@ -45,6 +46,7 @@ _Works on selection or entire document._
     - URL Encode/Decode
     - Base64 Encode/Decode
     - JSON String Escape/Unescape
+    - JSON Minify
 
 ### Utilities
 
@@ -110,19 +112,32 @@ All commands are available through the Command Palette (`Ctrl+Shift+P` / `Cmd+Sh
 
 ### Sort Commands
 
-- `Line King: Sort: Ascending (A-Z)`
+**Ascending:**
+
+- `Line King: Sort: Ascending`
 - `Line King: Sort: Ascending (Case Insensitive)`
-- `Line King: Sort: Descending (Z-A)`
+- `Line King: Sort: Ascending (Natural)`
+- `Line King: Sort: Ascending (Ignore Special)`
+- `Line King: Sort: Ascending (Ignore Special, Case Insensitive)`
+- `Line King: Sort: Ascending (By Length)`
+
+**Descending:**
+
+- `Line King: Sort: Descending`
 - `Line King: Sort: Descending (Case Insensitive)`
-- `Line King: Sort: Unique (Remove Duplicates)`
-- `Line King: Sort: Unique (Case Insensitive)`
-- `Line King: Sort: Natural (Alphanumeric)`
-- `Line King: Sort: By Length (Shortest)`
-- `Line King: Sort: By Length (Longest)`
-- `Line King: Sort: Reverse Order`
+- `Line King: Sort: Descending (Natural)`
+- `Line King: Sort: Descending (Ignore Special)`
+- `Line King: Sort: Descending (Ignore Special, Case Insensitive)`
+- `Line King: Sort: Descending (By Length)`
+
+**Other:**
+
+- `Line King: Sort: Reverse`
 - `Line King: Sort: By IP Address`
 - `Line King: Sort: Shuffle`
-- `Line King: Sort: Sort CSS Properties`
+- `Line King: Sort: CSS Properties`
+- `Line King: Sort: JSON by Key`
+- `Line King: Sort: JSON by Value`
 
 ### Tidy Commands
 
@@ -141,9 +156,9 @@ All commands are available through the Command Palette (`Ctrl+Shift+P` / `Cmd+Sh
 - `Line King: Case: Sentence case`
 - `Line King: Case: Title Case`
 - `Line King: Case: camelCase`
+- `Line King: Case: PascalCase`
 - `Line King: Case: kebab-case`
 - `Line King: Case: snake_case`
-- `Line King: Case: PascalCase`
 
 ### Dev Tools Commands
 
@@ -153,14 +168,18 @@ All commands are available through the Command Palette (`Ctrl+Shift+P` / `Cmd+Sh
 - `Line King: Dev: Base64 Decode`
 - `Line King: Dev: JSON String Escape`
 - `Line King: Dev: JSON String Unescape`
+- `Line King: Dev: Minify JSON`
 
-### Utility Commands
+### Tools Commands
 
 - `Line King: Tools: Duplicate Selection`
 - `Line King: Tools: Join Lines`
 - `Line King: Tools: Split Selection...`
 - `Line King: Tools: Align to Separator...`
 - `Line King: Tools: Insert Numeric Sequence (1,2,3...)`
+
+### Util Commands
+
 - `Line King: Util: Show Whitespace Characters`
 - `Line King: Util: Hide Whitespace Characters`
 - `Line King: Util: Convert to LF (Unix)`
@@ -234,7 +253,7 @@ email = john@example.com
 
 ## Requirements
 
-- Visual Studio Code v1.107+
+- Visual Studio Code v1.109+
 - No additional dependencies required
 
 ## Extension Compatibility
