@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { COMMANDS } from '../constants.js';
-import { applyLineAction, getJoinSeparator } from '../utils/editor.js';
+import { applyLineAction } from '../utils/editor.js';
+import { configCache } from '../utils/config-cache.js';
 import * as transformer from '../lib/transformer.js';
 import { createCommandFactory } from './factory.js';
 
@@ -30,7 +31,7 @@ export function registerTransformationCommands(context: vscode.ExtensionContext)
 
     factory.registerLineCommand({
         id: 'lineKing.manipulate.join',
-        processor: (lines) => transformer.transformJoin(lines, getJoinSeparator()),
+        processor: (lines) => transformer.transformJoin(lines, configCache.getJoinSeparator()),
         expandSelection: true,
     });
 

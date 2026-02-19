@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import { CONFIG, PERFORMANCE } from '../constants.js';
-import { configCache } from './config-cache.js';
+import { PERFORMANCE } from '../constants.js';
 import { Logger } from './Logger.js';
 import {
     getEOL,
@@ -297,12 +296,4 @@ async function processLargeDocument(
         );
         editBuilder.replace(fullRange, processedLines.join(eol));
     });
-}
-
-/**
- * Gets the configured join separator from extension settings
- * Default is a space character
- */
-export function getJoinSeparator(): string {
-    return configCache.get(CONFIG.JOIN_SEPARATOR, ' ');
 }

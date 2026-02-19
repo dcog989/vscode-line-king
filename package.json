@@ -2,7 +2,7 @@
   "name": "line-king",
   "displayName": "Line King",
   "description": "Sort, remove dups, change case, clean, encode / decode. Do all the things to line and text.",
-  "version": "1.1.24",
+  "version": "1.1.25",
   "publisher": "dcog989",
   "icon": "assets/icon.png",
   "repository": {
