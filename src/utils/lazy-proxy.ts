@@ -10,18 +10,25 @@
  */
 export function createLazyProxy<T extends Record<string, unknown>>(modulePath: string): T {
     let module: T | null = null;
+    let loadingPromise: Promise<T> | null = null;
 
     const loadModule = async (): Promise<T> => {
-        if (!module) {
-            module = (await import(modulePath)) as T;
+        if (module) {
+            return module;
         }
-        return module;
+        if (!loadingPromise) {
+            loadingPromise = import(modulePath).then((m) => {
+                module = m as T;
+                return module;
+            });
+        }
+        return loadingPromise;
     };
 
     return new Proxy({} as T, {
         get: (_target, prop: string | symbol) => {
             if (typeof prop !== 'string') {
-                throw new Error(`Cannot access symbol property on lazy proxy`);
+                return undefined;
             }
 
             return async (...args: unknown[]) => {
