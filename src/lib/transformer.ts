@@ -56,8 +56,9 @@ export function transformUrlEncode(lines: string[]): string[] {
     return lines.map((l) => {
         try {
             return encodeURIComponent(l);
-        } catch {
-            return l;
+        } catch (e) {
+            const message = e instanceof Error ? e.message : 'Invalid URL component';
+            throw new Error(`URL encode failed: ${message}`);
         }
     });
 }
@@ -66,8 +67,9 @@ export function transformUrlDecode(lines: string[]): string[] {
     return lines.map((l) => {
         try {
             return decodeURIComponent(l);
-        } catch {
-            return l;
+        } catch (e) {
+            const message = e instanceof Error ? e.message : 'Invalid URL encoding';
+            throw new Error(`URL decode failed: ${message}`);
         }
     });
 }
@@ -76,8 +78,9 @@ export function transformBase64Encode(lines: string[]): string[] {
     return lines.map((l) => {
         try {
             return base64Encode(l);
-        } catch {
-            return l;
+        } catch (e) {
+            const message = e instanceof Error ? e.message : 'Invalid input for Base64';
+            throw new Error(`Base64 encode failed: ${message}`);
         }
     });
 }
@@ -102,8 +105,9 @@ export function transformJsonEscape(lines: string[]): string[] {
     return lines.map((l) => {
         try {
             return JSON.stringify(l).slice(1, -1);
-        } catch {
-            return l;
+        } catch (e) {
+            const message = e instanceof Error ? e.message : 'Invalid string for JSON escape';
+            throw new Error(`JSON escape failed: ${message}`);
         }
     });
 }
