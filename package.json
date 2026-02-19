@@ -2,7 +2,7 @@
   "name": "line-king",
   "displayName": "Line King",
   "description": "Sort, remove dups, change case, clean, encode / decode. Do all the things to line and text.",
-  "version": "1.1.25",
+  "version": "1.1.27",
   "publisher": "dcog989",
   "icon": "assets/icon.png",
   "repository": {
@@ -545,11 +545,11 @@
         },
         {
           "command": "lineKing.sort.length.asc",
-          "group": "3_len@1"
+          "group": "1_asc@6"
         },
         {
           "command": "lineKing.sort.length.desc",
-          "group": "3_len@2"
+          "group": "2_desc@6"
         },
         {
           "command": "lineKing.sort.reverse",
