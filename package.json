@@ -58,6 +58,7 @@
     "migrate": "bun scripts/migrate.js",
     "packprod": "bun run check-types && bun esbuild.config.mjs --production",
     "package": "vsce package --no-dependencies",
+    "publish": "vsce publish --no-dependencies",
     "prepare": "husky",
     "test": "bun test",
     "test:e2e": "echo 'E2E tests require VS Code extension host environment. Use bun test for unit tests.'",
