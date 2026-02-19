@@ -86,8 +86,8 @@ export function transformBase64Decode(lines: string[]): string[] {
     return lines.map((l) => {
         try {
             const decoded = base64Decode(l);
-            const validUtf8 = /^[\x20-\x7E\s]*$/;
-            if (!validUtf8.test(decoded)) {
+            // Check for replacement character which indicates invalid UTF-8
+            if (decoded.includes('\uFFFD')) {
                 throw new Error('Result contains invalid UTF-8 characters');
             }
             return decoded;
