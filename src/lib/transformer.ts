@@ -12,6 +12,10 @@ import {
  * Pure logic only - no VS Code dependencies for unit testing compatibility
  */
 
+// JSON escape sequence constants
+const ESCAPE_PREFIX_LENGTH = 2; // Length of \ + escape character (e.g., \n, \")
+const UNICODE_ESCAPE_LENGTH = 6; // Length of \u + 4 hex digits (e.g., \u0041)
+
 function base64Encode(str: string): string {
     return Buffer.from(str, 'utf-8').toString('base64');
 }
@@ -143,43 +147,43 @@ function unescapeJsonString(str: string): string {
             switch (nextChar) {
                 case '"':
                     result += '"';
-                    i += 2;
+                    i += ESCAPE_PREFIX_LENGTH;
                     break;
                 case '\\':
                     result += '\\';
-                    i += 2;
+                    i += ESCAPE_PREFIX_LENGTH;
                     break;
                 case '/':
                     result += '/';
-                    i += 2;
+                    i += ESCAPE_PREFIX_LENGTH;
                     break;
                 case 'b':
                     result += '\b';
-                    i += 2;
+                    i += ESCAPE_PREFIX_LENGTH;
                     break;
                 case 'f':
                     result += '\f';
-                    i += 2;
+                    i += ESCAPE_PREFIX_LENGTH;
                     break;
                 case 'n':
                     result += '\n';
-                    i += 2;
+                    i += ESCAPE_PREFIX_LENGTH;
                     break;
                 case 'r':
                     result += '\r';
-                    i += 2;
+                    i += ESCAPE_PREFIX_LENGTH;
                     break;
                 case 't':
                     result += '\t';
-                    i += 2;
+                    i += ESCAPE_PREFIX_LENGTH;
                     break;
                 case 'u':
-                    if (i + 6 <= len) {
-                        const hex = str.slice(i + 2, i + 6);
+                    if (i + UNICODE_ESCAPE_LENGTH <= len) {
+                        const hex = str.slice(i + ESCAPE_PREFIX_LENGTH, i + UNICODE_ESCAPE_LENGTH);
                         const codePoint = parseInt(hex, 16);
                         if (!isNaN(codePoint)) {
                             result += String.fromCharCode(codePoint);
-                            i += 6;
+                            i += UNICODE_ESCAPE_LENGTH;
                             break;
                         }
                     }

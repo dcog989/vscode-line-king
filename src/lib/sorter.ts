@@ -6,6 +6,12 @@
 
 import { REGEX } from '../constants.js';
 
+// IP address bit position constants for 32-bit integer conversion
+const IP_BIT_POSITION_1 = 24;
+const IP_BIT_POSITION_2 = 16;
+const IP_BIT_POSITION_3 = 8;
+const IP_BIT_POSITION_4 = 0;
+
 let naturalCollator: Intl.Collator | undefined;
 let caseInsensitiveCollator: Intl.Collator | undefined;
 
@@ -65,10 +71,10 @@ export function sortIP(lines: string[]): string[] {
         const match = line.match(REGEX.IP_ADDRESS);
         if (match) {
             const ipValue =
-                ((parseInt(match[1], 10) << 24) |
-                    (parseInt(match[2], 10) << 16) |
-                    (parseInt(match[3], 10) << 8) |
-                    parseInt(match[4], 10)) >>>
+                ((parseInt(match[1], 10) << IP_BIT_POSITION_1) |
+                    (parseInt(match[2], 10) << IP_BIT_POSITION_2) |
+                    (parseInt(match[3], 10) << IP_BIT_POSITION_3) |
+                    (parseInt(match[4], 10) << IP_BIT_POSITION_4)) >>>
                 0;
             withIPs.push({ line, ipValue });
         } else {
