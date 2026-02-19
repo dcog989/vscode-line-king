@@ -92,7 +92,7 @@ export const sortShuffle = (lines: string[]): string[] => {
 };
 
 export const sortUnique = (lines: string[]): string[] =>
-    Array.from(new Set(lines)).sort((a, b) => a.localeCompare(b));
+    [...new Set(lines)].sort((a, b) => a.localeCompare(b));
 
 export const sortUniqueInsensitive = (lines: string[]): string[] => {
     const seen = new Set<string>();
